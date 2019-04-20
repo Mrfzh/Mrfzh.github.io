@@ -5,15 +5,19 @@
   
 
   
-  <title>Hexo</title>
+  <title>EventBus的基本使用 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="简介EventBus是一种用于Android的发布/订阅事件总线。它有很多优点：简化应用组件间的通信；解耦事件的发送者和接收者；避免复杂和容易出错的依赖和生命周期的问题；很快，专门为高性能优化过等等。 基本使用准备工作 创建一个工具类，里面封装了一些基本方法 123456789101112131415161718public class EventBusUtil &amp;#123;    public">
+<meta property="og:type" content="article">
+<meta property="og:title" content="EventBus的基本使用">
+<meta property="og:url" content="http://yoursite.com/2019/04/20/EventBus的基本使用/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="简介EventBus是一种用于Android的发布/订阅事件总线。它有很多优点：简化应用组件间的通信；解耦事件的发送者和接收者；避免复杂和容易出错的依赖和生命周期的问题；很快，专门为高性能优化过等等。 基本使用准备工作 创建一个工具类，里面封装了一些基本方法 123456789101112131415161718public class EventBusUtil &amp;#123;    public">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-04-20T11:41:03.355Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="EventBus的基本使用">
+<meta name="twitter:description" content="简介EventBus是一种用于Android的发布/订阅事件总线。它有很多优点：简化应用组件间的通信；解耦事件的发送者和接收者；避免复杂和容易出错的依赖和生命周期的问题；很快，专门为高性能优化过等等。 基本使用准备工作 创建一个工具类，里面封装了一些基本方法 123456789101112131415161718public class EventBusUtil &amp;#123;    public">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -60,9 +64,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-EventBus的基本使用" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-EventBus的基本使用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/04/20/EventBus的基本使用/" class="article-date">
   <time datetime="2019-04-20T11:39:13.000Z" itemprop="datePublished">2019-04-20</time>
@@ -75,8 +77,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/20/EventBus的基本使用/">EventBus的基本使用</a>
+    <h1 class="article-title" itemprop="name">
+      EventBus的基本使用
     </h1>
   
 
@@ -135,114 +137,19 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-java集合之HashMap" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/02/18/java集合之HashMap/" class="article-date">
-  <time datetime="2019-02-18T09:59:33.000Z" itemprop="datePublished">2019-02-18</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/02/18/java集合之HashMap/">java集合之HashMap</a>
-    </h1>
+    <a href="/2019/02/18/java集合之HashMap/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">java集合之HashMap</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ul>
-<li>用于存储键值对（key-value），其中key不可以重复，value可以重复。</li>
-<li><p>基本用法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//初始化，第一个泛型是key的类型，第二个是values</span></span><br><span class="line">HashMap&lt;Integer, String&gt; hashMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"><span class="comment">//添加元素</span></span><br><span class="line">hashMap.put(<span class="number">1</span>, <span class="string">"first"</span>);</span><br><span class="line">hashMap.put(<span class="number">2</span>, <span class="string">"second"</span>);</span><br><span class="line">hashMap.put(<span class="number">3</span>, <span class="string">"third"</span>);</span><br><span class="line"><span class="comment">//hashMap.put(3, "doubleThird");    //会覆盖原先的&lt;3，third&gt;</span></span><br><span class="line">System.out.println(hashMap);    <span class="comment">//&#123;1=first, 2=second, 3=third&#125;</span></span><br><span class="line">System.out.println(hashMap.get(<span class="number">0</span>));     <span class="comment">//null</span></span><br><span class="line">System.out.println(hashMap.get(<span class="number">1</span>));     <span class="comment">//first</span></span><br><span class="line">System.out.println(hashMap.containsKey(<span class="number">1</span>)); <span class="comment">//true</span></span><br><span class="line">System.out.println(hashMap.containsValue(<span class="string">"third"</span>)); <span class="comment">//true</span></span><br><span class="line">System.out.println(hashMap.remove(<span class="number">10</span>)); <span class="comment">//null</span></span><br><span class="line">System.out.println(hashMap.remove(<span class="number">2</span>));  <span class="comment">//second</span></span><br><span class="line">System.out.println(hashMap);    <span class="comment">//&#123;1=first, 3=third&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//遍历</span></span><br><span class="line"><span class="keyword">for</span> (Object o : hashMap.keySet()) &#123;</span><br><span class="line">    <span class="keyword">int</span> key = (<span class="keyword">int</span>) o;</span><br><span class="line">    System.out.println(<span class="string">"key = "</span> + key + <span class="string">", values = "</span> + hashMap.get(key));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//另一种遍历方法</span></span><br><span class="line">Set&lt;Map.Entry&lt;Integer, String&gt;&gt; set = hashMap.entrySet();</span><br><span class="line"><span class="keyword">for</span> (Map.Entry&lt;Integer, String&gt; entry : set) &#123;</span><br><span class="line">    System.out.println(<span class="string">"key = "</span> + entry.getKey() + <span class="string">", values = "</span> + entry.getValue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>HashMap和Hashtable的区别  </p>
-</li>
-</ul>
-<ol>
-<li>Hashtable是一个线程安全的Map实现，而HashMap是一个<strong>线程不安全</strong>的实现。所有HashMap的性能会高一点。</li>
-<li>Hashtable不允许null作为key或value的元素，如果使用会抛出异常，但HashMap允许null作为key或value的元素。HashMap允许一个key为null，允许多个value为null。 </li>
-</ol>
-<ul>
-<li><p>用作key的对象必须实现了equals()和hashCode()方法，因为判断两个key相等的条件是：通过equals()方法比较后返回true，并且两者的hashCode()方法返回的值相等。所以如果重写了对象的equals()方法，必须保证两个方法的判断标准一致，即equals()方法返回true时，返回的hashCode也要相等。当我们使用自定义对象作为key时，也要重写这两个方法并保持判断标准一致。  </p>
-</li>
-<li><p>HashMap和LinkedHashMap的区别</p>
-</li>
-</ul>
-<ol>
-<li>HashMap是无序的：其遍历的顺序与其插入的顺序不一样，而LinkedHashMap是有序的：其遍历的顺序和其插入的顺序一致</li>
-<li>LinkedHashMap需要维护元素的顺序，所以性能略低于HashMap，但由于它是以链表维护元素的顺序，所以在迭代元素的时候性能会好一些。</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/18/java集合之HashMap/" data-id="cjupfmc7p0001zotgfa0so8ot" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
   
 </article>
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/02/18/hello-world/" class="article-date">
-  <time datetime="2019-02-18T08:41:15.328Z" itemprop="datePublished">2019-02-18</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/02/18/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/18/hello-world/" data-id="cjupfmc8v0002zotgbtnnwue2" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-
 
 </section>
         
