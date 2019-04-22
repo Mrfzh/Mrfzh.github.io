@@ -5,15 +5,19 @@
   
 
   
-  <title>Hexo</title>
+  <title>线程笔记（1） | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="线程和进程主要区别根本区别：  进程是是系统进行资源分配和调度的基本单位 线程是进程中的一个实体，是被系统独立调度和分派的基本单位  在开销方面：  每个进程都有独立的代码和数据空间（程序上下文），程序之间的切换会有较大的开销 线程可以看做轻量级的进程，同一类线程共享代码和数据空间，每个线程都有自己独立的运行栈和程序计数器（PC），线程之间切换的开销小。  资源和内存方面：  进程是系统中一个活动">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程笔记（1）">
+<meta property="og:url" content="http://yoursite.com/2019/04/22/线程笔记（1）/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="线程和进程主要区别根本区别：  进程是是系统进行资源分配和调度的基本单位 线程是进程中的一个实体，是被系统独立调度和分派的基本单位  在开销方面：  每个进程都有独立的代码和数据空间（程序上下文），程序之间的切换会有较大的开销 线程可以看做轻量级的进程，同一类线程共享代码和数据空间，每个线程都有自己独立的运行栈和程序计数器（PC），线程之间切换的开销小。  资源和内存方面：  进程是系统中一个活动">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-04-22T14:14:22.338Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="线程笔记（1）">
+<meta name="twitter:description" content="线程和进程主要区别根本区别：  进程是是系统进行资源分配和调度的基本单位 线程是进程中的一个实体，是被系统独立调度和分派的基本单位  在开销方面：  每个进程都有独立的代码和数据空间（程序上下文），程序之间的切换会有较大的开销 线程可以看做轻量级的进程，同一类线程共享代码和数据空间，每个线程都有自己独立的运行栈和程序计数器（PC），线程之间切换的开销小。  资源和内存方面：  进程是系统中一个活动">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -60,9 +64,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-线程笔记（1）" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-线程笔记（1）" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/04/22/线程笔记（1）/" class="article-date">
   <time datetime="2019-04-22T14:10:26.000Z" itemprop="datePublished">2019-04-22</time>
@@ -75,8 +77,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/22/线程笔记（1）/">线程笔记（1）</a>
+    <h1 class="article-title" itemprop="name">
+      线程笔记（1）
     </h1>
   
 
@@ -199,191 +201,19 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-EventBus的基本使用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/04/20/EventBus的基本使用/" class="article-date">
-  <time datetime="2019-04-20T11:39:13.000Z" itemprop="datePublished">2019-04-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/20/EventBus的基本使用/">EventBus的基本使用</a>
-    </h1>
+    <a href="/2019/04/20/EventBus的基本使用/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">EventBus的基本使用</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>EventBus是一种用于Android的发布/订阅事件总线。它有很多优点：简化应用组件间的通信；解耦事件的发送者和接收者；避免复杂和容易出错的依赖和生命周期的问题；很快，专门为高性能优化过等等。</p>
-<h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><ol>
-<li><p>创建一个工具类，里面封装了一些基本方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EventBusUtil</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">register</span><span class="params">(Object subscriber)</span> </span>&#123;</span><br><span class="line">        EventBus.getDefault().register(subscriber);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">unregister</span><span class="params">(Object subscriber)</span> </span>&#123;</span><br><span class="line">        EventBus.getDefault().unregister(subscriber);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sendEvent</span><span class="params">(Event event)</span> </span>&#123;</span><br><span class="line">        EventBus.getDefault().post(event);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sendStickyEvent</span><span class="params">(Event event)</span> </span>&#123;</span><br><span class="line">        EventBus.getDefault().postSticky(event);    <span class="comment">//后续注册的订阅者依然可以从内存中得到这个已发送的sticky事件</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>创建一个基本事件类</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Event</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> code;   <span class="comment">//该字段用于判断事件的发送源</span></span><br><span class="line">    <span class="keyword">private</span> T data;     <span class="comment">//事件类型</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Event</span><span class="params">(<span class="keyword">int</span> code, T data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.code = code;</span><br><span class="line">        <span class="keyword">this</span>.data = data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> code;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCode</span><span class="params">(<span class="keyword">int</span> code)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.code = code;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">getData</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setData</span><span class="params">(T data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.data = data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>封装到基类（BaseActivity、BaseFragment）</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 是否注册EventBus，注册后才可以订阅事件</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> true表示绑定EventBus事件分发，默认不绑定，子类需要绑定的话复写此方法返回true.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">isRegisterEventBus</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>在onCreated方法中加入<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (isRegisterEventBus()) &#123;</span><br><span class="line">    EventBusUtil.register(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>在onDestroy方法中加入<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (isRegisterEventBus()) &#123;</span><br><span class="line">    EventBusUtil.unregister(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h2 id="在代码中使用"><a href="#在代码中使用" class="headerlink" title="在代码中使用"></a>在代码中使用</h2><ol>
-<li>接收事件  </li>
-</ol>
-<p>例如某个Activity要接收事件，则其首先要注册Eventbus<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">isRegisterEventBus</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>然后写一个接收事件的方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Subscribe</span>(threadMode = ThreadMode.MAIN)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEventCome</span><span class="params">(Event&lt;MainEvent&gt; event)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (event.getCode()) &#123;</span><br><span class="line">        <span class="keyword">case</span> EventBusCode.Login2Main:</span><br><span class="line">        <span class="keyword">case</span> EventBusCode.Register2Main:</span><br><span class="line">            updateAfterLoginOrRegister(event.getData().getUserName());  <span class="comment">//更新用户信息</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>EventBusCode是用来区分不同活动发来的事件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public class EventBusCode &#123;</span><br><span class="line">    public static final int Register2Main = 0;</span><br><span class="line">    public static final int Login2Main = 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<ol start="2">
-<li>发送事件<br>例如在登录活动中发送一个事件给主活动<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//更新用户信息</span></span><br><span class="line">Event&lt;MainEvent&gt; mainEvent = <span class="keyword">new</span> Event&lt;&gt;(EventBusCode.Login2Main, <span class="keyword">new</span> MainEvent(userName));</span><br><span class="line">EventBusUtil.sendEvent(mainEvent);</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h1 id="发送黏性事件"><a href="#发送黏性事件" class="headerlink" title="发送黏性事件"></a>发送黏性事件</h1><p>所谓的黏性事件，就是指发送了该事件之后再注册的订阅者依然能够接收到的事件。简单来说就是可以把事件发送到未启动的活动中。</p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><ol>
-<li><p>在订阅事件处添加 sticky = true属性</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Subscribe</span>(threadMode = ThreadMode.MAIN, sticky = <span class="keyword">true</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onStickyEventBusCome</span><span class="params">(Event&lt;ShowArticleEvent&gt; event)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (event.getCode()) &#123;</span><br><span class="line">        <span class="keyword">case</span> EventBusCode.Home2ShowArticle:</span><br><span class="line">            mLink = event.getData().getLink();</span><br><span class="line">            mTitle = event.getData().getTitle();</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>发布事件处发送黏性事件</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EventBusUtil.sendStickyEvent(event);</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h1 id="封装"><a href="#封装" class="headerlink" title="封装"></a>封装</h1><ul>
-<li><a href="https://www.jianshu.com/p/e00297348f17" target="_blank" rel="noopener">https://www.jianshu.com/p/e00297348f17</a></li>
-</ul>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://www.jianshu.com/p/f9ae5691e1bb" target="_blank" rel="noopener">https://www.jianshu.com/p/f9ae5691e1bb</a></li>
-<li><a href="https://blog.csdn.net/u012317510/article/details/78935720" target="_blank" rel="noopener">https://blog.csdn.net/u012317510/article/details/78935720</a></li>
-<li><a href="https://www.jianshu.com/p/e7d5c7bda783" target="_blank" rel="noopener">https://www.jianshu.com/p/e7d5c7bda783</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/20/EventBus的基本使用/" data-id="cjusfzb5d0001m8tg5f05pvbf" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
   
 </article>
-
-
-  
-    <article id="post-java集合之HashMap" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/02/18/java集合之HashMap/" class="article-date">
-  <time datetime="2019-02-18T09:59:33.000Z" itemprop="datePublished">2019-02-18</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/02/18/java集合之HashMap/">java集合之HashMap</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ul>
-<li>用于存储键值对（key-value），其中key不可以重复，value可以重复。</li>
-<li><p>基本用法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//初始化，第一个泛型是key的类型，第二个是values</span></span><br><span class="line">HashMap&lt;Integer, String&gt; hashMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"><span class="comment">//添加元素</span></span><br><span class="line">hashMap.put(<span class="number">1</span>, <span class="string">"first"</span>);</span><br><span class="line">hashMap.put(<span class="number">2</span>, <span class="string">"second"</span>);</span><br><span class="line">hashMap.put(<span class="number">3</span>, <span class="string">"third"</span>);</span><br><span class="line"><span class="comment">//hashMap.put(3, "doubleThird");    //会覆盖原先的&lt;3，third&gt;</span></span><br><span class="line">System.out.println(hashMap);    <span class="comment">//&#123;1=first, 2=second, 3=third&#125;</span></span><br><span class="line">System.out.println(hashMap.get(<span class="number">0</span>));     <span class="comment">//null</span></span><br><span class="line">System.out.println(hashMap.get(<span class="number">1</span>));     <span class="comment">//first</span></span><br><span class="line">System.out.println(hashMap.containsKey(<span class="number">1</span>)); <span class="comment">//true</span></span><br><span class="line">System.out.println(hashMap.containsValue(<span class="string">"third"</span>)); <span class="comment">//true</span></span><br><span class="line">System.out.println(hashMap.remove(<span class="number">10</span>)); <span class="comment">//null</span></span><br><span class="line">System.out.println(hashMap.remove(<span class="number">2</span>));  <span class="comment">//second</span></span><br><span class="line">System.out.println(hashMap);    <span class="comment">//&#123;1=first, 3=third&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//遍历</span></span><br><span class="line"><span class="keyword">for</span> (Object o : hashMap.keySet()) &#123;</span><br><span class="line">    <span class="keyword">int</span> key = (<span class="keyword">int</span>) o;</span><br><span class="line">    System.out.println(<span class="string">"key = "</span> + key + <span class="string">", values = "</span> + hashMap.get(key));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//另一种遍历方法</span></span><br><span class="line">Set&lt;Map.Entry&lt;Integer, String&gt;&gt; set = hashMap.entrySet();</span><br><span class="line"><span class="keyword">for</span> (Map.Entry&lt;Integer, String&gt; entry : set) &#123;</span><br><span class="line">    System.out.println(<span class="string">"key = "</span> + entry.getKey() + <span class="string">", values = "</span> + entry.getValue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>HashMap和Hashtable的区别  </p>
-</li>
-</ul>
-<ol>
-<li>Hashtable是一个线程安全的Map实现，而HashMap是一个<strong>线程不安全</strong>的实现。所有HashMap的性能会高一点。</li>
-<li>Hashtable不允许null作为key或value的元素，如果使用会抛出异常，但HashMap允许null作为key或value的元素。HashMap允许一个key为null，允许多个value为null。 </li>
-</ol>
-<ul>
-<li><p>用作key的对象必须实现了equals()和hashCode()方法，因为判断两个key相等的条件是：通过equals()方法比较后返回true，并且两者的hashCode()方法返回的值相等。所以如果重写了对象的equals()方法，必须保证两个方法的判断标准一致，即equals()方法返回true时，返回的hashCode也要相等。当我们使用自定义对象作为key时，也要重写这两个方法并保持判断标准一致。  </p>
-</li>
-<li><p>HashMap和LinkedHashMap的区别</p>
-</li>
-</ul>
-<ol>
-<li>HashMap是无序的：其遍历的顺序与其插入的顺序不一样，而LinkedHashMap是有序的：其遍历的顺序和其插入的顺序一致</li>
-<li>LinkedHashMap需要维护元素的顺序，所以性能略低于HashMap，但由于它是以链表维护元素的顺序，所以在迭代元素的时候性能会好一些。</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/18/java集合之HashMap/" data-id="cjusfzb5t0002m8tg7xcyd1ih" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/02/18/hello-world/" class="article-date">
-  <time datetime="2019-02-18T08:41:15.328Z" itemprop="datePublished">2019-02-18</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/02/18/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/18/hello-world/" data-id="cjusfzb5d0000m8tgtrehc8hn" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-
 
 </section>
         
