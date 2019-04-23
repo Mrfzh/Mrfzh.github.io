@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。  运行 如果处于就绪状态的线程获得了CPU">
+<meta name="keywords" content="线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程笔记（2）">
+<meta property="og:url" content="http://yoursite.com/2019/04/23/线程笔记（2）/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。  运行 如果处于就绪状态的线程获得了CPU">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181106200534194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
+<meta property="og:updated_time" content="2019-04-23T14:15:38.472Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线程笔记（2）">
+<meta name="twitter:description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。  运行 如果处于就绪状态的线程获得了CPU">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20181106200534194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/04/23/线程笔记（2）/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>线程笔记（2） | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/23/线程笔记（2）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="http://baocangwh.cn/t6/702/1556000588x2890186190.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">线程笔记（2）
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-23 22:14:26 / 修改时间：22:15:38" itemprop="dateCreated datePublished" datetime="2019-04-23T22:14:26+08:00">2019-04-23</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/java笔记/" itemprop="url" rel="index"><span itemprop="name">java笔记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="线程的生命周期"><a href="#线程的生命周期" class="headerlink" title="线程的生命周期"></a>线程的生命周期</h1><h2 id="新建"><a href="#新建" class="headerlink" title="新建"></a>新建</h2><ul>
+<li>当程序new了一个线程后，该线程就处于新建状态。</li>
+<li>此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。</li>
+</ul>
+<h2 id="就绪"><a href="#就绪" class="headerlink" title="就绪"></a>就绪</h2><ul>
+<li>当线程对象调用其start方法后，该线程就处于就绪状态。</li>
+<li>此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。</li>
+</ul>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><ul>
+<li>如果处于就绪状态的线程获得了CPU，开始执行线程体，则该线程处于运行状态。</li>
+</ul>
+<h2 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h2><p>当发生如下情况时，线程将进入阻塞状态。</p>
+<ul>
+<li>线程调用sleep方法</li>
+<li>线程调用了一个阻塞式的IO方法，在该方法返回之前，该线程被阻塞</li>
+<li>线程试图获得一个同步监视器，但该同步监视器正被其他线程所持有（与线程锁有关）</li>
+<li>线程在等待某个通知（notify）</li>
+<li>调用了suspend方法将线程挂起（该方法容易造成死锁，应该尽量避免使用该方法）</li>
+</ul>
+<h3 id="重新进入就绪状态"><a href="#重新进入就绪状态" class="headerlink" title="重新进入就绪状态"></a>重新进入就绪状态</h3><p>被阻塞的线程在合适的时候会重新进入就绪状态（注意是就绪状态而不是运行状态），针对上面的几种状况，线程重新进入就绪状态的条件分别为</p>
+<ul>
+<li>调用sleep方法的线程经过了指定时间</li>
+<li>线程调用的阻塞式IO方法已经返回</li>
+<li>线程成功获得了试图取得的同步监视器</li>
+<li>线程正在等待某个通知时，其他线程发出了一个通知</li>
+<li>调用了resume方法恢复被挂起的线程</li>
+</ul>
+<h2 id="死亡"><a href="#死亡" class="headerlink" title="死亡"></a>死亡</h2><p>线程会以如下三种方式结束，结束后线程就处于死亡状态。</p>
+<ul>
+<li>线程体执行完毕，线程正常结束</li>
+<li>线程抛出一个未捕获的Exception或Error</li>
+<li>直接调用该线程的stop方法结束该线程（该方法容易造成死锁，通常不推荐使用）</li>
+</ul>
+<h3 id="如何判断线程是否死亡"><a href="#如何判断线程是否死亡" class="headerlink" title="如何判断线程是否死亡"></a>如何判断线程是否死亡</h3><p>可以通过线程的isAlive方法判断，当线程处于就绪、运行、阻塞状态时，返回true；当线程处于新建、死亡状态时，返回false。</p>
+<h2 id="线程状态转换图"><a href="#线程状态转换图" class="headerlink" title="线程状态转换图"></a>线程状态转换图</h2><p><img src="https://img-blog.csdnimg.cn/20181106200534194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70" alt></p>
+<h1 id="控制线程"><a href="#控制线程" class="headerlink" title="控制线程"></a>控制线程</h1><h2 id="join线程"><a href="#join线程" class="headerlink" title="join线程"></a>join线程</h2><ul>
+<li>当在某个程序执行流中调用其他线程的join()方法时，调用线程将被阻塞，直到被join方法加入的线程执行完为止。</li>
+</ul>
+<h2 id="后台线程"><a href="#后台线程" class="headerlink" title="后台线程"></a>后台线程</h2><ul>
+<li>后台线程是在后台运行的，为其他的线程提供服务。</li>
+<li>后台线程有个特征：如果所有的前台线程都死亡，后台线程会自动死亡。</li>
+<li>如何创建：通过调用Thread的setDaemon(true)方法可以将指定线程设置为后台线程，注意该方法要在start方法前调用。</li>
+<li>主线程默认是前台线程，如果没有使用setDaemon(true)方法显示设置，那么前台线程创建的子线程默认是前台线程，后台线程创建的子线程默认是后台线程。</li>
+</ul>
+<h2 id="线程睡眠：sleep"><a href="#线程睡眠：sleep" class="headerlink" title="线程睡眠：sleep"></a>线程睡眠：sleep</h2><ul>
+<li>Thread.sleep()方法：让当前正在执行的线程暂停一段时间，并进入阻塞状态。</li>
+</ul>
+<h2 id="线程让步：yield"><a href="#线程让步：yield" class="headerlink" title="线程让步：yield"></a>线程让步：yield</h2><ul>
+<li>Thread.yield()方法：与sleep方法不同，该方法只是将该线程转入就绪状态。完全可能出现的情况是：当某个线程调用了yield方法暂停之后，线程调度器又将其调度出来重新执行。</li>
+<li>当某个线程调用了yield方法暂停之后，只有优先级与当前线程相同，或者优先级高于当前线程的处于就绪状态的线程才会获得执行的机会。</li>
+</ul>
+<h3 id="关于sleep方法和yield方法的区别"><a href="#关于sleep方法和yield方法的区别" class="headerlink" title="关于sleep方法和yield方法的区别"></a>关于sleep方法和yield方法的区别</h3><ul>
+<li>sleep方法暂停当前线程后，会给其他线程执行机会，不会理会其他线程的优先级；但yield方法只会给优先级相同，或优先级更高的线程执行机会</li>
+<li>sleep方法会将线程转入阻塞状态，直到经过阻塞时间才会转入就绪状态；而yield方法不会将线程转入阻塞状态，它只是强制当前线程转入就绪状态，因此完全有可能某个线程调用了yield方法暂停之后，立即再次获得处理器资源而被执行。</li>
+<li>sleep方法声明抛出了InterruptedException异常，而yield方法没有抛出异常。</li>
+<li>sleep方法比yield方法有更好的可移植性，通常不建议使用yield方法来控制并发线程的执行。</li>
+</ul>
+<h1 id="线程同步"><a href="#线程同步" class="headerlink" title="线程同步"></a>线程同步</h1><h2 id="线程安全问题"><a href="#线程安全问题" class="headerlink" title="线程安全问题"></a>线程安全问题</h2><p>例如银行取钱问题，在某种情况下，可能出现两个取钱线程同时操作同一个账户的情况（虽然出现的可能性很小，但还是有可能会发生），这时假如两个线程都是取钱800，而账户余额只剩下1000，那么就可能出现取了两次800的情况而出现余额-600的情况，显然现实中是不允许这种事情发生的。</p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><h3 id="同步代码块"><a href="#同步代码块" class="headerlink" title="同步代码块"></a>同步代码块</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">synchronized</span> (obj) &#123;</span><br><span class="line">    <span class="comment">//同步代码块</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>上面的obj就是<strong>同步监视器</strong>，线程开始执行同步代码块之前，必须先获得对同步监视器的锁定，而任何时刻只能有一个线程可以获得对同步监视器的锁定，当同步代码块执行完成时，该线程才会释放对该同步监视器的锁定。</li>
+<li>虽然java程序允许使用任何对象作为同步监视器，但同步监视器的目的就是阻止两个线程对同一个共享资源进行并发访问，因此通常推荐使用可能被并发访问的共享资源作为同步监视器。</li>
+<li>在银行取钱问题中，可以把账户作为同步监视器，取钱过程作为同步代码块，这样就保证只有一个线程能够进行取钱操作，当一个线程的取钱操作结束后另一个线程才能取得同步监视器进行另外的取钱操作。</li>
+</ul>
+<h3 id="同步方法"><a href="#同步方法" class="headerlink" title="同步方法"></a>同步方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">draw</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//取钱操作</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>上面的方法用synchronized修饰，是一个同步方法。对于同步方法，无需显示指定同步监视器，同步方法的同步监视器是this，也就是调用该方法的对象。</li>
+<li>因为draw方法是一个同步方法，而该方法是账户类的一个方法，所以对于同一个账户变量来说，如果有多个线程操作该变量，那么同一时刻只能有一个线程能执行draw方法，其他线程执行draw方法时会阻塞，这样就保证了取钱操作的安全性。</li>
+</ul>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><ol>
+<li>可变类的线程安全是以降低程序的运行效率为代价的，为了减少线程安全带来的负面影响，程序可采取如下策略：  </li>
+</ol>
+<ul>
+<li>不要对线程安全类的所有方法都进行同步，只对那些会改变共享资源的方法进行同步。</li>
+<li>如果可变类有两种运行环境：单线程环境和多线程环境，则应该为可变类提供两种版本，即线程不安全版本和线程安全版本。在单线程环境中使用线程不安全版本来保证性能，在多线程环境中使用线程安全版本。例如JDK提供的StringBuilder和StringBuffer，在单线程环境下使用StringBuilder来保证较好的性能，在多线程环境中使用StringBuffer来保证安全。</li>
+</ul>
+<h2 id="释放同步监视器的锁定"><a href="#释放同步监视器的锁定" class="headerlink" title="释放同步监视器的锁定"></a>释放同步监视器的锁定</h2><h3 id="何时释放"><a href="#何时释放" class="headerlink" title="何时释放"></a>何时释放</h3><ul>
+<li>当前线程的同步方法、同步代码块执行完毕</li>
+<li>当前线程在执行同步方法、同步代码块时出现了未处理的Error或Exception而异常结束</li>
+<li>当前线程执行同步方法或同步代码块时，程序执行了同步监视器对象的wait方法，则当前线程暂停，并释放同步监视器  </li>
+</ul>
+<h3 id="以下情况不会释放"><a href="#以下情况不会释放" class="headerlink" title="以下情况不会释放"></a>以下情况不会释放</h3><ul>
+<li>当前线程执行同步方法或同步代码块时，程序调用了sleep、yield方法来暂停当前线程，当前线程不会释放同步监视器</li>
+<li>当前线程执行同步代码块时，其他线程调用了当前线程的suspend方法将当前线程挂起，当前线程不会释放同步监视器。当然，程序应该尽量避免使用suspend和resume方法来控制线程。 </li>
+</ul>
+<h2 id="关于synchronized关键字"><a href="#关于synchronized关键字" class="headerlink" title="关于synchronized关键字"></a>关于synchronized关键字</h2><ul>
+<li><a href="https://www.jianshu.com/p/d53bf830fa09" target="_blank" rel="noopener">https://www.jianshu.com/p/d53bf830fa09</a></li>
+</ul>
+<h2 id="同步锁"><a href="#同步锁" class="headerlink" title="同步锁"></a>同步锁</h2><h3 id="Lock"><a href="#Lock" class="headerlink" title="Lock"></a>Lock</h3><ul>
+<li>Lock提供了比synchronized方法和synchronized代码块更广泛的锁定操作，Lock允许实现更灵活的结构，可以具有差别很大的属性，并且支持多个相关的condition对象。</li>
+</ul>
+<h3 id="ReentrantLock（可重入锁）"><a href="#ReentrantLock（可重入锁）" class="headerlink" title="ReentrantLock（可重入锁）"></a>ReentrantLock（可重入锁）</h3><ul>
+<li>Lock接口的实现类</li>
+<li><p>基本使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">X</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//创建锁对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ReentrantLock reentrantLock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//加锁</span></span><br><span class="line">        reentrantLock.lock();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//需要保证线程安全的代码</span></span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">//使用finally块来保证释放锁</span></span><br><span class="line">            reentrantLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>何时使用：需要实现ReentrantLock的独有功能时</p>
+</li>
+</ul>
+<h4 id="公平锁和非公平锁"><a href="#公平锁和非公平锁" class="headerlink" title="公平锁和非公平锁"></a>公平锁和非公平锁</h4><ul>
+<li><p>公平锁的创建：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> ReentrantLock fairLock = <span class="keyword">new</span> ReentrantLock(<span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>非公平锁的创建：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> ReentrantLock unFairLock = <span class="keyword">new</span> ReentrantLock();</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>区别：公平锁指的是线程获取锁的顺序是按照加锁顺序来的，即先加锁的线程（执行lock方法）会优先获得锁，非公平锁指的是抢锁机制，先lock的线程不一定先获得锁。</p>
+</li>
+<li>非公平锁可能会产生饥饿现象，公平锁虽然不会产生饥饿现象，但是性能会比非公平锁差很多。</li>
+</ul>
+<h3 id="Lock与synchronized对比"><a href="#Lock与synchronized对比" class="headerlink" title="Lock与synchronized对比"></a>Lock与synchronized对比</h3><ul>
+<li>Lock是一个接口，而synchronized是Java中的关键字，synchronized是内置的语言实现</li>
+<li>synchronized在发生异常时，会自动释放线程占有的锁，因此不会导致死锁现象发生；而Lock在发生异常时，如果没有主动通过unLock()去释放锁，则很可能造成死锁现象，因此使用Lock时需要在finally块中释放锁；</li>
+<li>Lock可以让等待锁的线程响应中断，而synchronized却不行，使用synchronized时，等待的线程会一直等待下去，不能够响应中断；</li>
+<li>通过Lock可以知道有没有成功获取锁，而synchronized却无法办到。</li>
+</ul>
+<h3 id="ReentrantLock和synchronized对比"><a href="#ReentrantLock和synchronized对比" class="headerlink" title="ReentrantLock和synchronized对比"></a>ReentrantLock和synchronized对比</h3><ul>
+<li>可重入性：从名字上理解，ReenTrantLock的字面意思就是可重入锁，其实synchronized关键字所使用的锁也是可重入的，两者关于这个的区别不大。两者都是同一个线程每进入一次，锁的计数器都自增1，所以要等到锁的计数器下降为0时才能释放锁。（lock了几次相对应就要unLock几次）</li>
+<li>锁的实现：Synchronized是依赖于JVM实现的，而ReenTrantLock是JDK实现的，两者的区别就类似于操作系统来控制实现和用户自己敲代码实现的区别。前者的实现是比较难见到的，后者有直接的源码可供阅读。</li>
+<li>性能上：在Synchronized优化以前，synchronized的性能是比ReenTrantLock差很多的，但是自从Synchronized引入了偏向锁，轻量级锁（自旋锁）后，两者的性能就差不多了，在两种方法都可用的情况下，官方甚至建议使用synchronized。</li>
+<li>便利性：很明显Synchronized的使用比较方便简洁，并且由编译器去保证锁的加锁和释放，而ReenTrantLock需要手工声明来加锁和释放锁，为了避免忘记手工释放锁造成死锁，所以最好在finally中声明释放锁。</li>
+</ul>
+<h3 id="可重入锁和不可重入锁的区别"><a href="#可重入锁和不可重入锁的区别" class="headerlink" title="可重入锁和不可重入锁的区别"></a>可重入锁和不可重入锁的区别</h3><ul>
+<li><a href="https://blog.csdn.net/u012545728/article/details/80843595" target="_blank" rel="noopener">https://blog.csdn.net/u012545728/article/details/80843595</a></li>
+</ul>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="http://baijiahao.baidu.com/s?id=1580877892723254760&amp;wfr=spider&amp;for=pc" target="_blank" rel="noopener">Java：重入锁ReentrantLock详解、代码实战、与Synchronized对比</a></li>
+<li><a href="https://www.cnblogs.com/-new/p/7256297.html" target="_blank" rel="noopener">java多线程系列(四)—ReentrantLock的使用</a></li>
+<li><a href="https://www.cnblogs.com/baizhanshi/p/7211802.html" target="_blank" rel="noopener">ReenTrantLock可重入锁（和synchronized的区别）总结</a></li>
+<li><a href="https://blog.csdn.net/u010325193/article/details/80497364" target="_blank" rel="noopener">ReentrantLock 的使用</a></li>
+</ul>
+<h2 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><ul>
+<li>当两个线程互相等待对方释放同步监视器时就会发生死锁，Java虚拟机没有检测，也没有采取措施来处理死锁情况，所以多线程编程时应采取措施避免死锁发生。</li>
+<li>一旦出现死锁，整个程序既不会发生任何异常，也不会给任何提示，只是所以线程处于阻塞状态，无法继续。</li>
+</ul>
+<h3 id="简单例子"><a href="#简单例子" class="headerlink" title="简单例子"></a>简单例子</h3><p>思路是创建两个字符串a和b，再创建两个线程A和B，让每个线程都用synchronized锁住字符串（A先锁a，再去锁b；B先锁b，再锁a），如果A锁住a，B锁住b，A就没办法锁住b，B也没办法锁住a，这时就陷入了死锁。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DeadLock</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> String obj1 = <span class="string">"obj1"</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> String obj2 = <span class="string">"obj2"</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> Lock1()).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> Lock2()).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Lock1</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"Lock1 running"</span>);</span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">                <span class="keyword">synchronized</span>(DeadLock.obj1)&#123;</span><br><span class="line">                    System.out.println(<span class="string">"Lock1 lock obj1"</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">3000</span>);<span class="comment">//获取obj1后先等一会儿，让Lock2有足够的时间锁住obj2</span></span><br><span class="line">                    <span class="keyword">synchronized</span>(DeadLock.obj2)&#123;</span><br><span class="line">                        System.out.println(<span class="string">"Lock1 lock obj2"</span>);  </span><br><span class="line">                        <span class="comment">//不会执行到这句，因为obj2锁已经被Lock2持有，而Lock2需要获取obj1锁，</span></span><br><span class="line">                        <span class="comment">//但obj1锁已经被Lock1持有，所以Lock2也不能获取到obj1锁</span></span><br><span class="line">                        <span class="comment">//造成的后果是：Lock1和Lock2都在等待对方执行完代码后释放自己所需的锁，</span></span><br><span class="line">                        <span class="comment">//但双方的代码都需要持有已经被对方持有的锁，所以就形成一个死循环。</span></span><br><span class="line">                        <span class="comment">//双方都在等待对方释放锁，程序也就变成了虽然没有报错，但运行不下去的情况。</span></span><br><span class="line">                        <span class="comment">//这就是死锁</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">catch</span>(Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Lock2</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"Lock2 running"</span>);</span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">                <span class="keyword">synchronized</span>(DeadLock.obj2)&#123;</span><br><span class="line">                    System.out.println(<span class="string">"Lock2 lock obj2"</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">                    <span class="keyword">synchronized</span>(DeadLock.obj1)&#123;</span><br><span class="line">                        System.out.println(<span class="string">"Lock2 lock obj1"</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">catch</span>(Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Lock1 running</span><br><span class="line">Lock1 lock obj1</span><br><span class="line">Lock2 running</span><br><span class="line">Lock2 lock obj2</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，最终程序没有报错，但却停在了这里运行不下去，两个线程都变成了阻塞状态，形成了是死锁。</p>
+<h3 id="参考-1"><a href="#参考-1" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="https://www.cnblogs.com/mudao/p/5867107.html" target="_blank" rel="noopener">Java产生死锁的一个简单例子</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/线程/" rel="tag"><i class="fa fa-tag"></i> 线程</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/22/线程笔记（1）/" rel="next" title="线程笔记（1）">
+                <i class="fa fa-chevron-left"></i> 线程笔记（1）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/23/线程笔记（3）/" rel="prev" title="线程笔记（3）">
+                线程笔记（3） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="http://baocangwh.cn/t6/702/1556000588x2890186190.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#线程的生命周期"><span class="nav-number">1.</span> <span class="nav-text">线程的生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#新建"><span class="nav-number">1.1.</span> <span class="nav-text">新建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#就绪"><span class="nav-number">1.2.</span> <span class="nav-text">就绪</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行"><span class="nav-number">1.3.</span> <span class="nav-text">运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阻塞"><span class="nav-number">1.4.</span> <span class="nav-text">阻塞</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#重新进入就绪状态"><span class="nav-number">1.4.1.</span> <span class="nav-text">重新进入就绪状态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#死亡"><span class="nav-number">1.5.</span> <span class="nav-text">死亡</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何判断线程是否死亡"><span class="nav-number">1.5.1.</span> <span class="nav-text">如何判断线程是否死亡</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程状态转换图"><span class="nav-number">1.6.</span> <span class="nav-text">线程状态转换图</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#控制线程"><span class="nav-number">2.</span> <span class="nav-text">控制线程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#join线程"><span class="nav-number">2.1.</span> <span class="nav-text">join线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后台线程"><span class="nav-number">2.2.</span> <span class="nav-text">后台线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程睡眠：sleep"><span class="nav-number">2.3.</span> <span class="nav-text">线程睡眠：sleep</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程让步：yield"><span class="nav-number">2.4.</span> <span class="nav-text">线程让步：yield</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于sleep方法和yield方法的区别"><span class="nav-number">2.4.1.</span> <span class="nav-text">关于sleep方法和yield方法的区别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#线程同步"><span class="nav-number">3.</span> <span class="nav-text">线程同步</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#线程安全问题"><span class="nav-number">3.1.</span> <span class="nav-text">线程安全问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方法"><span class="nav-number">3.2.</span> <span class="nav-text">解决方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#同步代码块"><span class="nav-number">3.2.1.</span> <span class="nav-text">同步代码块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#同步方法"><span class="nav-number">3.2.2.</span> <span class="nav-text">同步方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意"><span class="nav-number">3.3.</span> <span class="nav-text">注意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#释放同步监视器的锁定"><span class="nav-number">3.4.</span> <span class="nav-text">释放同步监视器的锁定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#何时释放"><span class="nav-number">3.4.1.</span> <span class="nav-text">何时释放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#以下情况不会释放"><span class="nav-number">3.4.2.</span> <span class="nav-text">以下情况不会释放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于synchronized关键字"><span class="nav-number">3.5.</span> <span class="nav-text">关于synchronized关键字</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#同步锁"><span class="nav-number">3.6.</span> <span class="nav-text">同步锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lock"><span class="nav-number">3.6.1.</span> <span class="nav-text">Lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReentrantLock（可重入锁）"><span class="nav-number">3.6.2.</span> <span class="nav-text">ReentrantLock（可重入锁）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#公平锁和非公平锁"><span class="nav-number">3.6.2.1.</span> <span class="nav-text">公平锁和非公平锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Lock与synchronized对比"><span class="nav-number">3.6.3.</span> <span class="nav-text">Lock与synchronized对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReentrantLock和synchronized对比"><span class="nav-number">3.6.4.</span> <span class="nav-text">ReentrantLock和synchronized对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可重入锁和不可重入锁的区别"><span class="nav-number">3.6.5.</span> <span class="nav-text">可重入锁和不可重入锁的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">3.6.6.</span> <span class="nav-text">参考</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#死锁"><span class="nav-number">3.7.</span> <span class="nav-text">死锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">3.7.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简单例子"><span class="nav-number">3.7.2.</span> <span class="nav-text">简单例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考-1"><span class="nav-number">3.7.3.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v7.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
