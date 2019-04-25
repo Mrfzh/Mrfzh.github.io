@@ -105,7 +105,7 @@
 <meta property="og:description" content="线程池 简介：线程池在系统启动时即创建大量空闲的线程，程序将一个Runnable对象或者Callable对象传给线程池，线程池就会启动一个线程来执行它们的run或call方法，当run或call方法执行结束后，该线程并不会死亡，而是再次返回线程池中成为空闲状态，等待下一个Runnable或Callable对象。 作用：使用线程池可以有效地控制系统中并发线程的数量，当系统中包含大量并发线程时，会导致">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/2019032211104944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
-<meta property="og:updated_time" content="2019-04-23T14:20:45.879Z">
+<meta property="og:updated_time" content="2019-04-25T14:23:05.796Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="线程笔记（4）">
 <meta name="twitter:description" content="线程池 简介：线程池在系统启动时即创建大量空闲的线程，程序将一个Runnable对象或者Callable对象传给线程池，线程池就会启动一个线程来执行它们的run或call方法，当run或call方法执行结束后，该线程并不会死亡，而是再次返回线程池中成为空闲状态，等待下一个Runnable或Callable对象。 作用：使用线程池可以有效地控制系统中并发线程的数量，当系统中包含大量并发线程时，会导致">
@@ -369,12 +369,24 @@
                 
               
 
-              <time title="创建时间：2019-04-23 22:20:01 / 修改时间：22:20:45" itemprop="dateCreated datePublished" datetime="2019-04-23T22:20:01+08:00">2019-04-23</time>
+              <time title="创建时间：2019-04-23 22:20:01" itemprop="dateCreated datePublished" datetime="2019-04-23T22:20:01+08:00">2019-04-23</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-25 22:23:05" itemprop="dateModified" datetime="2019-04-25T22:23:05+08:00">2019-04-25</time>
               
             
           </span>
@@ -437,6 +449,7 @@
 <li>简介：线程池在系统启动时即创建大量空闲的线程，程序将一个Runnable对象或者Callable对象传给线程池，线程池就会启动一个线程来执行它们的run或call方法，当run或call方法执行结束后，该线程<strong>并不会死亡</strong>，而是再次返回线程池中成为空闲状态，等待下一个Runnable或Callable对象。</li>
 <li>作用：使用线程池可以有效地控制系统中并发线程的数量，当系统中包含大量并发线程时，会导致系统性能剧烈下降，甚至导致JVM崩溃，而线程池的最大线程数可以控制系统中的并发线程数不超过此数。</li>
 </ul>
+<a id="more"></a>
 <h2 id="Executors、Executor和ExecutorService"><a href="#Executors、Executor和ExecutorService" class="headerlink" title="Executors、Executor和ExecutorService"></a>Executors、Executor和ExecutorService</h2><p>Executors是一个工厂类，包含了一些静态方法来创建线程池；Executor是一个接口，它是ExecutorService接口的父接口（类似Collections和Collection）</p>
 <h2 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadPoolTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//创建一个具有固定线程数的线程池</span></span><br><span class="line">        ExecutorService pool = Executors.newFixedThreadPool(<span class="number">6</span>);</span><br><span class="line">        <span class="comment">//创建一个Runnable对象</span></span><br><span class="line">        Runnable target = () -&gt; &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">"的i = "</span> + i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="comment">//向线程池中提交两个线程</span></span><br><span class="line">        pool.submit(target);</span><br><span class="line">        pool.submit(target);</span><br><span class="line">        <span class="comment">//关闭线程池</span></span><br><span class="line">        pool.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="Executors创建线程池的几种方式"><a href="#Executors创建线程池的几种方式" class="headerlink" title="Executors创建线程池的几种方式"></a>Executors创建线程池的几种方式</h2><ol>

@@ -96,19 +96,19 @@
 
 
 
-  <meta name="description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。  运行 如果处于就绪状态的线程获得了CPU">
+  <meta name="description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。">
 <meta name="keywords" content="线程">
 <meta property="og:type" content="article">
 <meta property="og:title" content="线程笔记（2）">
 <meta property="og:url" content="http://yoursite.com/2019/04/23/线程笔记（2）/index.html">
 <meta property="og:site_name" content="FengZH的博客">
-<meta property="og:description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。  运行 如果处于就绪状态的线程获得了CPU">
+<meta property="og:description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20181106200534194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
-<meta property="og:updated_time" content="2019-04-23T14:15:38.472Z">
+<meta property="og:updated_time" content="2019-04-25T14:22:48.753Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="线程笔记（2）">
-<meta name="twitter:description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。  运行 如果处于就绪状态的线程获得了CPU">
+<meta name="twitter:description" content="线程的生命周期新建 当程序new了一个线程后，该线程就处于新建状态。 此时该线程仅仅由java虚拟机为其分配内存，并初始化其成员变量，并未表现出线程的动态特征，程序也不会执行其线程体。  就绪 当线程对象调用其start方法后，该线程就处于就绪状态。 此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。">
 <meta name="twitter:image" content="https://img-blog.csdnimg.cn/20181106200534194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
 
 
@@ -369,12 +369,24 @@
                 
               
 
-              <time title="创建时间：2019-04-23 22:14:26 / 修改时间：22:15:38" itemprop="dateCreated datePublished" datetime="2019-04-23T22:14:26+08:00">2019-04-23</time>
+              <time title="创建时间：2019-04-23 22:14:26" itemprop="dateCreated datePublished" datetime="2019-04-23T22:14:26+08:00">2019-04-23</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-25 22:22:48" itemprop="dateModified" datetime="2019-04-25T22:22:48+08:00">2019-04-25</time>
               
             
           </span>
@@ -441,6 +453,7 @@
 <li>当线程对象调用其start方法后，该线程就处于就绪状态。</li>
 <li>此时只是表示该线程可以运行了，并未真正开始运行，至于该线程何时开始运行则取决于JVM里线程调度器的调度。</li>
 </ul>
+<a id="more"></a>
 <h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><ul>
 <li>如果处于就绪状态的线程获得了CPU，开始执行线程体，则该线程处于运行状态。</li>
 </ul>

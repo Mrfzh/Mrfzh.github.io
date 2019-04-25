@@ -96,18 +96,18 @@
 
 
 
-  <meta name="description" content="用于存储键值对（key-value），其中key不可以重复，value可以重复。 基本用法 123456789101112131415161718192021222324252627//初始化，第一个泛型是key的类型，第二个是valuesHashMap&amp;lt;Integer, String&amp;gt; hashMap = new HashMap&amp;lt;&amp;gt;();//添加元素hashMap.pu">
+  <meta name="description" content="用于存储键值对（key-value），其中key不可以重复，value可以重复。">
 <meta name="keywords" content="集合">
 <meta property="og:type" content="article">
 <meta property="og:title" content="java集合之HashMap">
 <meta property="og:url" content="http://yoursite.com/2019/02/18/java集合之HashMap/index.html">
 <meta property="og:site_name" content="FengZH的博客">
-<meta property="og:description" content="用于存储键值对（key-value），其中key不可以重复，value可以重复。 基本用法 123456789101112131415161718192021222324252627//初始化，第一个泛型是key的类型，第二个是valuesHashMap&amp;lt;Integer, String&amp;gt; hashMap = new HashMap&amp;lt;&amp;gt;();//添加元素hashMap.pu">
+<meta property="og:description" content="用于存储键值对（key-value），其中key不可以重复，value可以重复。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-23T01:19:55.019Z">
+<meta property="og:updated_time" content="2019-04-25T14:23:39.908Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="java集合之HashMap">
-<meta name="twitter:description" content="用于存储键值对（key-value），其中key不可以重复，value可以重复。 基本用法 123456789101112131415161718192021222324252627//初始化，第一个泛型是key的类型，第二个是valuesHashMap&amp;lt;Integer, String&amp;gt; hashMap = new HashMap&amp;lt;&amp;gt;();//添加元素hashMap.pu">
+<meta name="twitter:description" content="用于存储键值对（key-value），其中key不可以重复，value可以重复。">
 
 
 
@@ -384,7 +384,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-04-23 09:19:55" itemprop="dateModified" datetime="2019-04-23T09:19:55+08:00">2019-04-23</time>
+                <time title="修改时间：2019-04-25 22:23:39" itemprop="dateModified" datetime="2019-04-25T22:23:39+08:00">2019-04-25</time>
               
             
           </span>
@@ -445,6 +445,9 @@
       
         <ul>
 <li>用于存储键值对（key-value），其中key不可以重复，value可以重复。</li>
+</ul>
+<a id="more"></a>
+<ul>
 <li><p>基本用法</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//初始化，第一个泛型是key的类型，第二个是values</span></span><br><span class="line">HashMap&lt;Integer, String&gt; hashMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"><span class="comment">//添加元素</span></span><br><span class="line">hashMap.put(<span class="number">1</span>, <span class="string">"first"</span>);</span><br><span class="line">hashMap.put(<span class="number">2</span>, <span class="string">"second"</span>);</span><br><span class="line">hashMap.put(<span class="number">3</span>, <span class="string">"third"</span>);</span><br><span class="line"><span class="comment">//hashMap.put(3, "doubleThird");    //会覆盖原先的&lt;3，third&gt;</span></span><br><span class="line">System.out.println(hashMap);    <span class="comment">//&#123;1=first, 2=second, 3=third&#125;</span></span><br><span class="line">System.out.println(hashMap.get(<span class="number">0</span>));     <span class="comment">//null</span></span><br><span class="line">System.out.println(hashMap.get(<span class="number">1</span>));     <span class="comment">//first</span></span><br><span class="line">System.out.println(hashMap.containsKey(<span class="number">1</span>)); <span class="comment">//true</span></span><br><span class="line">System.out.println(hashMap.containsValue(<span class="string">"third"</span>)); <span class="comment">//true</span></span><br><span class="line">System.out.println(hashMap.remove(<span class="number">10</span>)); <span class="comment">//null</span></span><br><span class="line">System.out.println(hashMap.remove(<span class="number">2</span>));  <span class="comment">//second</span></span><br><span class="line">System.out.println(hashMap);    <span class="comment">//&#123;1=first, 3=third&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//遍历</span></span><br><span class="line"><span class="keyword">for</span> (Object o : hashMap.keySet()) &#123;</span><br><span class="line">    <span class="keyword">int</span> key = (<span class="keyword">int</span>) o;</span><br><span class="line">    System.out.println(<span class="string">"key = "</span> + key + <span class="string">", values = "</span> + hashMap.get(key));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//另一种遍历方法</span></span><br><span class="line">Set&lt;Map.Entry&lt;Integer, String&gt;&gt; set = hashMap.entrySet();</span><br><span class="line"><span class="keyword">for</span> (Map.Entry&lt;Integer, String&gt; entry : set) &#123;</span><br><span class="line">    System.out.println(<span class="string">"key = "</span> + entry.getKey() + <span class="string">", values = "</span> + entry.getValue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>

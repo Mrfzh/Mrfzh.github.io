@@ -104,7 +104,7 @@
 <meta property="og:site_name" content="FengZH的博客">
 <meta property="og:description" content="线程通信传统的线程通信（wait、notify、notifyAll） wait()、notify/notifyAll() 方法是Object的本地final方法，无法被重写。 这三个方法必须有同步监视器对象来调用，这可分为两种情况：   对于使用synchronized修饰的同步方法，因为该类的实例this就是同步监视器，所以可以在同步方法中直接使用这三个方法。 对于使用synchronized修">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-04-23T14:18:06.130Z">
+<meta property="og:updated_time" content="2019-04-25T14:24:15.549Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="线程笔记（3）">
 <meta name="twitter:description" content="线程通信传统的线程通信（wait、notify、notifyAll） wait()、notify/notifyAll() 方法是Object的本地final方法，无法被重写。 这三个方法必须有同步监视器对象来调用，这可分为两种情况：   对于使用synchronized修饰的同步方法，因为该类的实例this就是同步监视器，所以可以在同步方法中直接使用这三个方法。 对于使用synchronized修">
@@ -367,12 +367,24 @@
                 
               
 
-              <time title="创建时间：2019-04-23 22:17:06 / 修改时间：22:18:06" itemprop="dateCreated datePublished" datetime="2019-04-23T22:17:06+08:00">2019-04-23</time>
+              <time title="创建时间：2019-04-23 22:17:06" itemprop="dateCreated datePublished" datetime="2019-04-23T22:17:06+08:00">2019-04-23</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-25 22:24:15" itemprop="dateModified" datetime="2019-04-25T22:24:15+08:00">2019-04-25</time>
               
             
           </span>
@@ -439,6 +451,9 @@
 </ul>
 </li>
 <li>wait():导致当前线程等待，直到其他线程调用该同步监视器的notify()方法或notifyAll()方法来唤醒该线程。调用wait方法的当前线程会释放对该同步监视器的锁定。</li>
+</ul>
+<a id="more"></a>
+<ul>
 <li>notify():唤醒在此同步监视器上等待的<strong>单个</strong>线程。如果有多个线程在此同步监视器上等待，则选择唤醒其中一个线程，这种选择是任意性的。</li>
 <li>notifyAll():唤醒在此同步监视器上等待的<strong>所有</strong>线程。</li>
 <li>注意：notify/notifyAll方法的执行只是唤醒沉睡的线程，而不会立即释放锁。直到执行完synchronized代码块的代码或者是调用wait方法，才会释放锁。所以在编程中，应尽量在使用了notify/notifyAll方法后立即退出临界区，以唤醒其他线程。</li>
