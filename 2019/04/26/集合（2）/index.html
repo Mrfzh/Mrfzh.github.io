@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="List List判断两个对象是否相等的标志是只要通过equals方法返回true即可。  1234567List&amp;lt;String&amp;gt; list = new ArrayList&amp;lt;&amp;gt;();list.add(&quot;first&quot;);list.add(&quot;second&quot;);System.out.println(list);   //[first, second]String s = &quot;fir">
+<meta name="keywords" content="集合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="集合（2）">
+<meta property="og:url" content="http://yoursite.com/2019/04/26/集合（2）/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="List List判断两个对象是否相等的标志是只要通过equals方法返回true即可。  1234567List&amp;lt;String&amp;gt; list = new ArrayList&amp;lt;&amp;gt;();list.add(&quot;first&quot;);list.add(&quot;second&quot;);System.out.println(list);   //[first, second]String s = &quot;fir">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-26T11:55:19.483Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="集合（2）">
+<meta name="twitter:description" content="List List判断两个对象是否相等的标志是只要通过equals方法返回true即可。  1234567List&amp;lt;String&amp;gt; list = new ArrayList&amp;lt;&amp;gt;();list.add(&quot;first&quot;);list.add(&quot;second&quot;);System.out.println(list);   //[first, second]String s = &quot;fir">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/04/26/集合（2）/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>集合（2） | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/26/集合（2）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="http://baocangwh.cn/t6/702/1556262979x2728278598.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">集合（2）
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-26 19:52:47 / 修改时间：19:55:19" itemprop="dateCreated datePublished" datetime="2019-04-26T19:52:47+08:00">2019-04-26</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="List"><a href="#List" class="headerlink" title="List"></a>List</h1><ul>
+<li>List判断两个对象是否相等的标志是只要通过equals方法返回true即可。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">list.add(<span class="string">"first"</span>);</span><br><span class="line">list.add(<span class="string">"second"</span>);</span><br><span class="line">System.out.println(list);   <span class="comment">//[first, second]</span></span><br><span class="line">String s = <span class="string">"first"</span>;</span><br><span class="line">list.remove(s);</span><br><span class="line">System.out.println(list);   <span class="comment">//[second]</span></span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ListTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            list.add(i);        <span class="comment">//添加元素</span></span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(list);</span><br><span class="line">        System.out.println(list.contains(<span class="number">8</span>));   <span class="comment">//是否包含该元素</span></span><br><span class="line">        System.out.println(list.contains(<span class="number">11</span>));</span><br><span class="line">        <span class="comment">//在索引为5的位置添加元素15（原先索引大于等于5的元素都后移一位）</span></span><br><span class="line">        list.add(<span class="number">5</span>, <span class="number">15</span>);</span><br><span class="line">        System.out.println(list);</span><br><span class="line">        list.set(<span class="number">5</span>, <span class="number">16</span>);            <span class="comment">//将索引为5的元素修改为16</span></span><br><span class="line">        System.out.println(list);</span><br><span class="line">        <span class="comment">//返回元素（第一个）索引，若没有该元素则返回-1</span></span><br><span class="line">        System.out.println(<span class="string">"元素9（第一个）的索引是："</span> + list.indexOf(<span class="number">9</span>));</span><br><span class="line">        <span class="comment">//返回索引为[2, 7)的子集</span></span><br><span class="line">        System.out.println(list.subList(<span class="number">2</span>, <span class="number">7</span>));</span><br><span class="line">        list.remove(<span class="number">7</span>);     <span class="comment">//删除索引为7的元素（注意删除后的索引改变引发的问题）</span></span><br><span class="line">        System.out.println(list);</span><br><span class="line">        list.clear();   <span class="comment">//清除所有元素</span></span><br><span class="line">        System.out.println(list);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</span><br><span class="line">true</span><br><span class="line">false</span><br><span class="line">[0, 1, 2, 3, 4, 15, 5, 6, 7, 8, 9]</span><br><span class="line">[0, 1, 2, 3, 4, 16, 5, 6, 7, 8, 9]</span><br><span class="line">元素9（第一个）的索引是：10</span><br><span class="line">[2, 3, 4, 16, 5]</span><br><span class="line">[0, 1, 2, 3, 4, 16, 5, 7, 8, 9]</span><br><span class="line">[]</span><br></pre></td></tr></table></figure></p>
+<h2 id="其他方法"><a href="#其他方法" class="headerlink" title="其他方法"></a>其他方法</h2><ul>
+<li>sort方法：使用一个Comparator对象来控制元素排序</li>
+<li>replaceAll方法：使用UnaryOperator对象来替换所有的元素</li>
+<li>listIterator方法：返回一个ListIterator接口对象。<blockquote>
+<p>ListIterator与普通的Iterator相比，增加了向前迭代的功能，而且还可以通过add方法向List集合中添加元素。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="ArrayList和Vector"><a href="#ArrayList和Vector" class="headerlink" title="ArrayList和Vector"></a>ArrayList和Vector</h2><ul>
+<li>两个类都是List类的典型实现，底层封装了一个动态的，允许再分配的Object[]数组。</li>
+<li>ArrayList和Vector的显著区别是，ArrayList是线程不安全的。但Vector具有很多缺点，所以即使需要保证集合线程安全，也同样不推荐使用Vector，通过Collections工具类，可以将ArrayList变成线程安全的。</li>
+<li>Vector还提供了一个Stack子类，可用于模拟“栈”这种数据结构。但Stack同样是线程安全、性能较差的，因此也应该尽量少用Stack类。如果需要使用“栈”，可以考虑ArrayDeque。</li>
+</ul>
+<h2 id="固定长度的List"><a href="#固定长度的List" class="headerlink" title="固定长度的List"></a>固定长度的List</h2><p>当我们调用Arrays.asList方法将一个数组转换为集合的时候，返回的对象是Arrays.ArrayList（Arrays的内部类ArrayList），Arrays.ArrayList是一个固定长度的List，程序<strong>只能遍历该集合的元素，而不能增加或删除该集合的元素</strong>。</p>
+<h1 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h1><ul>
+<li>Queue用于模拟队列这种数据结构，队列通常是指“先进先出”的容器。</li>
+<li>Queue接口定义了以下几个方法<blockquote>
+<p>boolean add(E e); 将元素e加入此队列的尾部。<br>boolean offer(E e); 将元素e加入此队列的尾部。当使用有容量限制的队列时，此方法通常比add方法更好。<br>E element(); 获取队列头部的元素，但不删除该元素。<br>E peek(); 获取队列头部的元素，但不删除该元素。如果此队列为空，则返回null。<br>E remove(); 获取队列头部的元素，并删除该元素。<br>E poll(); 获取队列头部的元素，并删除该元素。如果此队列为空，则返回null。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="PriorityQueue"><a href="#PriorityQueue" class="headerlink" title="PriorityQueue"></a>PriorityQueue</h2><ul>
+<li>PriorityQueue是Queue的实现类，但是PriorityQueue保存队列的元素并不是按照加入队列的顺序，而是按照某种规则进行重新排序。</li>
+<li>PriorityQueue不允许插入null元素，PriorityQueue的元素有两种排序方式：自然排序和定制排序（与TreeSet类似）</li>
+<li>关于PriorityQueue排序的一些问题，先看下面的代码<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Queue&lt;Integer&gt; priorityQueue = <span class="keyword">new</span> PriorityQueue&lt;&gt;();</span><br><span class="line">priorityQueue.offer(<span class="number">6</span>);</span><br><span class="line">priorityQueue.offer(<span class="number">1</span>);</span><br><span class="line">priorityQueue.offer(<span class="number">10</span>);</span><br><span class="line">priorityQueue.offer(-<span class="number">3</span>);</span><br><span class="line">System.out.println(priorityQueue);  <span class="comment">//[-3, 1, 10, 6]</span></span><br><span class="line">priorityQueue.offer(-<span class="number">6</span>);</span><br><span class="line">System.out.println(priorityQueue);  <span class="comment">//[-6, -3, 10, 6, 1]</span></span><br><span class="line"><span class="keyword">while</span> (priorityQueue.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    System.out.print(priorityQueue.remove() + <span class="string">"  "</span>);    <span class="comment">//-6  -3  1  6  10</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>可以看出输出的队列元素并不是完全的升序，但是删除的顺序是有序的。其实PriorityQueue在添加和删除元素的时候也是有排序的, 但不是完全的排序, 只是保证需要放在头部的元素一定在队头，而队尾的元素不一定是有序的。</p>
+<h2 id="Deque"><a href="#Deque" class="headerlink" title="Deque"></a>Deque</h2><ul>
+<li>Queue还有一个Deque子接口，Deque代表一个“双端队列”，双端队列可以从两端添加、删除元素，因此Deque的实现类既可以当成队列使用，也可以当成栈来使用。</li>
+<li>Deque接口中定义了pop（出栈）、push（入栈）方法用于实现栈。其中pop方法的作用是获取并删除队列的队头元素，push方法的作用是将指定元素插入队列的队头。</li>
+</ul>
+<h3 id="ArrayDeque"><a href="#ArrayDeque" class="headerlink" title="ArrayDeque"></a>ArrayDeque</h3><ul>
+<li>ArrayDeque是Deque类的典型实现，它是一个基于数组的双端队列</li>
+<li><p>ArrayDeque可以作为栈来使用，因此当程序需要栈这种数据结构时，应使用ArrayDeque，尽量避免使用Stack，因为Stack是古老的集合，性能较差。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Deque&lt;String&gt; stack = <span class="keyword">new</span> ArrayDeque&lt;&gt;();</span><br><span class="line"><span class="comment">//依次将三个元素入栈</span></span><br><span class="line">stack.push(<span class="string">"first"</span>);</span><br><span class="line">stack.push(<span class="string">"second"</span>);</span><br><span class="line">stack.push(<span class="string">"third"</span>);</span><br><span class="line">System.out.println(stack);  <span class="comment">//[third, second, first]</span></span><br><span class="line">System.out.println(<span class="string">"将栈顶元素出栈："</span> + stack.pop());   <span class="comment">//third</span></span><br><span class="line">System.out.println(stack);  <span class="comment">//[second, first]</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ArrayDeque也可以作为队列来使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Deque&lt;String&gt; queue = <span class="keyword">new</span> ArrayDeque&lt;&gt;();</span><br><span class="line"><span class="comment">//添加三个元素入队列</span></span><br><span class="line">queue.offer(<span class="string">"first"</span>);</span><br><span class="line">queue.offer(<span class="string">"second"</span>);</span><br><span class="line">queue.offer(<span class="string">"third"</span>);</span><br><span class="line">System.out.println(queue);  <span class="comment">//[first, second, third]</span></span><br><span class="line">System.out.println(<span class="string">"删除队头元素："</span> + queue.poll());   <span class="comment">//first</span></span><br><span class="line">System.out.println(queue);  <span class="comment">//[second, third]</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h3><ul>
+<li>LinkedList既实现了List接口也实现了Deque接口，所以可以用来作为List集合、队列、栈。</li>
+<li>LinkedList的内部以链表的形式来保持集合中的元素。与内部以数组的形式实现的ArrayList、ArrayDeque不同，一般来说，其在插入、删除元素时性能比较出色（只需改变指针所指的地址即可），但随机访问集合元素时性能较差（需要遍历链表）。</li>
+</ul>
+<h1 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h1><ul>
+<li>Map用于保存具有映射关系的数据，因此Map集合里保存着两组值，一组值用于保存key，另一组用于保存value，key和value一一对应，且必须是引用类型的数据。</li>
+<li>如果把所有key组成在一起，就组成了一个Set集合，实际上Map确实包含了一个keySet()方法用于返回Map里所有key组成的一个Set集合。</li>
+<li>Map和Set的关系非常密切，从Java源码来看，Java是先实现了Map，然后通过包装一个所有value都为null的Map就是实现了Set。</li>
+</ul>
+<h2 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h2><ul>
+<li>用于存储键值对（key-value），其中key不可以重复，value可以重复。</li>
+<li><p>基本用法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//初始化，第一个泛型是key的类型，第二个是values</span></span><br><span class="line">HashMap&lt;Integer, String&gt; hashMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"><span class="comment">//添加元素</span></span><br><span class="line">hashMap.put(<span class="number">1</span>, <span class="string">"first"</span>);</span><br><span class="line">hashMap.put(<span class="number">2</span>, <span class="string">"second"</span>);</span><br><span class="line">hashMap.put(<span class="number">3</span>, <span class="string">"third"</span>);</span><br><span class="line"><span class="comment">//hashMap.put(3, "doubleThird");    //会覆盖原先的&lt;3，third&gt;</span></span><br><span class="line">System.out.println(hashMap);    <span class="comment">//&#123;1=first, 2=second, 3=third&#125;</span></span><br><span class="line">System.out.println(hashMap.get(<span class="number">0</span>));     <span class="comment">//null</span></span><br><span class="line">System.out.println(hashMap.get(<span class="number">1</span>));     <span class="comment">//first</span></span><br><span class="line">System.out.println(hashMap.containsKey(<span class="number">1</span>)); <span class="comment">//true</span></span><br><span class="line">System.out.println(hashMap.containsValue(<span class="string">"third"</span>)); <span class="comment">//true</span></span><br><span class="line">System.out.println(hashMap.remove(<span class="number">10</span>)); <span class="comment">//null</span></span><br><span class="line">System.out.println(hashMap.remove(<span class="number">2</span>));  <span class="comment">//second</span></span><br><span class="line">System.out.println(hashMap);    <span class="comment">//&#123;1=first, 3=third&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//遍历</span></span><br><span class="line"><span class="keyword">for</span> (Object o : hashMap.keySet()) &#123;</span><br><span class="line">    <span class="keyword">int</span> key = (<span class="keyword">int</span>) o;</span><br><span class="line">    System.out.println(<span class="string">"key = "</span> + key + <span class="string">", values = "</span> + hashMap.get(key));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//另一种遍历方法</span></span><br><span class="line">Set&lt;Map.Entry&lt;Integer, String&gt;&gt; set = hashMap.entrySet();</span><br><span class="line"><span class="keyword">for</span> (Map.Entry&lt;Integer, String&gt; entry : set) &#123;</span><br><span class="line">    System.out.println(<span class="string">"key = "</span> + entry.getKey() + <span class="string">", values = "</span> + entry.getValue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>HashMap和Hashtable的区别  </p>
+</li>
+</ul>
+<ol>
+<li>Hashtable是一个线程安全的Map实现，而HashMap是一个<strong>线程不安全</strong>的实现。所有HashMap的性能会高一点。</li>
+<li>Hashtable不允许null作为key或value的元素，如果使用会抛出异常，但HashMap允许null作为key或value的元素。HashMap允许一个key为null，允许多个value为null。 </li>
+</ol>
+<ul>
+<li><p>用作key的对象必须实现了equals()和hashCode()方法，因为判断两个key相等的条件是：通过equals()方法比较后返回true，并且两者的hashCode()方法返回的值相等。所以如果重写了对象的equals()方法，必须保证两个方法的判断标准一致，即equals()方法返回true时，返回的hashCode也要相等。当我们使用自定义对象作为key时，也要重写这两个方法并保持判断标准一致。  </p>
+</li>
+<li><p>HashMap和LinkedHashMap的区别</p>
+</li>
+</ul>
+<ol>
+<li>HashMap是无序的：其遍历的顺序与其插入的顺序不一样，而LinkedHashMap是有序的：其遍历的顺序和其插入的顺序一致</li>
+<li>LinkedHashMap需要维护元素的顺序，所以性能略低于HashMap，但由于它是以链表维护元素的顺序，所以在迭代元素的时候性能会好一些。</li>
+</ol>
+<h2 id="LinkedHashMap、TreeMap和EnumMap"><a href="#LinkedHashMap、TreeMap和EnumMap" class="headerlink" title="LinkedHashMap、TreeMap和EnumMap"></a>LinkedHashMap、TreeMap和EnumMap</h2><ul>
+<li>LinkedHashMap、TreeMap类似于LinkedHashSet和TreeSet，排序的实现基本相同，只不过是对key排序，并且每个key都带了一个value。</li>
+<li>EnumMap类似于EnumSet，只不过是需要保证所有的key必须是同一个枚举类的枚举值。</li>
+</ul>
+<h2 id="WeakHashMap"><a href="#WeakHashMap" class="headerlink" title="WeakHashMap"></a>WeakHashMap</h2><ul>
+<li>WeakHashMap与HashMap的用法基本相似。两者的区别在于：<ul>
+<li>HashMap的key保留了对实际对象的<strong>强引用</strong>，这意味着只要该HashMap对象不被销毁，该HashMap对象的所有key所引用的对象就不会被系统回收，HashMap就不会自动删除这些key对于的key-value对。</li>
+<li>WeakHashMap的key只保留了对实际对象的<strong>弱引用</strong>，这意味着如果WeakHashMap对象的key所引用的对象没有被其他强引用变量所引用，则这些key所引用的对象就有可能被回收，WeakHashMap也就会自动删除那些引用对象被回收了的key所对应的key-value对。</li>
+</ul>
+</li>
+<li>如果需要使用WeakHashMap的key来保持对象的弱引用，就不用让该key所引用的对象具有任何强引用，否则将失去使用WeakHashMap的意义</li>
+</ul>
+<h2 id="IdentityHashMap"><a href="#IdentityHashMap" class="headerlink" title="IdentityHashMap"></a>IdentityHashMap</h2><ul>
+<li>IdentityHashMap与HashMap的用法基本相似，两者的区别在于：<ul>
+<li>IdentityHashMap在判断两个key是否相等时，当且仅当key1 == key2时，才认为两个key相等</li>
+<li>HashMap则是当key1和key2通过equals方法返回true，并且它们的hashCode相等时，才认为两个key相等</li>
+</ul>
+</li>
+</ul>
+<h1 id="操作集合的工具类：Collections"><a href="#操作集合的工具类：Collections" class="headerlink" title="操作集合的工具类：Collections"></a>操作集合的工具类：Collections</h1><ul>
+<li>Collections类提供了用于对List集合元素排序的方法，例如反转、自然排序、定制排序、交换等操作</li>
+<li>Collections类提供了查找集合的最大或最小元素、替换指定元素等操作</li>
+<li>Collections提供了多个synchronizedXxx方法，用于将指定集合包装成线程安全的集合</li>
+<li>Collections提供了返回空的或者只有一个元素的不可变集合，以及将普通集合转换成不可变集合的操作。不可变集合里的元素只能访问而不可修改</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/集合/" rel="tag"><i class="fa fa-tag"></i> 集合</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/26/源码分析：Activity的启动过程（2）/" rel="next" title="源码分析：Activity的启动过程（2）">
+                <i class="fa fa-chevron-left"></i> 源码分析：Activity的启动过程（2）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="http://baocangwh.cn/t6/702/1556262979x2728278598.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#List"><span class="nav-number">1.</span> <span class="nav-text">List</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本使用"><span class="nav-number">1.1.</span> <span class="nav-text">基本使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他方法"><span class="nav-number">1.2.</span> <span class="nav-text">其他方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ArrayList和Vector"><span class="nav-number">1.3.</span> <span class="nav-text">ArrayList和Vector</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#固定长度的List"><span class="nav-number">1.4.</span> <span class="nav-text">固定长度的List</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Queue"><span class="nav-number">2.</span> <span class="nav-text">Queue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PriorityQueue"><span class="nav-number">2.1.</span> <span class="nav-text">PriorityQueue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deque"><span class="nav-number">2.2.</span> <span class="nav-text">Deque</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ArrayDeque"><span class="nav-number">2.2.1.</span> <span class="nav-text">ArrayDeque</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LinkedList"><span class="nav-number">2.2.2.</span> <span class="nav-text">LinkedList</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Map"><span class="nav-number">3.</span> <span class="nav-text">Map</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap"><span class="nav-number">3.1.</span> <span class="nav-text">HashMap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LinkedHashMap、TreeMap和EnumMap"><span class="nav-number">3.2.</span> <span class="nav-text">LinkedHashMap、TreeMap和EnumMap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WeakHashMap"><span class="nav-number">3.3.</span> <span class="nav-text">WeakHashMap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IdentityHashMap"><span class="nav-number">3.4.</span> <span class="nav-text">IdentityHashMap</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#操作集合的工具类：Collections"><span class="nav-number">4.</span> <span class="nav-text">操作集合的工具类：Collections</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
