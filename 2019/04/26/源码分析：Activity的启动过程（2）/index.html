@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="ActivityStackSupervisor#realStartActivityLocked（以下源码都是基于API25）realStartActivityLocked方法中有一段非常重要的代码123456789101112final boolean realStartActivityLocked(ActivityRecord r, ProcessRecord app,        boole">
+<meta name="keywords" content="源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="源码分析：Activity的启动过程（2）">
+<meta property="og:url" content="http://yoursite.com/2019/04/26/源码分析：Activity的启动过程（2）/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="ActivityStackSupervisor#realStartActivityLocked（以下源码都是基于API25）realStartActivityLocked方法中有一段非常重要的代码123456789101112final boolean realStartActivityLocked(ActivityRecord r, ProcessRecord app,        boole">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-26T07:14:28.736Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="源码分析：Activity的启动过程（2）">
+<meta name="twitter:description" content="ActivityStackSupervisor#realStartActivityLocked（以下源码都是基于API25）realStartActivityLocked方法中有一段非常重要的代码123456789101112final boolean realStartActivityLocked(ActivityRecord r, ProcessRecord app,        boole">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/04/26/源码分析：Activity的启动过程（2）/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>源码分析：Activity的启动过程（2） | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/26/源码分析：Activity的启动过程（2）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="http://baocangwh.cn/t6/702/1556262979x2728278598.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">源码分析：Activity的启动过程（2）
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-26 15:13:26 / 修改时间：15:14:28" itemprop="dateCreated datePublished" datetime="2019-04-26T15:13:26+08:00">2019-04-26</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="ActivityStackSupervisor-realStartActivityLocked（以下源码都是基于API25）"><a href="#ActivityStackSupervisor-realStartActivityLocked（以下源码都是基于API25）" class="headerlink" title="ActivityStackSupervisor#realStartActivityLocked（以下源码都是基于API25）"></a>ActivityStackSupervisor#realStartActivityLocked（以下源码都是基于API25）</h1><p>realStartActivityLocked方法中有一段非常重要的代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">realStartActivityLocked</span><span class="params">(ActivityRecord r, ProcessRecord app,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> andResume, <span class="keyword">boolean</span> checkConfig)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">    app.thread.scheduleLaunchActivity(<span class="keyword">new</span> Intent(r.intent), r.appToken,</span><br><span class="line">            System.identityHashCode(r), r.info, <span class="keyword">new</span> Configuration(mService.mConfiguration),</span><br><span class="line">            <span class="keyword">new</span> Configuration(task.mOverrideConfig), r.compat, r.launchedFromPackage,</span><br><span class="line">            task.voiceInteractor, app.repProcState, r.icicle, r.persistentState, results,</span><br><span class="line">            newIntents, !andResume, mService.isNextTransitionForward(), profilerInfo);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//...                </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<ul>
+<li>其中app是realStartActivityLocked方法传入的参数，其类型是ProcessRecord（包含当前正在运行的特定进程的完整信息）。app.thread的类型则是IApplicationThread。</li>
+<li>IApplicationThread接口继承了IInterface接口，所以它是一个Binder类型的接口。该接口内部包含了大量启动、停止Activity的方法。该接口的最终实现者是ActivityThread的内部类ApplicationThread<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ActivityThread</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationThread</span> <span class="keyword">extends</span> <span class="title">ApplicationThreadNative</span> </span>&#123;...&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationThreadNative</span> <span class="keyword">extends</span> <span class="title">Binder</span></span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">IApplicationThread</span>  </span>&#123;...&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="ActivityThread-ApplicationThread-scheduleLaunchActivity"><a href="#ActivityThread-ApplicationThread-scheduleLaunchActivity" class="headerlink" title="ActivityThread.ApplicationThread#scheduleLaunchActivity"></a>ActivityThread.ApplicationThread#scheduleLaunchActivity</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// we use token to identify this activity without having to send the</span></span><br><span class="line"><span class="comment">// activity itself back to the activity manager. (matters more with ipc)</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">scheduleLaunchActivity</span><span class="params">(Intent intent, IBinder token, <span class="keyword">int</span> ident,</span></span></span><br><span class="line"><span class="function"><span class="params">        ActivityInfo info, Configuration curConfig, Configuration overrideConfig,</span></span></span><br><span class="line"><span class="function"><span class="params">        CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">int</span> procState, Bundle state, PersistableBundle persistentState,</span></span></span><br><span class="line"><span class="function"><span class="params">        List&lt;ResultInfo&gt; pendingResults, List&lt;ReferrerIntent&gt; pendingNewIntents,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> notResumed, <span class="keyword">boolean</span> isForward, ProfilerInfo profilerInfo)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    updateProcessState(procState, <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">    ActivityClientRecord r = <span class="keyword">new</span> ActivityClientRecord();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//一些r的配置</span></span><br><span class="line">    </span><br><span class="line">    updatePendingConfiguration(curConfig);</span><br><span class="line"></span><br><span class="line">    sendMessage(H.LAUNCH_ACTIVITY, r);  <span class="comment">//H是ActivityThread的一个内部类，其继承自Handler</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法的实现很简单，就是发送一个启动activity的消息交给H处理。</p>
+<h1 id="ActivityThread-H-handleMessage"><a href="#ActivityThread-H-handleMessage" class="headerlink" title="ActivityThread.H#handleMessage"></a>ActivityThread.H#handleMessage</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">H</span> <span class="keyword">extends</span> <span class="title">Handler</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (DEBUG_MESSAGES) Slog.v(TAG, <span class="string">"&gt;&gt;&gt; handling: "</span> + codeToString(msg.what));</span><br><span class="line">        <span class="keyword">switch</span> (msg.what) &#123;</span><br><span class="line">            <span class="keyword">case</span> LAUNCH_ACTIVITY: &#123;</span><br><span class="line">                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, <span class="string">"activityStart"</span>);</span><br><span class="line">                <span class="keyword">final</span> ActivityClientRecord r = (ActivityClientRecord) msg.obj;</span><br><span class="line"></span><br><span class="line">                r.packageInfo = getPackageInfoNoCheck(</span><br><span class="line">                        r.activityInfo.applicationInfo, r.compatInfo);</span><br><span class="line">                handleLaunchActivity(r, <span class="keyword">null</span>, <span class="string">"LAUNCH_ACTIVITY"</span>);   <span class="comment">//继续调用</span></span><br><span class="line">                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);</span><br><span class="line">            &#125; <span class="keyword">break</span>;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>H对这条消息的处理是：调用ActivityThread的handleLaunchActivity方法启动activity</p>
+<h1 id="ActivityThread-handleLaunchActivity"><a href="#ActivityThread-handleLaunchActivity" class="headerlink" title="ActivityThread#handleLaunchActivity"></a>ActivityThread#handleLaunchActivity</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">handleLaunchActivity</span><span class="params">(ActivityClientRecord r, Intent customIntent, String reason)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    Activity a = performLaunchActivity(r, customIntent);    </span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (a != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        </span><br><span class="line">        handleResumeActivity(r.token, <span class="keyword">false</span>, r.isForward,</span><br><span class="line">                !r.activity.mFinished &amp;&amp; !r.startsNotResumed, r.lastProcessedSeq, reason);</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中，performLaunchActivity方法最终完成了activity对象的创建和启动，并且通过handleResumeActivity方法来调用该activity对象的onResume这一生命周期方法。</p>
+<h1 id="ActivityThread-performLaunchActivity"><a href="#ActivityThread-performLaunchActivity" class="headerlink" title="ActivityThread#performLaunchActivity"></a>ActivityThread#performLaunchActivity</h1><p>该方法主要完成了这几件事：  </p>
+<h2 id="1-从ActivityClientRecord中获取待启动的activity的组件信息"><a href="#1-从ActivityClientRecord中获取待启动的activity的组件信息" class="headerlink" title="1. 从ActivityClientRecord中获取待启动的activity的组件信息"></a>1. 从ActivityClientRecord中获取待启动的activity的组件信息</h2><h2 id="2-通过Instrumentation的newActivity方法使用类加载器创建Activity对象"><a href="#2-通过Instrumentation的newActivity方法使用类加载器创建Activity对象" class="headerlink" title="2. 通过Instrumentation的newActivity方法使用类加载器创建Activity对象"></a>2. 通过Instrumentation的newActivity方法使用类加载器创建Activity对象</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Activity activity = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    java.lang.ClassLoader cl = r.packageInfo.getClassLoader();</span><br><span class="line">    activity = mInstrumentation.newActivity(</span><br><span class="line">            cl, component.getClassName(), r.intent);	<span class="comment">//创建Activity对象并最终返回该对象</span></span><br><span class="line">    StrictMode.incrementExpectedActivityCount(activity.getClass());</span><br><span class="line">    r.intent.setExtrasClassLoader(cl);</span><br><span class="line">    r.intent.prepareToEnterProcess();</span><br><span class="line">    <span class="keyword">if</span> (r.state != <span class="keyword">null</span>) &#123;</span><br><span class="line">        r.state.setClassLoader(cl);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-通过LoadedApk的makeApplication方法来尝试创建Application对象"><a href="#3-通过LoadedApk的makeApplication方法来尝试创建Application对象" class="headerlink" title="3. 通过LoadedApk的makeApplication方法来尝试创建Application对象"></a>3. 通过LoadedApk的makeApplication方法来尝试创建Application对象</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Application app = r.packageInfo.makeApplication(<span class="keyword">false</span>, mInstrumentation);</span><br><span class="line"><span class="comment">//r是一个ActivityClientRecord（ActivityThread的静态内部类）对象</span></span><br><span class="line"><span class="comment">//r.packageInfo是一个LoadedApk对象</span></span><br></pre></td></tr></table></figure>
+<h3 id="LoadedApk-makeApplication"><a href="#LoadedApk-makeApplication" class="headerlink" title="LoadedApk#makeApplication"></a>LoadedApk#makeApplication</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Application <span class="title">makeApplication</span><span class="params">(<span class="keyword">boolean</span> forceDefaultAppClass,</span></span></span><br><span class="line"><span class="function"><span class="params">        Instrumentation instrumentation)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (mApplication != <span class="keyword">null</span>) &#123;     <span class="comment">//如果已经创建过Application，就直接返回该Application</span></span><br><span class="line">        <span class="keyword">return</span> mApplication;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Application app = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        </span><br><span class="line">        app = mActivityThread.mInstrumentation.newApplication(</span><br><span class="line">                cl, appClass, appContext);  </span><br><span class="line">        <span class="comment">//与创建Activity对象类似，创建Application对象也是通过Instrumentation并使用类加载器完成的</span></span><br><span class="line">                </span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    mActivityThread.mAllApplications.add(app);</span><br><span class="line">    mApplication = app;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (instrumentation != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            instrumentation.callApplicationOnCreate(app);   <span class="comment">//调用Application的onCreate方法</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> app;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出，如果之前已经创建过Application对象，就直接返回该对象，这保证了一个应用只有一个Application对象。Application对象创建完毕后，会通过Instrumentation的callApplicationOnCreate方法来调用Application的onCreate方法</p>
+<h2 id="4-创建ContextImpl对象并通过Activity的attach方法来完成一项重要数据的初始化"><a href="#4-创建ContextImpl对象并通过Activity的attach方法来完成一项重要数据的初始化" class="headerlink" title="4. 创建ContextImpl对象并通过Activity的attach方法来完成一项重要数据的初始化"></a>4. 创建ContextImpl对象并通过Activity的attach方法来完成一项重要数据的初始化</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Context appContext = createBaseContextForActivity(r, activity);     <span class="comment">//最终返回的是ContextImpl对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">activity.attach(appContext, <span class="keyword">this</span>, getInstrumentation(), r.token,</span><br><span class="line">        r.ident, app, r.intent, r.activityInfo, title, r.parent,</span><br><span class="line">        r.embeddedID, r.lastNonConfigurationInstances, config,</span><br><span class="line">        r.referrer, r.voiceInteractor, window);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>ContextImpl是Context抽象类的具体实现，ContextImpl是通过Activity的attach方法来和Activity建立关联的。</li>
+<li>attach方法除了关联ContextImpl和Activity，还会完成Window的创建并建立Activity和Windwo的关联，这样当Window接收到外部输入事件后就可以将事件传递给Activity。 </li>
+</ul>
+<h2 id="5-调用Activity的onCreate方法"><a href="#5-调用Activity的onCreate方法" class="headerlink" title="5. 调用Activity的onCreate方法"></a>5. 调用Activity的onCreate方法</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (r.isPersistable()) &#123;</span><br><span class="line">    mInstrumentation.callActivityOnCreate(activity, r.state, r.persistentState);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    mInstrumentation.callActivityOnCreate(activity, r.state);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Activity的onCreate方法的调用，也意味着Activity已经完成了整个启动过程。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li>《Android开发艺术探索》</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/25/一些排序算法的实现（C语言）/" rel="next" title="一些排序算法的实现（C语言）">
+                <i class="fa fa-chevron-left"></i> 一些排序算法的实现（C语言）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="http://baocangwh.cn/t6/702/1556262979x2728278598.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ActivityStackSupervisor-realStartActivityLocked（以下源码都是基于API25）"><span class="nav-number">1.</span> <span class="nav-text">ActivityStackSupervisor#realStartActivityLocked（以下源码都是基于API25）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ActivityThread-ApplicationThread-scheduleLaunchActivity"><span class="nav-number">2.</span> <span class="nav-text">ActivityThread.ApplicationThread#scheduleLaunchActivity</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ActivityThread-H-handleMessage"><span class="nav-number">3.</span> <span class="nav-text">ActivityThread.H#handleMessage</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ActivityThread-handleLaunchActivity"><span class="nav-number">4.</span> <span class="nav-text">ActivityThread#handleLaunchActivity</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ActivityThread-performLaunchActivity"><span class="nav-number">5.</span> <span class="nav-text">ActivityThread#performLaunchActivity</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-从ActivityClientRecord中获取待启动的activity的组件信息"><span class="nav-number">5.1.</span> <span class="nav-text">1. 从ActivityClientRecord中获取待启动的activity的组件信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-通过Instrumentation的newActivity方法使用类加载器创建Activity对象"><span class="nav-number">5.2.</span> <span class="nav-text">2. 通过Instrumentation的newActivity方法使用类加载器创建Activity对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-通过LoadedApk的makeApplication方法来尝试创建Application对象"><span class="nav-number">5.3.</span> <span class="nav-text">3. 通过LoadedApk的makeApplication方法来尝试创建Application对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LoadedApk-makeApplication"><span class="nav-number">5.3.1.</span> <span class="nav-text">LoadedApk#makeApplication</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-创建ContextImpl对象并通过Activity的attach方法来完成一项重要数据的初始化"><span class="nav-number">5.4.</span> <span class="nav-text">4. 创建ContextImpl对象并通过Activity的attach方法来完成一项重要数据的初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-调用Activity的onCreate方法"><span class="nav-number">5.5.</span> <span class="nav-text">5. 调用Activity的onCreate方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
