@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="概述 Java集合大致可分为Set、List、Queue和Map四种体系，其中Set代表无序、不可重复的集合；List代表有序、重复的集合；而Map代表具有映射关系的集合；Java5又增加了Queue集合体系，代表一种队列集合实现。 Java集合就像一个容器，可以把多个对象（实际上是对象的引用，但习惯上都称对象）“丢进”该容器中。">
+<meta name="keywords" content="集合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="集合（1）">
+<meta property="og:url" content="http://yoursite.com/2019/02/18/集合（1）/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="概述 Java集合大致可分为Set、List、Queue和Map四种体系，其中Set代表无序、不可重复的集合；List代表有序、重复的集合；而Map代表具有映射关系的集合；Java5又增加了Queue集合体系，代表一种队列集合实现。 Java集合就像一个容器，可以把多个对象（实际上是对象的引用，但习惯上都称对象）“丢进”该容器中。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2019032419173018.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190324192443539.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190324212707387.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2019032421272513.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190324212739240.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
+<meta property="og:updated_time" content="2019-04-26T11:31:21.297Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="集合（1）">
+<meta name="twitter:description" content="概述 Java集合大致可分为Set、List、Queue和Map四种体系，其中Set代表无序、不可重复的集合；List代表有序、重复的集合；而Map代表具有映射关系的集合；Java5又增加了Queue集合体系，代表一种队列集合实现。 Java集合就像一个容器，可以把多个对象（实际上是对象的引用，但习惯上都称对象）“丢进”该容器中。">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/2019032419173018.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/02/18/集合（1）/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>集合（1） | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/18/集合（1）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="http://baocangwh.cn/t6/702/1556262979x2728278598.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">集合（1）
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-02-18 17:59:33" itemprop="dateCreated datePublished" datetime="2019-02-18T17:59:33+08:00">2019-02-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-26 19:31:21" itemprop="dateModified" datetime="2019-04-26T19:31:21+08:00">2019-04-26</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/java笔记/" itemprop="url" rel="index"><span itemprop="name">java笔记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><ul>
+<li>Java集合大致可分为Set、List、Queue和Map四种体系，其中Set代表无序、不可重复的集合；List代表有序、重复的集合；而Map代表具有映射关系的集合；Java5又增加了Queue集合体系，代表一种队列集合实现。</li>
+<li>Java集合就像一个容器，可以把多个对象（实际上是对象的引用，但习惯上都称对象）“丢进”该容器中。</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li>集合体系如下：<br><img src="https://img-blog.csdnimg.cn/2019032419173018.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70" alt><br><img src="https://img-blog.csdnimg.cn/20190324192443539.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70" alt></li>
+</ul>
+<h1 id="Iterator"><a href="#Iterator" class="headerlink" title="Iterator"></a>Iterator</h1><ul>
+<li>Iterator接口也是java集合框架中的成员，它并不是作为容器，而是主要用于遍历（即迭代访问）Collection集合中的元素，Iterator对象也被称为迭代器。</li>
+<li>Iterator接口隐藏了各种Collection实现类的底层细节，向外界提供了遍历Collection集合的统一编程接口。</li>
+</ul>
+<h2 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IteratorTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            list.add(i);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Iterator iterator = list.iterator();    <span class="comment">//获取到集合的Iterator</span></span><br><span class="line">        <span class="keyword">while</span> (iterator.hasNext()) &#123;    <span class="comment">//如果集合元素还没有遍历完，则返回true</span></span><br><span class="line">            Integer i = (Integer) iterator.next();  <span class="comment">//next方法返回的是Object，需进行强制类型转换</span></span><br><span class="line">            System.out.print(i + <span class="string">"\t"</span>);</span><br><span class="line">            <span class="keyword">if</span> (i == <span class="number">1</span>) &#123;</span><br><span class="line">                iterator.remove();  <span class="comment">//在集合中删除上一次next方法返回的元素</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(list);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0	1	2	3	4	[0, 2, 3, 4]</span><br></pre></td></tr></table></figure></p>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><ol>
+<li>当使用Iterator对集合元素进行迭代时，Iterator并不是把集合元素本身传给了迭代变量，而是把集合元素的值传给了迭代变量，所以修改迭代变量的值对集合元素本身没有任何影响。</li>
+<li>当使用Iterator变量元素时，Collection集合的元素不能被修改，除了通过Iterator的remove方法删除上一次next方法返回的元素，否则会引发java.util.ConcurrentModificationException异常。例如下面操作：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (i == <span class="number">1</span>) &#123;</span><br><span class="line">    list.remove(i);     <span class="comment">//该操作会引发异常</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这是因为Iterator采用的是快速失败（fail-fast）机制，一旦在迭代过程中检测到该集合已经被修改（通常是程序中的其他线程修改），程序立即抛出异常，这样可以避免共享资源引发的潜在问题。</p>
+<h1 id="Predicate"><a href="#Predicate" class="headerlink" title="Predicate"></a>Predicate</h1><ul>
+<li>Java8为Collection集合新增了一个removeIf(Predicate&lt;? super E&gt; filter)方法，该方法将会批量删除符合条件（Predicate接口中的test方法返回结果为true）的所有元素</li>
+</ul>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PredicateTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            list.add(i);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        list.removeIf(<span class="keyword">new</span> Predicate&lt;Integer&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> integer == <span class="number">2</span>;     <span class="comment">//删除值为2的元素</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        System.out.println(list);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[0, 1, 3, 4]</span><br></pre></td></tr></table></figure></p>
+<p>由于Predicate也是函数式接口，因此可以使用Lambda表达式作为参数，化简后如下<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">list.removeIf(integer -&gt; integer == <span class="number">2</span>);     <span class="comment">//删除值为2的元素</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h1><ul>
+<li>Java8还新增了Stream、IntStream、LongStream、DoubleStream等流式接口，Stream是一个通用的流接口，而IntStream、LongStream、DoubleStream分别代表int、long、double元素的流。</li>
+</ul>
+<h2 id="简单使用-1"><a href="#简单使用-1" class="headerlink" title="简单使用"></a>简单使用</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StreamTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        IntStream.Builder builder = IntStream.builder();    <span class="comment">//先创建该Stream对应的Builder</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            builder.add(i);     <span class="comment">//添加元素</span></span><br><span class="line">        &#125;</span><br><span class="line">        IntStream intStream = builder.build();  <span class="comment">//获取对应的流</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//注意：只能调用一次聚集方法，即max和min只能调用一个，否则会抛出异常</span></span><br><span class="line">        System.out.println(<span class="string">"所以元素的最大值为："</span> + intStream.max().getAsInt());</span><br><span class="line">        <span class="comment">//System.out.println("所以元素的最小值为：" + intStream.min().getAsInt());</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">//将原来的Stream映射成一个新的Stream，新Stream中每个元素都是原来的两倍</span></span><br><span class="line">        <span class="comment">//IntStream newIs = intStream.map(operand -&gt; operand * 2);</span></span><br><span class="line">        <span class="comment">//遍历Stream里面的元素</span></span><br><span class="line">        <span class="comment">//newIs.forEach(value -&gt; System.out.print(value + "\t"));</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">所以元素的最大值为：4</span><br></pre></td></tr></table></figure></p>
+<p>如果注释max，取消注释map的话<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0	2	4	6	8</span><br></pre></td></tr></table></figure></p>
+<h2 id="Stream的方法"><a href="#Stream的方法" class="headerlink" title="Stream的方法"></a>Stream的方法</h2><ul>
+<li>Stream提供了大量的方法进行聚集操作，这些方法既可以是“中间的”，也可以是“末端的”。中间方法允许流保持打开状态，并允许直接调用后续方法，例如map方法。而末端方法是对流的最终操作，执行完该方法后流将会被“消耗”而不可再用，例如max和min方法。</li>
+</ul>
+<h3 id="常用的中间方法"><a href="#常用的中间方法" class="headerlink" title="常用的中间方法"></a>常用的中间方法</h3><p><img src="https://img-blog.csdnimg.cn/20190324212707387.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70" alt></p>
+<h3 id="常用的末端方法"><a href="#常用的末端方法" class="headerlink" title="常用的末端方法"></a>常用的末端方法</h3><p><img src="https://img-blog.csdnimg.cn/2019032421272513.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70" alt><br><img src="https://img-blog.csdnimg.cn/20190324212739240.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z6aGhzYQ==,size_16,color_FFFFFF,t_70" alt></p>
+<h1 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h1><h2 id="HashSet"><a href="#HashSet" class="headerlink" title="HashSet"></a>HashSet</h2><ul>
+<li>HashSet是Set接口的典型实现，HashSet按哈希算法来存储集合中的元素，因此具有很好的存取和查找功能。</li>
+<li>HashSet具有以下特点：<ol>
+<li>不能保证元素的排列顺序</li>
+<li>HashSet不能同步的，如果有多个线程同时访问一个HashSet对象，必须通过代码来保证其同步</li>
+<li>集合元素值可以是null（但只能有一个）</li>
+</ol>
+</li>
+<li>当向HashSet集合中存入一个元素时，HashSet会调用对象的hashCode()方法来得到该对象的哈希值，然后根据该哈希值决定该对象在HashSet中的存储位置。即使两个元素通过equals()方法比较返回true，只要它们的哈希值不一样，HashSet还是会把它们放在不同位置，依然可以添加成功。</li>
+<li>HashSet是底层是基于HashMap来实现的，所以HashMap适用的HashSet也基本适用，反之亦然。</li>
+</ul>
+<h3 id="注意-1"><a href="#注意-1" class="headerlink" title="注意"></a>注意</h3><ul>
+<li>当重写一个类的equals方法或hashCode方法时，应该尽量保证两个对象通过equals方法比较返回true时，它们的hashCode方法返回值也相等。原因如下：<blockquote>
+<p>HashSet（或者HashMap）判断两个元素相等的标志是两个对象通过equals方法比较返回true，并且它们的hashCode方法返回值也相等。如果两个对象通过equals方法比较返回true，但这两个对象返回的哈希值不同，那么这两个对象都可以添加成功，这违背了Set集合的规则。如果通过equals方法比较返回false，但两个对象的哈希值相同，那么这两个对象都能添加成功，这部违背Set集合的规则，但是由于两个对象的哈希值相同，HashSet试图将他们保存在同一位置，但这样又不行，所以实际上会在这个位置用链式结构来保持多个对象，这将会导致性能下降。</p>
+</blockquote>
+</li>
+<li>当程序把可变对象添加到HashSet之后，尽量不要去修改该对象中参与计算hashCode、equals的实例变量，否则将会导致HashSet无法正确操作这些集合元素。</li>
+</ul>
+<h2 id="LinkedHashSet"><a href="#LinkedHashSet" class="headerlink" title="LinkedHashSet"></a>LinkedHashSet</h2><ul>
+<li>LinkedHashSet是HashSet的子类，LinkedHashSet也是根据元素的哈希值来决定元素的存储位置，但它同时使用链表来维护元素的次序，也就是说当遍历LinkedHashSet的元素时，将会按照元素的添加顺序来遍历。</li>
+<li>LinkedHashSet需要维护元素的顺序，因此性能略低于HashSet，但在迭代访问Set集合的全部元素时有很好的性能。</li>
+</ul>
+<h2 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h2><ul>
+<li>TreeSet是SortedSet接口的实现类，可以确保集合元素处于排序状态。</li>
+<li>与HashSet集合相比，TreeSet还提供了几个额外的方法，例如访问第一个、最后一个、前一个、后一个或者截取子TreeSet的方法。</li>
+<li>TreeSet采用红黑树的数据结构来存储集合元素。</li>
+<li>TreeSet支持两种排序：自然排序和定制排序。默认情况下，TreeSet采用自然排序。</li>
+</ul>
+<h3 id="基本使用-1"><a href="#基本使用-1" class="headerlink" title="基本使用"></a>基本使用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TreeSetTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        TreeSet&lt;Integer&gt; set = <span class="keyword">new</span> TreeSet&lt;&gt;();</span><br><span class="line">        set.add(<span class="number">5</span>);</span><br><span class="line">        set.add(<span class="number">2</span>);</span><br><span class="line">        set.add(<span class="number">10</span>);</span><br><span class="line">        set.add(-<span class="number">7</span>);</span><br><span class="line">        System.out.println(set);        <span class="comment">//输出集合元素，看到集合已经处于排序状态（升序）</span></span><br><span class="line">        System.out.println(set.first());    <span class="comment">//输出第一个元素</span></span><br><span class="line">        System.out.println(set.last());     <span class="comment">//输出最后一个元素</span></span><br><span class="line">        System.out.println(set.headSet(<span class="number">3</span>));    <span class="comment">//返回一个SortSet（下同），由小于3的元素组成</span></span><br><span class="line">        System.out.println(set.tailSet(<span class="number">5</span>));     <span class="comment">//由大于或等于5的元素组成</span></span><br><span class="line">        System.out.println(set.subSet(-<span class="number">7</span>, <span class="number">5</span>));      <span class="comment">//由[-7, 5)的元素组成</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[-7, 2, 5, 10]</span><br><span class="line">-7</span><br><span class="line">10</span><br><span class="line">[-7, 2]</span><br><span class="line">[5, 10]</span><br><span class="line">[-7, 2]</span><br></pre></td></tr></table></figure></p>
+<h3 id="自然排序"><a href="#自然排序" class="headerlink" title="自然排序"></a>自然排序</h3><ul>
+<li>TreeSet会调用集合元素的compareTo方法来比较元素之间的大小关系，然后将集合元素按升序排列，这种方式就是自然排序。<blockquote>
+<p>java提供了一个Comparable接口，该接口里定义了一个compareTo(T o)方法，该方法返回一个整数值。当一个对象调用该方法与另一个对象进行比较时，例如obj1.compareTo(obj2);如果该方法返回0，则表示这两个对象相等；如果返回一个正整数，则表示obj1大于obj2；如果返回一个负整数，则表示obj1小于obj2。  </p>
+</blockquote>
+</li>
+<li>如果试图把一个对象添加到TreeSet，那么该对象的类必须实现Comparable接口，否则程序将抛出ClassCastException异常</li>
+<li>当把一个对象加入TreeSet集合时，TreeSet调用该对象的compareTo方法与容器中的其他对象比较大小，然后根据红黑树结构找到它的存储位置。如果两个对象通过compareTo方法比较返回0，则表示这两个对象相等，新对象无法添加到集合中。</li>
+</ul>
+<h3 id="定制排序"><a href="#定制排序" class="headerlink" title="定制排序"></a>定制排序</h3><ul>
+<li>如果需要实现定制排序，例如降序排列，则可以通过Comparator接口（注意和上面的Comparable接口区别开）的compare(T o1, T o2)来实现，该方法用于比较o1和o2的大小：如果该方法返回正整数，则表明o1大于o2；如果该方法返回0，则表明o1等于o2；如果该方法返回负整数，则表明o1小于o2。</li>
+</ul>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TreeSetTest2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        TreeSet&lt;Integer&gt; set = <span class="keyword">new</span> TreeSet&lt;&gt;(<span class="keyword">new</span> Comparator&lt;Integer&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Integer o1, Integer o2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> o1 &gt; o2 ? -<span class="number">1</span> : o1 &lt; o2 ? <span class="number">1</span> : <span class="number">0</span>;  <span class="comment">//重写该方法，定制降序排列</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        set.add(<span class="number">5</span>);</span><br><span class="line">        set.add(<span class="number">2</span>);</span><br><span class="line">        set.add(<span class="number">10</span>);</span><br><span class="line">        set.add(-<span class="number">7</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(set);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[10, 5, 2, -7]</span><br></pre></td></tr></table></figure></p>
+<h3 id="注意-2"><a href="#注意-2" class="headerlink" title="注意"></a>注意</h3><ol>
+<li>当需要把一个对象加入TreeSet中，如果重写该对象对应类的equals方法，必须保证该方法与compareTo方法返回的结果一致。其规则是：如果这两个对象通过equals方法比较返回true时，通过compareTo方法比较应该返回0。</li>
+<li>不要修改集合元素的关键实例变量（涉及到比较元素是否相等的实例变量），否则将会导致对应元素无法删除，并且可能破坏了集合元素的有序性。</li>
+</ol>
+<h2 id="EnumSet"><a href="#EnumSet" class="headerlink" title="EnumSet"></a>EnumSet</h2><ul>
+<li>EnumSet是专门为枚举类设计的集合类，EnumSet中的所有元素必须是<strong>同一个枚举类</strong>中的枚举元素。</li>
+<li>EnumSet的集合元素也是有序的，其以枚举值在其枚举类中定义的顺序来排序。</li>
+<li>EnumSet在内部以位相量的形式存储，这种存储形式非常紧凑、高效，因此EnumSet对象占用内存很小，而且运行效率很好。尤其是进行批量操作（如containsAll()、retainAll()方法）时，如果其参数也是EnumSet集合，则该批量操作的执行速度也非常快。</li>
+<li>EnumSet不允许加入null元素，否则将会抛出java.lang.NullPointerException异常。</li>
+</ul>
+<h3 id="简单使用-2"><a href="#简单使用-2" class="headerlink" title="简单使用"></a>简单使用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EnumSetTest</span> </span>&#123;</span><br><span class="line">    <span class="keyword">enum</span> Season &#123;   <span class="comment">//枚举类</span></span><br><span class="line">        SPRING, SUMMER, FAIL, WINTER</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//创建一个集合元素为Season枚举类的全部枚举值的EnumSet</span></span><br><span class="line">        EnumSet set1 = EnumSet.allOf(Season.class);</span><br><span class="line">        System.out.println(set1);</span><br><span class="line">        <span class="comment">//创建一个EnumSet空集合，指定其元素是Season枚举类的枚举值</span></span><br><span class="line">        EnumSet set2 = EnumSet.noneOf(Season.class);</span><br><span class="line">        System.out.println(set2);</span><br><span class="line">        set2.add(Season.SPRING);    <span class="comment">//添加元素</span></span><br><span class="line">        System.out.println(set2);</span><br><span class="line">        <span class="comment">//以指定枚举值创建EnumSet</span></span><br><span class="line">        EnumSet set3 = EnumSet.of(Season.SUMMER, Season.WINTER);</span><br><span class="line">        System.out.println(set3);</span><br><span class="line">        <span class="comment">//创建一个包含从from枚举值（第一个参数）到to枚举值（第二个参数）范围内所有枚举值的EnumSet</span></span><br><span class="line">        EnumSet set4 = EnumSet.range(Season.SUMMER, Season.WINTER);</span><br><span class="line">        System.out.println(set4);</span><br><span class="line">        <span class="comment">//创建的集合是另外一个集合的补集</span></span><br><span class="line">        <span class="comment">//即set5的枚举元素 = Season所有枚举元素 - set4的枚举元素</span></span><br><span class="line">        EnumSet set5 = EnumSet.complementOf(set4);</span><br><span class="line">        System.out.println(set5);</span><br><span class="line">        <span class="comment">//通过复制另一个EnumSet集合来创建EnumSet</span></span><br><span class="line">        EnumSet set6 = EnumSet.copyOf(set5);</span><br><span class="line">        System.out.println(set6);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[SPRING, SUMMER, FAIL, WINTER]</span><br><span class="line">[]</span><br><span class="line">[SPRING]</span><br><span class="line">[SUMMER, WINTER]</span><br><span class="line">[SUMMER, FAIL, WINTER]</span><br><span class="line">[SPRING]</span><br><span class="line">[SPRING]</span><br></pre></td></tr></table></figure></p>
+<h2 id="各Set实现类的性能分析"><a href="#各Set实现类的性能分析" class="headerlink" title="各Set实现类的性能分析"></a>各Set实现类的性能分析</h2><ul>
+<li>HashSet和TreeSet是Set的两个典型实现，HashSet的性能总是比TreeSet好（特别是最常用的添加、查询元素等操作），因为TreeSet需要额外的红黑树算法来维护元素的次序。只有当需要一个保存顺序的Set时，才考虑使用TreeSet，否则都应该使用HashSet。</li>
+<li>对于普通的插入、删除操作，LinkedHashSet比HashSet要慢一些，这是由于维护链表所带来的额外开销，但由于有了链表，遍历LinkedHashSet会更快。</li>
+<li>EnumSet是所有Set实现类中性能最好的，但它只能保持同一个枚举类的枚举值。</li>
+<li>这几个实现类都是线程不安全的，如果有多个线程同时访问并修改一个Set集合，则必须手动保证该Set集合的同步性。</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/集合/" rel="tag"><i class="fa fa-tag"></i> 集合</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/20/EventBus的基本使用/" rel="prev" title="EventBus的基本使用">
+                EventBus的基本使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="http://baocangwh.cn/t6/702/1556262979x2728278598.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Iterator"><span class="nav-number">2.</span> <span class="nav-text">Iterator</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简单使用"><span class="nav-number">2.1.</span> <span class="nav-text">简单使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意"><span class="nav-number">2.2.</span> <span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Predicate"><span class="nav-number">3.</span> <span class="nav-text">Predicate</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本使用"><span class="nav-number">3.1.</span> <span class="nav-text">基本使用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Stream"><span class="nav-number">4.</span> <span class="nav-text">Stream</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简单使用-1"><span class="nav-number">4.1.</span> <span class="nav-text">简单使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stream的方法"><span class="nav-number">4.2.</span> <span class="nav-text">Stream的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常用的中间方法"><span class="nav-number">4.2.1.</span> <span class="nav-text">常用的中间方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#常用的末端方法"><span class="nav-number">4.2.2.</span> <span class="nav-text">常用的末端方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Set"><span class="nav-number">5.</span> <span class="nav-text">Set</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HashSet"><span class="nav-number">5.1.</span> <span class="nav-text">HashSet</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#注意-1"><span class="nav-number">5.1.1.</span> <span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LinkedHashSet"><span class="nav-number">5.2.</span> <span class="nav-text">LinkedHashSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TreeSet"><span class="nav-number">5.3.</span> <span class="nav-text">TreeSet</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本使用-1"><span class="nav-number">5.3.1.</span> <span class="nav-text">基本使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自然排序"><span class="nav-number">5.3.2.</span> <span class="nav-text">自然排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定制排序"><span class="nav-number">5.3.3.</span> <span class="nav-text">定制排序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#例子"><span class="nav-number">5.3.3.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注意-2"><span class="nav-number">5.3.4.</span> <span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EnumSet"><span class="nav-number">5.4.</span> <span class="nav-text">EnumSet</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单使用-2"><span class="nav-number">5.4.1.</span> <span class="nav-text">简单使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#各Set实现类的性能分析"><span class="nav-number">5.5.</span> <span class="nav-text">各Set实现类的性能分析</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
