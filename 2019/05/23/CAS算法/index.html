@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="概述CAS（Compare-and-Swap），即比较并替换，是一种实现并发算法时常用到的技术。 CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。CAS指令执行时，当且仅当内存地址V的值与预期值A相等时，将内存地址V的值修改为B，否则就什么都不做。整个比较并替换的操作是一个原子操作。 当多个线程尝试使用CAS同时更新同一个变量时，只有其中一个线程能更新变量的值，而其它线程都">
+<meta name="keywords" content="并发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAS算法">
+<meta property="og:url" content="https://mrfzh.github.io/2019/05/23/CAS算法/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="概述CAS（Compare-and-Swap），即比较并替换，是一种实现并发算法时常用到的技术。 CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。CAS指令执行时，当且仅当内存地址V的值与预期值A相等时，将内存地址V的值修改为B，否则就什么都不做。整个比较并替换的操作是一个原子操作。 当多个线程尝试使用CAS同时更新同一个变量时，只有其中一个线程能更新变量的值，而其它线程都">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-05-23T09:56:30.617Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CAS算法">
+<meta name="twitter:description" content="概述CAS（Compare-and-Swap），即比较并替换，是一种实现并发算法时常用到的技术。 CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。CAS指令执行时，当且仅当内存地址V的值与预期值A相等时，将内存地址V的值修改为B，否则就什么都不做。整个比较并替换的操作是一个原子操作。 当多个线程尝试使用CAS同时更新同一个变量时，只有其中一个线程能更新变量的值，而其它线程都">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/05/23/CAS算法/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>CAS算法 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/05/23/CAS算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="http://pqob9320z.bkt.clouddn.com/headImage1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CAS算法
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-23 17:55:00 / 修改时间：17:56:30" itemprop="dateCreated datePublished" datetime="2019-05-23T17:55:00+08:00">2019-05-23</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>CAS（Compare-and-Swap），即比较并替换，是一种实现并发算法时常用到的技术。</p>
+<p>CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。CAS指令执行时，当且仅当内存地址V的值与预期值A相等时，将内存地址V的值修改为B，否则就什么都不做。整个比较并替换的操作是一个原子操作。</p>
+<p>当多个线程尝试使用CAS同时更新同一个变量时，只有其中一个线程能更新变量的值，而其它线程都失败，失败的线程并不会被挂起，而是被告知这次竞争中失败，并可以再次尝试。</p>
+<a id="more"></a>
+<h1 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h1><p>假设要新建多个线程来对一个int变量进行自增操作。由于自增操作不具备原子性，所以为了保证并发下结果的正确，必须要采取一些措施来保证线程安全。其中一种方法是使用原子操作类AtomicInteger的getAndIncrement()方法来进行自增。</p>
+<h2 id="AtomicInteger-getAndIncrement"><a href="#AtomicInteger-getAndIncrement" class="headerlink" title="AtomicInteger#getAndIncrement"></a>AtomicInteger#getAndIncrement</h2><p>现在就来看看getAndIncrement()方法是怎么保证自增操作的原子性的。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getAndIncrement</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> unsafe.getAndAddInt(<span class="keyword">this</span>, valueOffset, <span class="number">1</span>);   <span class="comment">//unsafe是一个Unsafe类型的变量</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到又调用了Unsafe类的getAndAddInt方法</p>
+<h2 id="Unsafe-getAndAddInt"><a href="#Unsafe-getAndAddInt" class="headerlink" title="Unsafe#getAndAddInt"></a>Unsafe#getAndAddInt</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getAndAddInt</span><span class="params">(Object o, <span class="keyword">long</span> offset, <span class="keyword">int</span> delta)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> v;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        v = getIntVolatile(o, offset);</span><br><span class="line">    &#125; <span class="keyword">while</span> (!compareAndSwapInt(o, offset, v, v + delta));</span><br><span class="line">    <span class="keyword">return</span> v;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法的作用是：拿到内存位置的最新值v，使用CAS尝试修将内存位置的值修改为目标值v+delta，如果修改失败，则获取该内存位置的新值v，然后继续尝试，直至修改成功。</p>
+<p>从而可以得知，AtomicInteger是利用CAS算法来保证自增操作的原子性。</p>
+<h2 id="Unsafe-compareAndSwapInt"><a href="#Unsafe-compareAndSwapInt" class="headerlink" title="Unsafe#compareAndSwapInt"></a>Unsafe#compareAndSwapInt</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Atomically update Java variable to &lt;tt&gt;x&lt;/tt&gt; if it is currently</span></span><br><span class="line"><span class="comment"> * holding &lt;tt&gt;expected&lt;/tt&gt;.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &lt;tt&gt;true&lt;/tt&gt; if successful</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">compareAndSwapInt</span><span class="params">(Object o, <span class="keyword">long</span> offset,</span></span></span><br><span class="line"><span class="function"><span class="params">                                              <span class="keyword">int</span> expected,</span></span></span><br><span class="line"><span class="function"><span class="params">                                              <span class="keyword">int</span> x)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>可以看到compareAndSwapInt是一个本地方法，这个本地方法在openjdk中依次调用的c++代码为：unsafe.cpp，atomic.cpp和atomic_windows_x86.inline.hpp，最终调用的代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#define LOCK_IF_MP(mp) __asm cmp mp, 0  \  </span><br><span class="line">                       __asm je L0      \  </span><br><span class="line">                       __asm _emit 0xF0 \  </span><br><span class="line">                       __asm L0:  </span><br><span class="line">  </span><br><span class="line">inline jint     Atomic::cmpxchg    (jint     exchange_value, volatile jint*     dest, jint     compare_value) &#123;  </span><br><span class="line">  // alternative for InterlockedCompareExchange  </span><br><span class="line">  int mp = os::is_MP();  </span><br><span class="line">  __asm &#123;  </span><br><span class="line">    mov edx, dest  </span><br><span class="line">    mov ecx, exchange_value  </span><br><span class="line">    mov eax, compare_value  </span><br><span class="line">    LOCK_IF_MP(mp)  </span><br><span class="line">    cmpxchg dword ptr [edx], ecx  </span><br><span class="line">  &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这是一段C++内嵌汇编的代码。</p>
+<p>Atomic::cmpxchg方法部分解析：</p>
+<ol>
+<li>os::is_MP()是一个内联函数，用来判断当前系统是否为多处理器。如果是则返回1，否则返回0。</li>
+<li>LOCK_IF_MP(mp)会根据mp的值来决定是否为cmpxchg指令添加lock前缀。如果mp是1则添加，否则不添加。</li>
+<li>cmpxchg是汇编指令，作用是比较并交换操作数</li>
+</ol>
+<h1 id="CAS的缺点"><a href="#CAS的缺点" class="headerlink" title="CAS的缺点"></a>CAS的缺点</h1><h2 id="循环时间长时开销很大"><a href="#循环时间长时开销很大" class="headerlink" title="循环时间长时开销很大"></a>循环时间长时开销很大</h2><p>如果CAS在比较时失败的话，会重新获取内存中的值，再一次比较，直到尝试成功。所以如果CAS长时间一直不成功的话，会给CPU带来很大的开销。</p>
+<p>针对这个问题的一个思路是引入退出机制，如果尝试次数超过一定限度就停止尝试并退出。当然，最好是避免在高并发的情况下使用CAS。</p>
+<h2 id="只能保证原子性"><a href="#只能保证原子性" class="headerlink" title="只能保证原子性"></a>只能保证原子性</h2><p>CAS只能保证变量的原子性，而只有原子性是不能保证线程安全的。所以CAS需要和volatile关键字配合才能保证线程安全。</p>
+<h2 id="只能保证一个共享变量的原子操作"><a href="#只能保证一个共享变量的原子操作" class="headerlink" title="只能保证一个共享变量的原子操作"></a>只能保证一个共享变量的原子操作</h2><p>当对一个共享变量执行操作时，我们可以使用循环CAS的方式来保证原子操作。但是对多个共享变量操作时，循环CAS就无法保证操作的原子性。这时就只能用其他方法，例如锁来保证原子性。</p>
+<h2 id="ABA问题"><a href="#ABA问题" class="headerlink" title="ABA问题"></a>ABA问题</h2><p>如果在内存中初次读取到的值是A，并且在准备赋值的时候检查到它的值仍为A，但是如果在这段时间它的值曾经被修改为B，后来再改回A，那么CAS就会误认为它从来没有改变过，从而允许这次赋值。这个漏洞称为CAS操作中的ABA问题。</p>
+<p>ABA问题会导致什么后果？  </p>
+<p>举个现实的例子。假如一位客户银行余额为1w，他提取了5k，因为某种意外，有两个线程（线程1和线程2）执行这个提取操作，线程1成功提取，余额为5k；这时候有人给这位客户汇款5k，所以有一个线程3执行了这个汇款过程，客户余额为1w；这时才执行到线程2，线程2发现余额还是1w，没有问题，所以又提取了5k。所以客户提取了5k，但实际上两个线程提取了1w，这就出现了问题。</p>
+<p>怎么解决ABA问题？</p>
+<p>引入版本号。内存中的值每修改一次，版本号加1。在进行CAS操作时，不仅比较内存中的值，也要比较版本号，只有两者都一致时，才会替换内存中的值。例如AtomicStampedReference类便是使用版本号来解决ABA问题的。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://blog.csdn.net/v123411739/article/details/79561458" target="_blank" rel="noopener">面试必问的CAS，你懂了吗？</a></li>
+<li><a href="https://www.cnblogs.com/Leo_wl/p/6899716.html" target="_blank" rel="noopener">浅谈CAS(Compare and Swap) 原理</a></li>
+<li><a href="http://www.cnblogs.com/kismetv/p/10787228.html" target="_blank" rel="noopener">【BAT面试题系列】面试官：你了解乐观锁和悲观锁吗？</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/并发/" rel="tag"><i class="fa fa-tag"></i> 并发</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/20/HashMap源码分析（JDK1-8）/" rel="next" title="HashMap源码分析（JDK1.8）">
+                <i class="fa fa-chevron-left"></i> HashMap源码分析（JDK1.8）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="http://pqob9320z.bkt.clouddn.com/headImage1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#例子"><span class="nav-number">2.</span> <span class="nav-text">例子</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AtomicInteger-getAndIncrement"><span class="nav-number">2.1.</span> <span class="nav-text">AtomicInteger#getAndIncrement</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unsafe-getAndAddInt"><span class="nav-number">2.2.</span> <span class="nav-text">Unsafe#getAndAddInt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unsafe-compareAndSwapInt"><span class="nav-number">2.3.</span> <span class="nav-text">Unsafe#compareAndSwapInt</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CAS的缺点"><span class="nav-number">3.</span> <span class="nav-text">CAS的缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#循环时间长时开销很大"><span class="nav-number">3.1.</span> <span class="nav-text">循环时间长时开销很大</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#只能保证原子性"><span class="nav-number">3.2.</span> <span class="nav-text">只能保证原子性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#只能保证一个共享变量的原子操作"><span class="nav-number">3.3.</span> <span class="nav-text">只能保证一个共享变量的原子操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ABA问题"><span class="nav-number">3.4.</span> <span class="nav-text">ABA问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
