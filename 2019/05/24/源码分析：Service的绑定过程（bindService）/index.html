@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="ContextWrapper#bindService（除特殊说明外，以下代码都基于API25）和Service的启动过程一样，Service的绑定过程也是从ContextWrapper开始的，mBase同样是ContextImpl类型的对象，所以真正调用的是ContextImpl的bindService方法。12345@Overridepublic boolean bindService(Inte">
+<meta name="keywords" content="源码,service">
+<meta property="og:type" content="article">
+<meta property="og:title" content="源码分析：Service的绑定过程（bindService）">
+<meta property="og:url" content="https://mrfzh.github.io/2019/05/24/源码分析：Service的绑定过程（bindService）/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="ContextWrapper#bindService（除特殊说明外，以下代码都基于API25）和Service的启动过程一样，Service的绑定过程也是从ContextWrapper开始的，mBase同样是ContextImpl类型的对象，所以真正调用的是ContextImpl的bindService方法。12345@Overridepublic boolean bindService(Inte">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-05-24T12:43:01.788Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="源码分析：Service的绑定过程（bindService）">
+<meta name="twitter:description" content="ContextWrapper#bindService（除特殊说明外，以下代码都基于API25）和Service的启动过程一样，Service的绑定过程也是从ContextWrapper开始的，mBase同样是ContextImpl类型的对象，所以真正调用的是ContextImpl的bindService方法。12345@Overridepublic boolean bindService(Inte">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/05/24/源码分析：Service的绑定过程（bindService）/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>源码分析：Service的绑定过程（bindService） | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/05/24/源码分析：Service的绑定过程（bindService）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="http://pqob9320z.bkt.clouddn.com/headImage1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">源码分析：Service的绑定过程（bindService）
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-24 20:36:31 / 修改时间：20:43:01" itemprop="dateCreated datePublished" datetime="2019-05-24T20:36:31+08:00">2019-05-24</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="ContextWrapper-bindService（除特殊说明外，以下代码都基于API25）"><a href="#ContextWrapper-bindService（除特殊说明外，以下代码都基于API25）" class="headerlink" title="ContextWrapper#bindService（除特殊说明外，以下代码都基于API25）"></a>ContextWrapper#bindService（除特殊说明外，以下代码都基于API25）</h1><p>和Service的启动过程一样，Service的绑定过程也是从ContextWrapper开始的，mBase同样是ContextImpl类型的对象，所以真正调用的是ContextImpl的bindService方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">bindService</span><span class="params">(Intent service, ServiceConnection conn,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">int</span> flags)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mBase.bindService(service, conn, flags);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h1 id="ContextImpl-bindService"><a href="#ContextImpl-bindService" class="headerlink" title="ContextImpl#bindService"></a>ContextImpl#bindService</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">bindService</span><span class="params">(Intent service, ServiceConnection conn,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">int</span> flags)</span> </span>&#123;</span><br><span class="line">    warnIfCallingFromSystemProcess();</span><br><span class="line">    <span class="keyword">return</span> bindServiceCommon(service, conn, flags, mMainThread.getHandler(),</span><br><span class="line">            Process.myUserHandle());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续调用自己的bindServiceCommon方法。</p>
+<h1 id="ContextImpl-bindServiceCommon"><a href="#ContextImpl-bindServiceCommon" class="headerlink" title="ContextImpl#bindServiceCommon"></a>ContextImpl#bindServiceCommon</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">bindServiceCommon</span><span class="params">(Intent service, ServiceConnection conn, <span class="keyword">int</span> flags, Handler</span></span></span><br><span class="line"><span class="function"><span class="params">          handler, UserHandle user)</span> </span>&#123;</span><br><span class="line">      IServiceConnection sd;	<span class="comment">//IServiceConnection是一个aidl文件</span></span><br><span class="line">      <span class="keyword">if</span> (conn == <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"connection is null"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (mPackageInfo != <span class="keyword">null</span>) &#123;</span><br><span class="line">	<span class="comment">//mPackageInfo是一个LoadedApk类型的对象</span></span><br><span class="line">	<span class="comment">//最终sd的类型是LoadedApk.ServiceDispatcher.InnerConnection</span></span><br><span class="line">          sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), handler, flags);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Not supported in system context"</span>);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//验证Service的有效性，Android 5.0版本以后不允许使用隐式调用</span></span><br><span class="line">      validateServiceIntent(service);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">//...</span></span><br><span class="line">          </span><br><span class="line">	<span class="comment">// 准备离开应用程序进程，进人ActivityManagerService进程</span></span><br><span class="line">          service.prepareToLeaveProcess(<span class="keyword">this</span>);</span><br><span class="line">          </span><br><span class="line">	<span class="comment">//调用AMS的bindService方法来完成具体的绑定过程</span></span><br><span class="line">          <span class="keyword">int</span> res = ActivityManagerNative.getDefault().bindService(</span><br><span class="line">              mMainThread.getApplicationThread(), getActivityToken(), service,</span><br><span class="line">              service.resolveTypeIfNeeded(getContentResolver()),</span><br><span class="line">              sd, flags, getOpPackageName(), user.getIdentifier());</span><br><span class="line">          <span class="keyword">if</span> (res &lt; <span class="number">0</span>) &#123;</span><br><span class="line">              <span class="keyword">throw</span> <span class="keyword">new</span> SecurityException(</span><br><span class="line">                      <span class="string">"Not allowed to bind to service "</span> + service);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">return</span> res != <span class="number">0</span>;</span><br><span class="line">      &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">          <span class="keyword">throw</span> e.rethrowFromSystemServer();</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>bindServiceCommon方法主要完成了如下两件事情：</p>
+<ol>
+<li>首先将客户端的ServiceConnection对象转化为LoadedApk.ServiceDispatcher.InnerConnection对象。这是通过LoadedApk的getServiceDispatcher方法来实现。</li>
+</ol>
+<p>为什么不能直接使用ServiceConnection对象？</p>
+<blockquote>
+<p>因为服务的绑定可能是跨进程的，因此ServiceConnection必须借助Binder才能让远程服务端回调自己的方法。InnerConnection就充当了Binder这个角色。而ServiceDispatcher起着连接ServiceConnection和InnerConnection的作用。</p>
+</blockquote>
+<ol start="2">
+<li>调用AMS的bindService方法来完成具体的绑定过程。</li>
+</ol>
+<h2 id="LoadedApk-getServiceDispatcher"><a href="#LoadedApk-getServiceDispatcher" class="headerlink" title="LoadedApk#getServiceDispatcher"></a>LoadedApk#getServiceDispatcher</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> IServiceConnection <span class="title">getServiceDispatcher</span><span class="params">(ServiceConnection c,</span></span></span><br><span class="line"><span class="function"><span class="params">          Context context, Handler handler, <span class="keyword">int</span> flags)</span> </span>&#123;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * mServices是一个ArrayMap对象，它的key是Context类型，value是ArrayMap&lt;ServiceConnection, LoadedApk.ServiceDispatcher&gt;类型</span></span><br><span class="line"><span class="comment"> * 所以存储的是当前活动的ServiceConnection和ServiceDispatcher的映射关系</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">      <span class="keyword">synchronized</span> (mServices) &#123;	</span><br><span class="line">          LoadedApk.ServiceDispatcher sd = <span class="keyword">null</span>;</span><br><span class="line">          ArrayMap&lt;ServiceConnection, LoadedApk.ServiceDispatcher&gt; map = mServices.get(context);</span><br><span class="line">          <span class="keyword">if</span> (map != <span class="keyword">null</span>) &#123;</span><br><span class="line">              sd = map.get(c);	<span class="comment">//查找当前ServiceConnection对应的ServiceDispatcher</span></span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">if</span> (sd == <span class="keyword">null</span>) &#123;	<span class="comment">//若没有找到ServiceDispatcher</span></span><br><span class="line">              sd = <span class="keyword">new</span> ServiceDispatcher(c, context, handler, flags);	<span class="comment">//初始化ServiceDispatcher</span></span><br><span class="line">		<span class="comment">//若当前活动还没有ServiceConnection和ServiceDispatcher的映射关系，先创建该映射关系</span></span><br><span class="line">              <span class="keyword">if</span> (map == <span class="keyword">null</span>) &#123;</span><br><span class="line">                  map = <span class="keyword">new</span> ArrayMap&lt;ServiceConnection, LoadedApk.ServiceDispatcher&gt;();</span><br><span class="line">                  mServices.put(context, map);</span><br><span class="line">              &#125;</span><br><span class="line">		<span class="comment">//在本活动新增映射关系</span></span><br><span class="line">              map.put(c, sd);</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              sd.validate(context, handler);	<span class="comment">//验证ServiceDispatcher</span></span><br><span class="line">          &#125;</span><br><span class="line">	<span class="comment">//返回IServiceConnection对象，该对象的真正类型是ServiceDispatcher.InnerConnection</span></span><br><span class="line">          <span class="keyword">return</span> sd.getIServiceConnection();	</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法先是得到与当前ServiceConnection对应的LoadedApk.ServiceDispatcher对象，并最终返回ServiceDispatcher中保存的InnerConnection对象。</p>
+<h2 id="LoadedApk-ServiceDispatcher-InnerConnection"><a href="#LoadedApk-ServiceDispatcher-InnerConnection" class="headerlink" title="LoadedApk.ServiceDispatcher.InnerConnection"></a>LoadedApk.ServiceDispatcher.InnerConnection</h2><p>InnerConnection是ServiceDispatcher的静态内部类<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">InnerConnection</span> <span class="keyword">extends</span> <span class="title">IServiceConnection</span>.<span class="title">Stub</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> WeakReference&lt;LoadedApk.ServiceDispatcher&gt; mDispatcher;</span><br><span class="line"></span><br><span class="line">    InnerConnection(LoadedApk.ServiceDispatcher sd) &#123;</span><br><span class="line">        mDispatcher = <span class="keyword">new</span> WeakReference&lt;LoadedApk.ServiceDispatcher&gt;(sd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">connected</span><span class="params">(ComponentName name, IBinder service)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">        LoadedApk.ServiceDispatcher sd = mDispatcher.get();</span><br><span class="line">        <span class="keyword">if</span> (sd != <span class="keyword">null</span>) &#123;</span><br><span class="line">            sd.connected(name, service);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>系统会通过InnerConnection来调用ServiceConnection的onServiceConnected方法，这个过程有可能是跨进程的。</p>
+<h1 id="ContextImpl-bindServiceCommon（API26）"><a href="#ContextImpl-bindServiceCommon（API26）" class="headerlink" title="ContextImpl#bindServiceCommon（API26）"></a>ContextImpl#bindServiceCommon（API26）</h1><p>在API26中，bindServiceCommon方法有一处小改变<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">bindServiceCommon</span><span class="params">(Intent service, ServiceConnection conn, <span class="keyword">int</span> flags, Handler</span></span></span><br><span class="line"><span class="function"><span class="params">        handler, UserHandle user)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> res = ActivityManager.getService().bindService(</span><br><span class="line">            mMainThread.getApplicationThread(), getActivityToken(), service,</span><br><span class="line">            service.resolveTypeIfNeeded(getContentResolver()),</span><br><span class="line">            sd, flags, getOpPackageName(), user.getIdentifier());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        <span class="keyword">return</span> res != <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，主要是获取AMS的方法变了，但是最终都是获取到AMS，然后调用AMS的bindService方法。</p>
+<h1 id="ActivityManagerService-bindService"><a href="#ActivityManagerService-bindService" class="headerlink" title="ActivityManagerService#bindService"></a>ActivityManagerService#bindService</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">bindService</span><span class="params">(IApplicationThread caller, IBinder token, Intent service,</span></span></span><br><span class="line"><span class="function"><span class="params">        String resolvedType, IServiceConnection connection, <span class="keyword">int</span> flags, String callingPackage,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">int</span> userId)</span> <span class="keyword">throws</span> TransactionTooLargeException </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">        <span class="comment">//mServices是一个ActiveServices对象</span></span><br><span class="line">        <span class="keyword">return</span> mServices.bindServiceLocked(caller, token, service,</span><br><span class="line">                resolvedType, connection, flags, callingPackage, userId);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后调用ActiveServices的bindServiceLocked方法</p>
+<h2 id="ActiveServices-bindServiceLocked"><a href="#ActiveServices-bindServiceLocked" class="headerlink" title="ActiveServices#bindServiceLocked"></a>ActiveServices#bindServiceLocked</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bindServiceLocked</span><span class="params">(IApplicationThread caller, IBinder token, Intent service,</span></span></span><br><span class="line"><span class="function"><span class="params">        String resolvedType, <span class="keyword">final</span> IServiceConnection connection, <span class="keyword">int</span> flags,</span></span></span><br><span class="line"><span class="function"><span class="params">        String callingPackage, <span class="keyword">final</span> <span class="keyword">int</span> userId)</span> <span class="keyword">throws</span> TransactionTooLargeException </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//retrieveServiceLocked方法解析Service，解析结果保存在res.record中</span></span><br><span class="line">    ServiceLookupResult res =</span><br><span class="line">        retrieveServiceLocked(service, resolvedType, callingPackage, Binder.getCallingPid(),</span><br><span class="line">                Binder.getCallingUid(), userId, <span class="keyword">true</span>, callerFg, isBindExternal);</span><br><span class="line">    <span class="keyword">if</span> (res == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (res.record == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ServiceRecord s = res.record;   <span class="comment">//res.record是一个ServiceRecord对象</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ((flags&amp;Context.BIND_AUTO_CREATE) != <span class="number">0</span>) &#123;</span><br><span class="line">            s.lastActivity = SystemClock.uptimeMillis();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//当标志位为BIND_AUTO_CREATE时，正常启动服务</span></span><br><span class="line">            <span class="keyword">if</span> (bringUpServiceLocked(s, service.getFlags(), callerFg, <span class="keyword">false</span>,</span><br><span class="line">                    permissionsReviewRequired) != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续调用bringUpServiceLocked，到这里开始和Service的启动过程类似，最终都是通过ApplicationThread来完成Service实例的创建并执行其onCreate方法。</p>
+<h2 id="ActiveServices-bringUpServiceLocked"><a href="#ActiveServices-bringUpServiceLocked" class="headerlink" title="ActiveServices#bringUpServiceLocked"></a>ActiveServices#bringUpServiceLocked</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">bringUpServiceLocked</span><span class="params">(ServiceRecord r, <span class="keyword">int</span> intentFlags, <span class="keyword">boolean</span> execInFg,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> whileRestarting, <span class="keyword">boolean</span> permissionsReviewRequired)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> TransactionTooLargeException </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">boolean</span> isolated = (r.serviceInfo.flags&amp;ServiceInfo.FLAG_ISOLATED_PROCESS) != <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!isolated) &#123;</span><br><span class="line">        <span class="keyword">if</span> (app != <span class="keyword">null</span> &amp;&amp; app.thread != <span class="keyword">null</span>) &#123;    <span class="comment">//如果服务所在进程已经启动</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                realStartServiceLocked(r, app, execInFg);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125; </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续调用realStartServiceLocked，同样和Service的启动过程类似</p>
+<h2 id="ActiveServices-realStartServiceLocked"><a href="#ActiveServices-realStartServiceLocked" class="headerlink" title="ActiveServices#realStartServiceLocked"></a>ActiveServices#realStartServiceLocked</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">realStartServiceLocked</span><span class="params">(ServiceRecord r,</span></span></span><br><span class="line"><span class="function"><span class="params">        ProcessRecord app, <span class="keyword">boolean</span> execInFg)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        </span><br><span class="line">        app.thread.scheduleCreateService(r, r.serviceInfo,</span><br><span class="line">                mAm.compatibilityInfoForPackageLocked(r.serviceInfo.applicationInfo),</span><br><span class="line">                app.repProcState);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    requestServiceBindingsLocked(r, execInFg);  </span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    sendServiceArgsLocked(r, execInFg, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同样和Service的启动过程类似，这里说一下不同的，首先看requestServiceBindingsLocked方法</p>
+<h1 id="ActiveServices-requestServiceBindingsLocked"><a href="#ActiveServices-requestServiceBindingsLocked" class="headerlink" title="ActiveServices#requestServiceBindingsLocked"></a>ActiveServices#requestServiceBindingsLocked</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">requestServiceBindingsLocked</span><span class="params">(ServiceRecord r, <span class="keyword">boolean</span> execInFg)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> TransactionTooLargeException </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=r.bindings.size()-<span class="number">1</span>; i&gt;=<span class="number">0</span>; i--) &#123;</span><br><span class="line">        IntentBindRecord ibr = r.bindings.valueAt(i);</span><br><span class="line">        <span class="keyword">if</span> (!requestServiceBindingLocked(r, ibr, execInFg, <span class="keyword">false</span>)) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中调用了requestServiceBindingLocked方法</p>
+<h2 id="ActiveServices-requestServiceBindingLocked"><a href="#ActiveServices-requestServiceBindingLocked" class="headerlink" title="ActiveServices#requestServiceBindingLocked"></a>ActiveServices#requestServiceBindingLocked</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">requestServiceBindingLocked</span><span class="params">(ServiceRecord r, IntentBindRecord i,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> execInFg, <span class="keyword">boolean</span> rebind)</span> <span class="keyword">throws</span> TransactionTooLargeException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (r.app == <span class="keyword">null</span> || r.app.thread == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// If service is not currently running, can't yet bind.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ((!i.requested || rebind) &amp;&amp; i.apps.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">            </span><br><span class="line">            r.app.thread.scheduleBindService(r, i.intent.getIntent(), rebind,</span><br><span class="line">                    r.app.repProcState);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        &#125; <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>r.app.thread的实现类是ActivityThread.ApplicationThread，调用其scheduleBindService方法进行Service的绑定</p>
+<h1 id="ActivityThread-ApplicationThread-scheduleBindService"><a href="#ActivityThread-ApplicationThread-scheduleBindService" class="headerlink" title="ActivityThread.ApplicationThread#scheduleBindService"></a>ActivityThread.ApplicationThread#scheduleBindService</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">scheduleBindService</span><span class="params">(IBinder token, Intent intent,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> rebind, <span class="keyword">int</span> processState)</span> </span>&#123;</span><br><span class="line">    updateProcessState(processState, <span class="keyword">false</span>);</span><br><span class="line">    BindServiceData s = <span class="keyword">new</span> BindServiceData();</span><br><span class="line">    s.token = token;</span><br><span class="line">    s.intent = intent;</span><br><span class="line">    s.rebind = rebind;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//发送消息给H</span></span><br><span class="line">    sendMessage(H.BIND_SERVICE, s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>H对这个消息的处理是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">case BIND_SERVICE:</span><br><span class="line">    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, &quot;serviceBind&quot;);</span><br><span class="line">    handleBindService((BindServiceData)msg.obj);</span><br><span class="line">    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);</span><br><span class="line">    break;</span><br></pre></td></tr></table></figure></p>
+<p>接着调用handleBindService方法</p>
+<h2 id="ActivityThread-ApplicationThread-handleBindService"><a href="#ActivityThread-ApplicationThread-handleBindService" class="headerlink" title="ActivityThread.ApplicationThread#handleBindService"></a>ActivityThread.ApplicationThread#handleBindService</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">handleBindService</span><span class="params">(BindServiceData data)</span> </span>&#123;</span><br><span class="line"><span class="comment">//mServices是一个ArrayMap&lt;IBinder, Service&gt;对象，这里根据token取出相应的service</span></span><br><span class="line"><span class="comment">//这里的service是在前面执行handleCreateService方法时存进去的</span></span><br><span class="line">      Service s = mServices.get(data.token);		</span><br><span class="line"></span><br><span class="line">      <span class="comment">//...</span></span><br><span class="line">      <span class="keyword">if</span> (s != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">try</span> &#123;</span><br><span class="line">              <span class="comment">//...</span></span><br><span class="line">              </span><br><span class="line">              <span class="keyword">try</span> &#123;</span><br><span class="line">                  <span class="keyword">if</span> (!data.rebind) &#123;</span><br><span class="line">                      IBinder binder = s.onBind(data.intent);		<span class="comment">//回调service的onBind方法</span></span><br><span class="line">                      ActivityManagerNative.getDefault().publishService(	</span><br><span class="line">                              data.token, data.intent, binder);	<span class="comment">//调用AMS的publishService方法</span></span><br><span class="line">                  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                      s.onRebind(data.intent);    <span class="comment">//如果多次绑定同一个service，回调onRebind方法</span></span><br><span class="line">                      ActivityManagerNative.getDefault().serviceDoneExecuting(</span><br><span class="line">                              data.token, SERVICE_DONE_EXECUTING_ANON, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">                  &#125;</span><br><span class="line">                  </span><br><span class="line">              <span class="comment">//...</span></span><br><span class="line">              &#125;   <span class="comment">//...</span></span><br><span class="line">          &#125;   <span class="comment">//...</span></span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到在该方法中回调了Service的onBind方法。原则上来说，这时service已经处于绑定状态，但是客户端还不知道已经成功连接service，所以继续看AMS的publishService方法</p>
+<h1 id="ActivityManagerService-publishService"><a href="#ActivityManagerService-publishService" class="headerlink" title="ActivityManagerService#publishService"></a>ActivityManagerService#publishService</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">publishService</span><span class="params">(IBinder token, Intent intent, IBinder service)</span> </span>&#123;</span><br><span class="line">     <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">         <span class="comment">//...</span></span><br><span class="line">         </span><br><span class="line"><span class="comment">//mServices是一个ActiveServices对象</span></span><br><span class="line">         mServices.publishServiceLocked((ServiceRecord)token, intent, service);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>调用ActiveServices的publishServiceLocked方法</p>
+<h2 id="ActiveServices-publishServiceLocked"><a href="#ActiveServices-publishServiceLocked" class="headerlink" title="ActiveServices#publishServiceLocked"></a>ActiveServices#publishServiceLocked</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">publishServiceLocked</span><span class="params">(ServiceRecord r, Intent intent, IBinder service)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (r != <span class="keyword">null</span>) &#123;</span><br><span class="line">            Intent.FilterComparison filter</span><br><span class="line">                    = <span class="keyword">new</span> Intent.FilterComparison(intent);</span><br><span class="line">            IntentBindRecord b = r.bindings.get(filter);</span><br><span class="line">            <span class="keyword">if</span> (b != <span class="keyword">null</span> &amp;&amp; !b.received) &#123;</span><br><span class="line">                <span class="comment">//...</span></span><br><span class="line">                </span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> conni=r.connections.size()-<span class="number">1</span>; conni&gt;=<span class="number">0</span>; conni--) &#123;</span><br><span class="line">                    ArrayList&lt;ConnectionRecord&gt; clist = r.connections.valueAt(conni);</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;clist.size(); i++) &#123;</span><br><span class="line">                        ConnectionRecord c = clist.get(i);</span><br><span class="line">                       </span><br><span class="line">                        <span class="comment">//...</span></span><br><span class="line">                        </span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="comment">//执行连接成功的回调，其中c.conn是IServiceConnection对象，</span></span><br><span class="line">				<span class="comment">//其实现类是LoadedApk.ServiceDispatcher.InnerConnection</span></span><br><span class="line">                            c.conn.connected(r.name, service);</span><br><span class="line">                            </span><br><span class="line">                        &#125;<span class="comment">//...</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>又跳转到了LoadedApk.ServiceDispatcher.InnerConnection的connected方法</p>
+<h2 id="LoadedApk-ServiceDispatcher-InnerConnection-1"><a href="#LoadedApk-ServiceDispatcher-InnerConnection-1" class="headerlink" title="LoadedApk.ServiceDispatcher.InnerConnection"></a>LoadedApk.ServiceDispatcher.InnerConnection</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">InnerConnection</span> <span class="keyword">extends</span> <span class="title">IServiceConnection</span>.<span class="title">Stub</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> WeakReference&lt;LoadedApk.ServiceDispatcher&gt; mDispatcher;</span><br><span class="line"></span><br><span class="line">    InnerConnection(LoadedApk.ServiceDispatcher sd) &#123;</span><br><span class="line">        mDispatcher = <span class="keyword">new</span> WeakReference&lt;LoadedApk.ServiceDispatcher&gt;(sd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">connected</span><span class="params">(ComponentName name, IBinder service)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">        LoadedApk.ServiceDispatcher sd = mDispatcher.get();</span><br><span class="line">        <span class="keyword">if</span> (sd != <span class="keyword">null</span>) &#123;</span><br><span class="line">            sd.connected(name, service);    <span class="comment">//调用LoadedApk.ServiceDispatcher的connected方法</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从InnerConnection的定义可以看出，其connected方法又调用LoadedApk.ServiceDispatcher的connected方法</p>
+<h2 id="LoadedApk-ServiceDispatcher-connected"><a href="#LoadedApk-ServiceDispatcher-connected" class="headerlink" title="LoadedApk.ServiceDispatcher#connected"></a>LoadedApk.ServiceDispatcher#connected</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">connected</span><span class="params">(ComponentName name, IBinder service)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (mActivityThread != <span class="keyword">null</span>) &#123;</span><br><span class="line"><span class="comment">//mActivityThread是一个Handler对象，其实它就是ActivityThread中的H</span></span><br><span class="line"><span class="comment">//RunConnection就可以通过H的post方法运行在主线程</span></span><br><span class="line">         mActivityThread.post(<span class="keyword">new</span> RunConnection(name, service, <span class="number">0</span>));</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">         doConnected(name, service);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>接着看下RunConnection的定义</p>
+<h2 id="LoadedApk-ServiceDispatcher-RunConnection"><a href="#LoadedApk-ServiceDispatcher-RunConnection" class="headerlink" title="LoadedApk.ServiceDispatcher.RunConnection"></a>LoadedApk.ServiceDispatcher.RunConnection</h2><p>RunConnection是ServiceDispatcher的内部类<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">RunConnection</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    RunConnection(ComponentName name, IBinder service, <span class="keyword">int</span> command) &#123;</span><br><span class="line">        mName = name;</span><br><span class="line">        mService = service;</span><br><span class="line">        mCommand = command;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mCommand == <span class="number">0</span>) &#123;</span><br><span class="line">            doConnected(mName, mService);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mCommand == <span class="number">1</span>) &#123;</span><br><span class="line">            doDeath(mName, mService);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> ComponentName mName;</span><br><span class="line">    <span class="keyword">final</span> IBinder mService;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> mCommand;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其run方法在传入的command为0时调用了doConnected方法</p>
+<h2 id="LoadedApk-ServiceDispatcher-doConnected"><a href="#LoadedApk-ServiceDispatcher-doConnected" class="headerlink" title="LoadedApk.ServiceDispatcher#doConnected"></a>LoadedApk.ServiceDispatcher#doConnected</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doConnected</span><span class="params">(ComponentName name, IBinder service)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// If there is a new service, it is now connected.</span></span><br><span class="line">    <span class="keyword">if</span> (service != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">////mConnection是一个ServiceConnection对象，其保存了客户端的ServiceConnection</span></span><br><span class="line">        mConnection.onServiceConnected(name, service);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，最终是在ServiceDispatcher的doConnected方法中回调了ServiceConnection的onServiceConnected方法。至此，service的绑定过程分析完毕。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li>《Android开发艺术探索》</li>
+<li><a href="https://blog.csdn.net/zhangyongfeiyong/article/details/51953300" target="_blank" rel="noopener">Android服务之bindService源码分析</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+          
+            <a href="/tags/service/" rel="tag"><i class="fa fa-tag"></i> service</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/23/CAS算法/" rel="next" title="CAS算法">
+                <i class="fa fa-chevron-left"></i> CAS算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="http://pqob9320z.bkt.clouddn.com/headImage1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ContextWrapper-bindService（除特殊说明外，以下代码都基于API25）"><span class="nav-number">1.</span> <span class="nav-text">ContextWrapper#bindService（除特殊说明外，以下代码都基于API25）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ContextImpl-bindService"><span class="nav-number">2.</span> <span class="nav-text">ContextImpl#bindService</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ContextImpl-bindServiceCommon"><span class="nav-number">3.</span> <span class="nav-text">ContextImpl#bindServiceCommon</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LoadedApk-getServiceDispatcher"><span class="nav-number">3.1.</span> <span class="nav-text">LoadedApk#getServiceDispatcher</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LoadedApk-ServiceDispatcher-InnerConnection"><span class="nav-number">3.2.</span> <span class="nav-text">LoadedApk.ServiceDispatcher.InnerConnection</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ContextImpl-bindServiceCommon（API26）"><span class="nav-number">4.</span> <span class="nav-text">ContextImpl#bindServiceCommon（API26）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ActivityManagerService-bindService"><span class="nav-number">5.</span> <span class="nav-text">ActivityManagerService#bindService</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ActiveServices-bindServiceLocked"><span class="nav-number">5.1.</span> <span class="nav-text">ActiveServices#bindServiceLocked</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ActiveServices-bringUpServiceLocked"><span class="nav-number">5.2.</span> <span class="nav-text">ActiveServices#bringUpServiceLocked</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ActiveServices-realStartServiceLocked"><span class="nav-number">5.3.</span> <span class="nav-text">ActiveServices#realStartServiceLocked</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ActiveServices-requestServiceBindingsLocked"><span class="nav-number">6.</span> <span class="nav-text">ActiveServices#requestServiceBindingsLocked</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ActiveServices-requestServiceBindingLocked"><span class="nav-number">6.1.</span> <span class="nav-text">ActiveServices#requestServiceBindingLocked</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ActivityThread-ApplicationThread-scheduleBindService"><span class="nav-number">7.</span> <span class="nav-text">ActivityThread.ApplicationThread#scheduleBindService</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ActivityThread-ApplicationThread-handleBindService"><span class="nav-number">7.1.</span> <span class="nav-text">ActivityThread.ApplicationThread#handleBindService</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ActivityManagerService-publishService"><span class="nav-number">8.</span> <span class="nav-text">ActivityManagerService#publishService</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ActiveServices-publishServiceLocked"><span class="nav-number">8.1.</span> <span class="nav-text">ActiveServices#publishServiceLocked</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LoadedApk-ServiceDispatcher-InnerConnection-1"><span class="nav-number">8.2.</span> <span class="nav-text">LoadedApk.ServiceDispatcher.InnerConnection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LoadedApk-ServiceDispatcher-connected"><span class="nav-number">8.3.</span> <span class="nav-text">LoadedApk.ServiceDispatcher#connected</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LoadedApk-ServiceDispatcher-RunConnection"><span class="nav-number">8.4.</span> <span class="nav-text">LoadedApk.ServiceDispatcher.RunConnection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LoadedApk-ServiceDispatcher-doConnected"><span class="nav-number">8.5.</span> <span class="nav-text">LoadedApk.ServiceDispatcher#doConnected</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">9.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
