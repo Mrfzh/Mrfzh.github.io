@@ -98,18 +98,29 @@
 
 
 
-  <meta name="description" content="题目描述给定一个无重复元素的数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。candidates 中的数字可以无限制重复被选取。 说明：  所有数字（包括 target）都是正整数。 解集不能包含重复的组合。">
-<meta name="keywords" content="leetcode,递归">
+  <meta name="description" content="简介红黑树是一种自平衡的二叉查找树。和AVL树类似，都是在进行插入和删除操作时通过特定操作保持二叉查找树的平衡，从而获得较高的查找性能。它查找、插入和删除的时间复杂度为O(logn)，这里的n是树中元素的数目。">
+<meta name="keywords" content="红黑树">
 <meta property="og:type" content="article">
-<meta property="og:title" content="巧用递归解决LeetCode第39题（组合总和）">
-<meta property="og:url" content="https://mrfzh.github.io/2019/05/13/巧用递归解决LeetCode第39题（组合总和）/index.html">
+<meta property="og:title" content="初步了解红黑树">
+<meta property="og:url" content="https://mrfzh.github.io/2019/05/30/初步了解红黑树/index.html">
 <meta property="og:site_name" content="FengZH的博客">
-<meta property="og:description" content="题目描述给定一个无重复元素的数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。candidates 中的数字可以无限制重复被选取。 说明：  所有数字（包括 target）都是正整数。 解集不能包含重复的组合。">
+<meta property="og:description" content="简介红黑树是一种自平衡的二叉查找树。和AVL树类似，都是在进行插入和删除操作时通过特定操作保持二叉查找树的平衡，从而获得较高的查找性能。它查找、插入和删除的时间复杂度为O(logn)，这里的n是树中元素的数目。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-05-13T07:54:33.831Z">
+<meta property="og:image" content="https://i.ibb.co/Ht6pPJ2/1.jpg">
+<meta property="og:image" content="https://i.ibb.co/7N8d4bn/red-black-tree4.jpg">
+<meta property="og:image" content="https://i.ibb.co/XV9vCzj/red-black-tree2.jpg">
+<meta property="og:image" content="https://i.ibb.co/X2SwLpC/red-black-tree3.jpg">
+<meta property="og:image" content="https://i.ibb.co/pb2CJ4c/red-black-tree5.jpg">
+<meta property="og:image" content="https://i.ibb.co/260xLB3/red-black-tree6.jpg">
+<meta property="og:image" content="https://i.ibb.co/qDQ3xtm/red-black-tree7.jpg">
+<meta property="og:image" content="https://i.ibb.co/PQXpS4G/red-black-tree8.jpg">
+<meta property="og:image" content="https://i.ibb.co/X8YXphJ/red-black-tree9.jpg">
+<meta property="og:image" content="https://i.ibb.co/J3J0FQc/red-black-tree10.jpg">
+<meta property="og:updated_time" content="2019-05-30T06:40:00.501Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="巧用递归解决LeetCode第39题（组合总和）">
-<meta name="twitter:description" content="题目描述给定一个无重复元素的数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。candidates 中的数字可以无限制重复被选取。 说明：  所有数字（包括 target）都是正整数。 解集不能包含重复的组合。">
+<meta name="twitter:title" content="初步了解红黑树">
+<meta name="twitter:description" content="简介红黑树是一种自平衡的二叉查找树。和AVL树类似，都是在进行插入和删除操作时通过特定操作保持二叉查找树的平衡，从而获得较高的查找性能。它查找、插入和删除的时间复杂度为O(logn)，这里的n是树中元素的数目。">
+<meta name="twitter:image" content="https://i.ibb.co/Ht6pPJ2/1.jpg">
 
 
 
@@ -117,7 +128,7 @@
 
   
   
-  <link rel="canonical" href="https://mrfzh.github.io/2019/05/13/巧用递归解决LeetCode第39题（组合总和）/">
+  <link rel="canonical" href="https://mrfzh.github.io/2019/05/30/初步了解红黑树/">
 
 
 
@@ -127,7 +138,7 @@
   };
 </script>
 
-  <title>巧用递归解决LeetCode第39题（组合总和） | FengZH的博客</title>
+  <title>初步了解红黑树 | FengZH的博客</title>
   
 
 
@@ -326,7 +337,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/05/13/巧用递归解决LeetCode第39题（组合总和）/">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/05/30/初步了解红黑树/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="FengZH">
@@ -343,7 +354,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">巧用递归解决LeetCode第39题（组合总和）
+          <h1 class="post-title" itemprop="name headline">初步了解红黑树
 
               
             
@@ -369,7 +380,7 @@
                 
               
 
-              <time title="创建时间：2019-05-13 15:49:55 / 修改时间：15:54:33" itemprop="dateCreated datePublished" datetime="2019-05-13T15:49:55+08:00">2019-05-13</time>
+              <time title="创建时间：2019-05-30 14:38:44 / 修改时间：14:40:00" itemprop="dateCreated datePublished" datetime="2019-05-30T14:38:44+08:00">2019-05-30</time>
             
 
             
@@ -391,7 +402,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/算法/" itemprop="url" rel="index"><span itemprop="name">算法</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/数据结构/" itemprop="url" rel="index"><span itemprop="name">数据结构</span></a></span>
 
                 
                 
@@ -433,16 +444,55 @@
       
 
       
-        <h1 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h1><p>给定一个<strong>无重复元素</strong>的数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。candidates 中的数字可以无限制重复被选取。</p>
-<p>说明：</p>
-<ul>
-<li>所有数字（包括 target）都是正整数。</li>
-<li>解集不能包含重复的组合。 </li>
-</ul>
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>红黑树是一种<strong>自平衡的二叉查找树</strong>。和AVL树类似，都是在进行插入和删除操作时通过特定操作保持二叉查找树的平衡，从而获得较高的查找性能。它<strong>查找、插入和删除的时间复杂度为O(logn)</strong>，这里的n是树中元素的数目。</p>
 <a id="more"></a>
-<h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><p>示例1：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">输入: candidates = [2,3,6,7], target = 7,</span><br><span class="line">所求解集为:</span><br><span class="line">[</span><br><span class="line">  [7],</span><br><span class="line">  [2,2,3]</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
-<p>示例2：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">输入: candidates = [2,3,5], target = 8,</span><br><span class="line">所求解集为:</span><br><span class="line">[</span><br><span class="line">  [2,2,2,2],</span><br><span class="line">  [2,3,3],</span><br><span class="line">  [3,5]</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
-<h1 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 利用递归求解</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;List&lt;Integer&gt;&gt; combinationSum(<span class="keyword">int</span>[] candidates, <span class="keyword">int</span> target) &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    List&lt;Integer&gt; temp = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    Arrays.sort(candidates);</span><br><span class="line">    find(result, temp, target, candidates, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 从candidates[start]开始，寻找数组中的元素，使其加入已有组合temp后，和为target，并将这些新组合存入result</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">find</span><span class="params">(List&lt;List&lt;Integer&gt;&gt; result, List&lt;Integer&gt; temp, <span class="keyword">int</span> target, <span class="keyword">int</span>[] candidates, <span class="keyword">int</span> start)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (target == <span class="number">0</span>) &#123;</span><br><span class="line">        result.add(temp);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = start; i &lt; candidates.length &amp;&amp; target &gt;= candidates[i]; i++) &#123;</span><br><span class="line">        <span class="comment">//对temp进行深拷贝，这是为了不影响这一层其他的递归</span></span><br><span class="line">        List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;(temp);</span><br><span class="line">        list.add(candidates[i]);</span><br><span class="line">        <span class="comment">//进行递归</span></span><br><span class="line">        find(result, list, target-candidates[i], candidates, i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h1><p>除了平衡二叉查找树的特性外，红黑树还具有下列特性：  </p>
+<ol>
+<li>节点是红色或黑色</li>
+<li>根节点是黑色</li>
+<li>每个叶子节点都是黑色的空节点（NIL节点）</li>
+<li>每个红色节点的两个子节点都是黑色。（即从每个叶子到根的所有路径上都不能有两个连续的红色节点）</li>
+<li>从一个节点（该节点任意）到其每个叶子的所有路径都包含相同数量的黑色节点。</li>
+</ol>
+<p>下图是一棵典型的红黑树：</p>
+<p><img src="https://i.ibb.co/Ht6pPJ2/1.jpg" alt></p>
+<h1 id="红黑树的调整"><a href="#红黑树的调整" class="headerlink" title="红黑树的调整"></a>红黑树的调整</h1><p>查找和修改的操作并不会改变红黑树的结构，但是当插入或删除节点的时候，红黑树的规则有可能被打破。这时就需要进行一些调整来维持红黑树的特性。</p>
+<p>调整有两种方法：<strong>变色</strong>和<strong>旋转</strong>，旋转又分为<strong>左旋转</strong>和<strong>右旋转</strong></p>
+<h2 id="变色"><a href="#变色" class="headerlink" title="变色"></a>变色</h2><p>当插入一个节点的时候，由于插入的节点为红色（如果是黑色就违背了规则5），所以如果其父节点也为红色的话，为了不破坏规则4，就需要将其父节点变为黑色，这就是其中一种<strong>变色</strong>。例如插入节点21后，要将节点22变色。</p>
+<p><img src="https://i.ibb.co/7N8d4bn/red-black-tree4.jpg" alt></p>
+<p>可以看到，这时又破坏了其他规则，所以要继续进行变色或旋转，直至满足所以规则为止。</p>
+<h2 id="左旋转"><a href="#左旋转" class="headerlink" title="左旋转"></a>左旋转</h2><p><strong>逆时针</strong>旋转红黑树的两个节点，父节点被自己的右孩子取代并成为其左孩子，原右孩子的左孩子成为原父节点的右孩子。如图：</p>
+<p><img src="https://i.ibb.co/XV9vCzj/red-black-tree2.jpg" alt></p>
+<h2 id="右旋转"><a href="#右旋转" class="headerlink" title="右旋转"></a>右旋转</h2><p><strong>顺时针</strong>旋转红黑树的两个节点，父节点被自己的左孩子取代并成为其右孩子，原左孩子的右孩子成为原父节点的左孩子。如图：</p>
+<p><img src="https://i.ibb.co/X2SwLpC/red-black-tree3.jpg" alt></p>
+<h1 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h1><h2 id="插入节点"><a href="#插入节点" class="headerlink" title="插入节点"></a>插入节点</h2><p>继续以刚才插入节点21为例：</p>
+<p><img src="https://i.ibb.co/pb2CJ4c/red-black-tree5.jpg" alt></p>
+<p>首先，把节点25及其以下节点<strong>变色</strong>：</p>
+<p><img src="https://i.ibb.co/260xLB3/red-black-tree6.jpg" alt></p>
+<p>此时节点17和节点25是连续的两个红色节点，可以把节点17变为黑色节点吗？不可以。因为这样就违背了规则4，并且<strong>不能再通过变色</strong>来维持规则4（假如将节点17变为黑色，由于17的父节点就是根节点，根据规则2，根节点必须是黑色，所以不能够将其父节点变色，这样从根节点到其右子树的叶子所经过的黑色节点数肯定大于到其左子树的叶子所经过的黑色节点数）。</p>
+<p>既然变色无法解决问题，那么就应该通过旋转了，把节点1.看作X，节点17看作Y，然后像刚才的示意图那样进行<strong>左旋转</strong>：</p>
+<p><img src="https://i.ibb.co/qDQ3xtm/red-black-tree7.jpg" alt></p>
+<p>由于根节点必须是黑色，所以需要进行<strong>变色</strong>，将根节点及左子树的部分节点变色后，结果如下：</p>
+<p><img src="https://i.ibb.co/PQXpS4G/red-black-tree8.jpg" alt></p>
+<p>因为其中两条路径(17 -&gt; 8 -&gt; 6 -&gt; NIL)的黑色节点个数是4，而其他路径的黑色节点个数是3，违背了规则5。所以还要进行旋转和变色，先将节点13看作X，节点8看作Y，项刚才的示意图那样进行<strong>右旋转</strong>：</p>
+<p><img src="https://i.ibb.co/X8YXphJ/red-black-tree9.jpg" alt></p>
+<p>然后进行<strong>变色</strong>：</p>
+<p><img src="https://i.ibb.co/J3J0FQc/red-black-tree10.jpg" alt></p>
+<p>可以看到，这时的红黑树就符号所有的规则。这一例子的调整过程较为复杂，经历了如下步骤：</p>
+<p>变色 -&gt; 左旋转 -&gt; 变色 -&gt; 右旋转 -&gt; 变色</p>
+<h2 id="插入节点后调整的技巧"><a href="#插入节点后调整的技巧" class="headerlink" title="插入节点后调整的技巧"></a>插入节点后调整的技巧</h2><ol>
+<li>一般插入节点后，第一步判断是否要变色，如果要变色就在该节点所在子树一直往上变色，直至不能变色为止。</li>
+<li>变色后发现不满足规则5的话，根据情况进行左旋或者右旋，旋转后一般都要再变色一次。</li>
+<li>变色过程为了满足规则4，一般是同一层节点同一种颜色，红色与黑色相邻。所以最终的结果是第一层节点（根节点）是黑色，第二层的非叶子节点都是红色，第三层的非叶子节点都是黑色，以此类推。</li>
+</ol>
+<h1 id="实际应用"><a href="#实际应用" class="headerlink" title="实际应用"></a>实际应用</h1><ol>
+<li>JDK的集合类TreeMap和TreeSet底层就是红黑树实现的。</li>
+<li>在Java8中，HashMap也用到了红黑树。</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://mp.weixin.qq.com/s/jz1ajDUygZ7sXLQFHyfjWA" target="_blank" rel="noopener">漫画：什么是红黑树？</a></li>
+</ul>
+
       
     </div>
 
@@ -476,9 +526,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/leetcode/" rel="tag"><i class="fa fa-tag"></i> leetcode</a>
-          
-            <a href="/tags/递归/" rel="tag"><i class="fa fa-tag"></i> 递归</a>
+            <a href="/tags/红黑树/" rel="tag"><i class="fa fa-tag"></i> 红黑树</a>
           
         </div>
       
@@ -491,8 +539,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/05/11/ConstraintLayout（约束布局）的使用/" rel="next" title="ConstraintLayout（约束布局）的使用">
-                <i class="fa fa-chevron-left"></i> ConstraintLayout（约束布局）的使用
+              <a href="/2019/05/27/LeetCode第56题：合并区间/" rel="next" title="LeetCode第56题：合并区间">
+                <i class="fa fa-chevron-left"></i> LeetCode第56题：合并区间
               </a>
             
           </div>
@@ -500,10 +548,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/05/20/HashMap源码分析（JDK1-8）/" rel="prev" title="HashMap源码分析（JDK1.8）">
-                HashMap源码分析（JDK1.8） <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -712,7 +756,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#题目描述"><span class="nav-number">1.</span> <span class="nav-text">题目描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#示例"><span class="nav-number">2.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#题解"><span class="nav-number">3.</span> <span class="nav-text">题解</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#特性"><span class="nav-number">2.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#红黑树的调整"><span class="nav-number">3.</span> <span class="nav-text">红黑树的调整</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#变色"><span class="nav-number">3.1.</span> <span class="nav-text">变色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#左旋转"><span class="nav-number">3.2.</span> <span class="nav-text">左旋转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#右旋转"><span class="nav-number">3.3.</span> <span class="nav-text">右旋转</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#例子"><span class="nav-number">4.</span> <span class="nav-text">例子</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#插入节点"><span class="nav-number">4.1.</span> <span class="nav-text">插入节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入节点后调整的技巧"><span class="nav-number">4.2.</span> <span class="nav-text">插入节点后调整的技巧</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实际应用"><span class="nav-number">5.</span> <span class="nav-text">实际应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
