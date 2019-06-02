@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言和分析JDK1.8的HashMap源码一样，本文也是通过构造方法、增删改查等基本操作来分析JDK1.7的源码。">
+<meta name="keywords" content="源码,集合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HashMap源码分析（JDK1.7）">
+<meta property="og:url" content="https://mrfzh.github.io/2019/06/02/HashMap源码分析（JDK1-7）/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="前言和分析JDK1.8的HashMap源码一样，本文也是通过构造方法、增删改查等基本操作来分析JDK1.7的源码。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-06-02T08:45:57.964Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HashMap源码分析（JDK1.7）">
+<meta name="twitter:description" content="前言和分析JDK1.8的HashMap源码一样，本文也是通过构造方法、增删改查等基本操作来分析JDK1.7的源码。">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/06/02/HashMap源码分析（JDK1-7）/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>HashMap源码分析（JDK1.7） | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/06/02/HashMap源码分析（JDK1-7）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">HashMap源码分析（JDK1.7）
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-02 16:37:04 / 修改时间：16:45:57" itemprop="dateCreated datePublished" datetime="2019-06-02T16:37:04+08:00">2019-06-02</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>和分析JDK1.8的HashMap源码一样，本文也是通过构造方法、增删改查等基本操作来分析JDK1.7的源码。</p>
+<a id="more"></a>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="用到的实例常量"><a href="#用到的实例常量" class="headerlink" title="用到的实例常量"></a>用到的实例常量</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITIAL_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">4</span>; 	<span class="comment">//默认初始容量：2^4 = 16</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> DEFAULT_LOAD_FACTOR = <span class="number">0.75f</span>;		<span class="comment">//默认加载因子：0.75</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXIMUM_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">30</span>;		<span class="comment">//最大容量：2^30</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * An empty table instance to share when the table is not inflated.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> Entry&lt;?,?&gt;[] EMPTY_TABLE = &#123;&#125;;     <span class="comment">//一个空的哈希桶</span></span><br></pre></td></tr></table></figure>
+<h2 id="用到的实例变量"><a href="#用到的实例变量" class="headerlink" title="用到的实例变量"></a>用到的实例变量</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> threshold;		<span class="comment">//扩容阀值</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">float</span> loadFactor;		<span class="comment">//加载因子</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The table, resized as necessary. Length MUST Always be a power of two.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">transient</span> Entry&lt;K,V&gt;[] table = (Entry&lt;K,V&gt;[]) EMPTY_TABLE;  <span class="comment">//哈希桶</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> modCount;     <span class="comment">//HashMap修改次数</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> size;         <span class="comment">//当前的键值对数量</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> hashSeed = <span class="number">0</span>;     <span class="comment">//用于判断hash是否需要更新，若为0则禁止替换hash值</span></span><br></pre></td></tr></table></figure>
+<h2 id="Entry（链表节点）"><a href="#Entry（链表节点）" class="headerlink" title="Entry（链表节点）"></a>Entry（链表节点）</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Map</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">      <span class="keyword">final</span> K key;</span><br><span class="line">      V value;</span><br><span class="line">      Entry&lt;K,V&gt; next;    <span class="comment">//下一节点</span></span><br><span class="line">      <span class="keyword">int</span> hash;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/**</span></span><br><span class="line"><span class="comment">       * Creates new entry.</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      Entry(<span class="keyword">int</span> h, K k, V v, Entry&lt;K,V&gt; n) &#123;</span><br><span class="line">          value = v;</span><br><span class="line">          next = n;</span><br><span class="line">          key = k;</span><br><span class="line">          hash = h;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> K <span class="title">getKey</span><span class="params">()</span> </span>&#123;</span><br><span class="line">          <span class="keyword">return</span> key;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> V <span class="title">getValue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">          <span class="keyword">return</span> value;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> V <span class="title">setValue</span><span class="params">(V newValue)</span> </span>&#123;</span><br><span class="line">          V oldValue = value;</span><br><span class="line">          value = newValue;</span><br><span class="line">          <span class="keyword">return</span> oldValue;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//只有两者的key和value通过equals比较后都返回true才为true</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">          <span class="keyword">if</span> (!(o <span class="keyword">instanceof</span> Map.Entry))</span><br><span class="line">              <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">          Map.Entry e = (Map.Entry)o;</span><br><span class="line">          Object k1 = getKey();</span><br><span class="line">          Object k2 = e.getKey();</span><br><span class="line">          <span class="keyword">if</span> (k1 == k2 || (k1 != <span class="keyword">null</span> &amp;&amp; k1.equals(k2))) &#123;</span><br><span class="line">              Object v1 = getValue();</span><br><span class="line">              Object v2 = e.getValue();</span><br><span class="line">              <span class="keyword">if</span> (v1 == v2 || (v1 != <span class="keyword">null</span> &amp;&amp; v1.equals(v2)))</span><br><span class="line">                  <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//将key和value的hashCode值进行异或操作即得到hashCode</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">          <span class="keyword">return</span> Objects.hashCode(getKey()) ^ Objects.hashCode(getValue());</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">          <span class="keyword">return</span> getKey() + <span class="string">"="</span> + getValue();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">//...</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="需要用到的方法"><a href="#需要用到的方法" class="headerlink" title="需要用到的方法"></a>需要用到的方法</h2><h3 id="inflateTable"><a href="#inflateTable" class="headerlink" title="inflateTable"></a>inflateTable</h3><p>初始化哈希桶，保证哈希桶的容量是2的n次幂。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">inflateTable</span><span class="params">(<span class="keyword">int</span> toSize)</span> </span>&#123;</span><br><span class="line">      <span class="comment">//获取初始容量：大于等于toSize的最小的2^n	</span></span><br><span class="line">      <span class="keyword">int</span> capacity = roundUpToPowerOf2(toSize);</span><br><span class="line"><span class="comment">//指定新的扩容阀值</span></span><br><span class="line">      threshold = (<span class="keyword">int</span>) Math.min(capacity * loadFactor, MAXIMUM_CAPACITY + <span class="number">1</span>);</span><br><span class="line"><span class="comment">//初始化哈希桶</span></span><br><span class="line">      table = <span class="keyword">new</span> Entry[capacity];</span><br><span class="line">      initHashSeedAsNeeded(capacity);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="resize"><a href="#resize" class="headerlink" title="resize"></a>resize</h3><p>传入新桶容量，进行扩容操作<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">resize</span><span class="params">(<span class="keyword">int</span> newCapacity)</span> </span>&#123;</span><br><span class="line">      Entry[] oldTable = table;</span><br><span class="line">      <span class="keyword">int</span> oldCapacity = oldTable.length;</span><br><span class="line"><span class="comment">//如果原哈希桶的长度等于最大容量，直接返回</span></span><br><span class="line">      <span class="keyword">if</span> (oldCapacity == MAXIMUM_CAPACITY) &#123;</span><br><span class="line">          threshold = Integer.MAX_VALUE;</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//根据新的容量创建新的哈希桶</span></span><br><span class="line">      Entry[] newTable = <span class="keyword">new</span> Entry[newCapacity];</span><br><span class="line"><span class="comment">//将旧桶中的所有元素放入新桶</span></span><br><span class="line">      transfer(newTable, initHashSeedAsNeeded(newCapacity));</span><br><span class="line"><span class="comment">//更新哈希桶</span></span><br><span class="line">      table = newTable;</span><br><span class="line"><span class="comment">//更新扩容阀值</span></span><br><span class="line">      threshold = (<span class="keyword">int</span>)Math.min(newCapacity * loadFactor, MAXIMUM_CAPACITY + <span class="number">1</span>);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="transfer"><a href="#transfer" class="headerlink" title="transfer"></a>transfer</h3><p>将旧桶中的所有元素转移到新桶中<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">transfer</span><span class="params">(Entry[] newTable, <span class="keyword">boolean</span> rehash)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">int</span> newCapacity = newTable.length;</span><br><span class="line"><span class="comment">//将旧桶中的所有元素转移到新桶中</span></span><br><span class="line">      <span class="keyword">for</span> (Entry&lt;K,V&gt; e : table) &#123;</span><br><span class="line">          <span class="keyword">while</span>(<span class="keyword">null</span> != e) &#123;</span><br><span class="line">              Entry&lt;K,V&gt; next = e.next;</span><br><span class="line">              <span class="keyword">if</span> (rehash) &#123;	<span class="comment">//如果需要重新计算哈希值</span></span><br><span class="line">                  e.hash = <span class="keyword">null</span> == e.key ? <span class="number">0</span> : hash(e.key);</span><br><span class="line">              &#125;</span><br><span class="line">		<span class="comment">//i为节点e在新桶中的位置</span></span><br><span class="line">              <span class="keyword">int</span> i = indexFor(e.hash, newCapacity);</span><br><span class="line">		<span class="comment">//节点e成为第i个桶的头结点</span></span><br><span class="line">              e.next = newTable[i];</span><br><span class="line">              newTable[i] = e;</span><br><span class="line">		<span class="comment">//e赋值为下一节点</span></span><br><span class="line">              e = next;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="hash"><a href="#hash" class="headerlink" title="hash"></a>hash</h3><p>根据传入的key计算其hash值<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object k)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">int</span> h = hashSeed;</span><br><span class="line"><span class="comment">//如果hashSeed不等于0且key为String类型，使用另一个优化后的hash函数</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="number">0</span> != h &amp;&amp; k <span class="keyword">instanceof</span> String) &#123;	</span><br><span class="line">          <span class="keyword">return</span> sun.misc.Hashing.stringHash32((String) k);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      h ^= k.hashCode();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> h ^ (h &gt;&gt;&gt; <span class="number">7</span>) ^ (h &gt;&gt;&gt; <span class="number">4</span>);	</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到该方法进行了多次移位和异或操作，这样做是为了降低哈希冲突，使得键值对的分布相对均匀</p>
+<h3 id="indexFor"><a href="#indexFor" class="headerlink" title="indexFor"></a>indexFor</h3><p>该方法传入一个hash值以及哈希桶容量，返回对应哈希桶索引<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">indexFor</span><span class="params">(<span class="keyword">int</span> h, <span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">      <span class="comment">//由于保证了哈希桶容量length为2的n次幂，所以h与(length-1)进行与操作，</span></span><br><span class="line"><span class="comment">//就相当于对length取模</span></span><br><span class="line">      <span class="keyword">return</span> h &amp; (length-<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="构造方法"><a href="#构造方法" class="headerlink" title="构造方法"></a>构造方法</h2><p>和1.8版本一样，1.7版本也有四个构造方法。</p>
+<p>默认构造方法，使用默认的初始容量和加载因子<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以指定初始容量的构造方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(initialCapacity, DEFAULT_LOAD_FACTOR);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>前两个方法都是调用该构造方法，该方法可同时指定初始容量和加载因子<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity, <span class="keyword">float</span> loadFactor)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (initialCapacity &lt; <span class="number">0</span>)</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Illegal initial capacity: "</span> +</span><br><span class="line">                                             initialCapacity);</span><br><span class="line">      <span class="keyword">if</span> (initialCapacity &gt; MAXIMUM_CAPACITY)</span><br><span class="line">          initialCapacity = MAXIMUM_CAPACITY;</span><br><span class="line">      <span class="keyword">if</span> (loadFactor &lt;= <span class="number">0</span> || Float.isNaN(loadFactor))</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Illegal load factor: "</span> +</span><br><span class="line">                                             loadFactor);</span><br><span class="line"><span class="comment">//初始容量不能小于0，也不能超过最大容量；加载因子必须大于0									  </span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">this</span>.loadFactor = loadFactor;</span><br><span class="line">      threshold = initialCapacity;	<span class="comment">//扩容阀值等于初始化容量</span></span><br><span class="line">      init();		<span class="comment">//一个默认的空方法</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>和1.8版本不同的是，<strong>扩容阀值等于初始化容量</strong>。</p>
+<p>还有个构造方法，根据传入的Map构造HashMap<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">(Map&lt;? extends K, ? extends V&gt; m)</span> </span>&#123;</span><br><span class="line"><span class="comment">//先调用构造方法指定扩容阀值和加载因子</span></span><br><span class="line">      <span class="keyword">this</span>(Math.max((<span class="keyword">int</span>) (m.size() / DEFAULT_LOAD_FACTOR) + <span class="number">1</span>,</span><br><span class="line">                    DEFAULT_INITIAL_CAPACITY), DEFAULT_LOAD_FACTOR);</span><br><span class="line"><span class="comment">//确定初始容量，指定扩容阀值并初始化哈希桶</span></span><br><span class="line">      inflateTable(threshold);</span><br><span class="line"><span class="comment">//将传入Map的所有元素加入到新的HashMap中</span></span><br><span class="line">      putAllForCreate(m);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="put（增、改）"><a href="#put（增、改）" class="headerlink" title="put（增、改）"></a>put（增、改）</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line"><span class="comment">//如果哈希桶为空，需先初始化哈希桶</span></span><br><span class="line">      <span class="keyword">if</span> (table == EMPTY_TABLE) &#123;	</span><br><span class="line">          inflateTable(threshold);</span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">//如果key为null，需要另行处理</span></span><br><span class="line">      <span class="keyword">if</span> (key == <span class="keyword">null</span>) &#123;</span><br><span class="line">	<span class="keyword">return</span> putForNullKey(value);</span><br><span class="line">&#125;</span><br><span class="line">          </span><br><span class="line">      <span class="keyword">int</span> hash = hash(key);	<span class="comment">//计算该key的hash值</span></span><br><span class="line">      <span class="keyword">int</span> i = indexFor(hash, table.length);	<span class="comment">//根据hash值获取其存放位置</span></span><br><span class="line"><span class="comment">//遍历其存放位置的所有节点，看是否存在相同的key</span></span><br><span class="line">      <span class="keyword">for</span> (Entry&lt;K,V&gt; e = table[i]; e != <span class="keyword">null</span>; e = e.next) &#123;</span><br><span class="line">          Object k;	<span class="comment">//k存放当前遍历到的节点的key</span></span><br><span class="line">	<span class="comment">//如果找到相同的key，更新value并返回旧的value</span></span><br><span class="line">          <span class="keyword">if</span> (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) &#123;</span><br><span class="line">              V oldValue = e.value;</span><br><span class="line">              e.value = value;</span><br><span class="line">              e.recordAccess(<span class="keyword">this</span>);</span><br><span class="line">              <span class="keyword">return</span> oldValue;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//如果没找到相同的key，则新增该键值对并返回null</span></span><br><span class="line">      modCount++;</span><br><span class="line">      addEntry(hash, key, value, i);</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>put方法的基本步骤：</p>
+<ol>
+<li>先判断哈希桶是否为空，为空需先初始化哈希桶。</li>
+<li>判断传入的key是否为null，为null的话需要另行处理：判断第0号哈希桶是否存在key为null的节点，如果存在则更新value并返回旧的value，否则将该键值对放入第0号哈希桶。</li>
+<li>根据该key的hash值获取到对应的哈希桶，遍历该哈希桶中的链表，如果找到相同的key，则更新value并返回旧value。否则，创建该新节点并将其放入对应的哈希桶，成为该哈希桶新的头结点，原头结点成为它的下一节点。然后方法结束，返回null。</li>
+</ol>
+<h3 id="putForNullKey"><a href="#putForNullKey" class="headerlink" title="putForNullKey"></a>putForNullKey</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> V <span class="title">putForNullKey</span><span class="params">(V value)</span> </span>&#123;</span><br><span class="line"><span class="comment">//查看第0号哈希桶是否存放过null，如果已经放过null就更新value，返回旧value</span></span><br><span class="line">      <span class="keyword">for</span> (Entry&lt;K,V&gt; e = table[<span class="number">0</span>]; e != <span class="keyword">null</span>; e = e.next) &#123;</span><br><span class="line">          <span class="keyword">if</span> (e.key == <span class="keyword">null</span>) &#123;</span><br><span class="line">              V oldValue = e.value;</span><br><span class="line">              e.value = value;</span><br><span class="line">              e.recordAccess(<span class="keyword">this</span>);</span><br><span class="line">              <span class="keyword">return</span> oldValue;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">//如果第0号哈希桶没有存放null，则将其存入第0号哈希桶</span></span><br><span class="line">      modCount++;</span><br><span class="line">      addEntry(<span class="number">0</span>, <span class="keyword">null</span>, value, <span class="number">0</span>);</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="addEntry"><a href="#addEntry" class="headerlink" title="addEntry"></a>addEntry</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">addEntry</span><span class="params">(<span class="keyword">int</span> hash, K key, V value, <span class="keyword">int</span> bucketIndex)</span> </span>&#123;</span><br><span class="line"><span class="comment">//如果当前键值对数量到达扩容阀值，并且要添加的键值对所对应的哈希桶不为空</span></span><br><span class="line">      <span class="keyword">if</span> ((size &gt;= threshold) &amp;&amp; (<span class="keyword">null</span> != table[bucketIndex])) &#123;</span><br><span class="line">          resize(<span class="number">2</span> * table.length);	<span class="comment">//进行扩容操作，扩容为原来的两倍</span></span><br><span class="line">          hash = (<span class="keyword">null</span> != key) ? hash(key) : <span class="number">0</span>;	<span class="comment">//重新计算其hash值</span></span><br><span class="line">          bucketIndex = indexFor(hash, table.length);	<span class="comment">//重新计算其存储位置</span></span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">//创建新的键值对并将其添加到对应的哈希桶</span></span><br><span class="line">      createEntry(hash, key, value, bucketIndex);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="createEntry"><a href="#createEntry" class="headerlink" title="createEntry"></a>createEntry</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">createEntry</span><span class="params">(<span class="keyword">int</span> hash, K key, V value, <span class="keyword">int</span> bucketIndex)</span> </span>&#123;</span><br><span class="line"><span class="comment">//e存储当前头结点</span></span><br><span class="line">      Entry&lt;K,V&gt; e = table[bucketIndex];	</span><br><span class="line"><span class="comment">//新增的键值对成为该位置的头结点，之前的头结点作为其下一节点</span></span><br><span class="line">      table[bucketIndex] = <span class="keyword">new</span> Entry&lt;&gt;(hash, key, value, e);</span><br><span class="line"><span class="comment">//更新当前键值对数量</span></span><br><span class="line">      size++;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="remove（删）"><a href="#remove（删）" class="headerlink" title="remove（删）"></a>remove（删）</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> V <span class="title">remove</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">      Entry&lt;K,V&gt; e = removeEntryForKey(key);</span><br><span class="line"><span class="comment">//如果没有找到该key，返回null，否则返回删除的键值对的value</span></span><br><span class="line">      <span class="keyword">return</span> (e == <span class="keyword">null</span> ? <span class="keyword">null</span> : e.value);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="removeEntryForKey"><a href="#removeEntryForKey" class="headerlink" title="removeEntryForKey"></a>removeEntryForKey</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">final</span> Entry&lt;K,V&gt; <span class="title">removeEntryForKey</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (size == <span class="number">0</span>) &#123;	<span class="comment">//键值对数量为0，直接返回null</span></span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">int</span> hash = (key == <span class="keyword">null</span>) ? <span class="number">0</span> : hash(key);	<span class="comment">//hash为该key的hash值</span></span><br><span class="line">      <span class="keyword">int</span> i = indexFor(hash, table.length);		<span class="comment">//找到其在哈希桶中的位置</span></span><br><span class="line">      Entry&lt;K,V&gt; prev = table[i];</span><br><span class="line">      Entry&lt;K,V&gt; e = prev;</span><br><span class="line"></span><br><span class="line"><span class="comment">//遍历单链表，查找要删除的节点</span></span><br><span class="line">      <span class="keyword">while</span> (e != <span class="keyword">null</span>) &#123;</span><br><span class="line">          Entry&lt;K,V&gt; next = e.next;</span><br><span class="line">          Object k;	<span class="comment">//k用于存储当前节点的key</span></span><br><span class="line">	<span class="comment">//若找到要删除的键值对</span></span><br><span class="line">          <span class="keyword">if</span> (e.hash == hash &amp;&amp;</span><br><span class="line">              ((k = e.key) == key || (key != <span class="keyword">null</span> &amp;&amp; key.equals(k)))) &#123;</span><br><span class="line">              modCount++;</span><br><span class="line">              size--;</span><br><span class="line">		<span class="comment">//删除并返回该键值对</span></span><br><span class="line">              <span class="keyword">if</span> (prev == e)</span><br><span class="line">                  table[i] = next;</span><br><span class="line">              <span class="keyword">else</span></span><br><span class="line">                  prev.next = next;</span><br><span class="line">              e.recordRemoval(<span class="keyword">this</span>);</span><br><span class="line">              <span class="keyword">return</span> e;</span><br><span class="line">          &#125;</span><br><span class="line">          prev = e;</span><br><span class="line">          e = next;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//若没有找到要删除的节点，返回null</span></span><br><span class="line">      <span class="keyword">return</span> e;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>删除节点的步骤如下：</p>
+<ol>
+<li>如果当前键值对的数量为0，直接返回null</li>
+<li>根据传入的key计算出其hash值，并找到对应的哈希桶。遍历该哈希桶中的链表，如果找到要删除的节点就删除并返回该节点，否则返回null。</li>
+</ol>
+<h2 id="get（查）"><a href="#get（查）" class="headerlink" title="get（查）"></a>get（查）</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> V <span class="title">get</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line"><span class="comment">//如果要查找的key为null，要另行处理</span></span><br><span class="line">      <span class="keyword">if</span> (key == <span class="keyword">null</span>) &#123;</span><br><span class="line">	<span class="keyword">return</span> getForNullKey();</span><br><span class="line">&#125;</span><br><span class="line">          </span><br><span class="line">      Entry&lt;K,V&gt; entry = getEntry(key);</span><br><span class="line"><span class="comment">//如果找到该key对应的键值对，返回其value，否则返回null</span></span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span> == entry ? <span class="keyword">null</span> : entry.getValue();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="getForNullKey"><a href="#getForNullKey" class="headerlink" title="getForNullKey"></a>getForNullKey</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> V <span class="title">getForNullKey</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="comment">//如果当前键值对数量为0，直接返回null</span></span><br><span class="line">      <span class="keyword">if</span> (size == <span class="number">0</span>) &#123;</span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">//遍历第0号哈希桶的单链表，找到key为null的键值对就返回其value</span></span><br><span class="line">      <span class="keyword">for</span> (Entry&lt;K,V&gt; e = table[<span class="number">0</span>]; e != <span class="keyword">null</span>; e = e.next) &#123;</span><br><span class="line">          <span class="keyword">if</span> (e.key == <span class="keyword">null</span>)</span><br><span class="line">              <span class="keyword">return</span> e.value;</span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">//没有找到key为null的键值对，返回null</span></span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="getEntry"><a href="#getEntry" class="headerlink" title="getEntry"></a>getEntry</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">final</span> Entry&lt;K,V&gt; <span class="title">getEntry</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line"><span class="comment">//如果当前键值对数量为0，直接返回null</span></span><br><span class="line">      <span class="keyword">if</span> (size == <span class="number">0</span>) &#123;</span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//先计算出该key对应的hash值</span></span><br><span class="line">      <span class="keyword">int</span> hash = (key == <span class="keyword">null</span>) ? <span class="number">0</span> : hash(key);</span><br><span class="line"><span class="comment">//遍历hash值对应的哈希桶中的单链表</span></span><br><span class="line">      <span class="keyword">for</span> (Entry&lt;K,V&gt; e = table[indexFor(hash, table.length)];</span><br><span class="line">           e != <span class="keyword">null</span>;</span><br><span class="line">           e = e.next) &#123;</span><br><span class="line">          Object k;</span><br><span class="line">	<span class="comment">//若找到对应的key，返回该键值对</span></span><br><span class="line">          <span class="keyword">if</span> (e.hash == hash &amp;&amp;</span><br><span class="line">              ((k = e.key) == key || (key != <span class="keyword">null</span> &amp;&amp; key.equals(k))))</span><br><span class="line">              <span class="keyword">return</span> e;</span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">//没有找到对应的key，返回null</span></span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>get方法的执行步骤：</p>
+<ol>
+<li>先判断要查找的key是否为null，为null的话另行处理。无论key是否为null，都要先判断当前键值对数量是否为0，为0直接返回null。</li>
+<li>如果key为null，则遍历第0号哈希桶的链表，如果找到key为null的键值对，返回其value，否则返回null。</li>
+<li>如果key不为null，先计算该key的hash值，然后根据该hash值找到相应的哈希桶。遍历该哈希桶的链表，如果找到对应的key，返回该键值对的value，否则返回null。</li>
+</ol>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>这里小结一下查看了源码后，对1.7版本HashMap的一些新认识：</p>
+<ol>
+<li>单个键值对存储在Entry类中，利用Entry数组存储多个键值对，利用拉链法来解决哈希冲突，多个冲突的键值对利用链表存储起来。</li>
+<li>一开始的扩容阀值（在构造方法中确定）等于初始容量（该初始容量不一定是2的n次幂），但是在初始化哈希桶数组时，哈希桶数组的长度是大于等于扩容阀值的最小的2的n次幂，也即是最终哈希桶数组的初始长度是大于等于初始容量的最小的2的n次幂（和1.8版本一样）。</li>
+<li>key为null的键值对放在第0号哈希桶。</li>
+<li>当键值对数量达到扩容阀值时，进行扩容并重新分配元素的位置，新的容量是原来的两倍。</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://blog.csdn.net/xiaokang123456kao/article/details/77503784" target="_blank" rel="noopener">HashMap源码解析（基于JDK1.7）</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+          
+            <a href="/tags/集合/" rel="tag"><i class="fa fa-tag"></i> 集合</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/30/初步了解红黑树/" rel="next" title="初步了解红黑树">
+                <i class="fa fa-chevron-left"></i> 初步了解红黑树
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#用到的实例常量"><span class="nav-number">2.1.</span> <span class="nav-text">用到的实例常量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用到的实例变量"><span class="nav-number">2.2.</span> <span class="nav-text">用到的实例变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Entry（链表节点）"><span class="nav-number">2.3.</span> <span class="nav-text">Entry（链表节点）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#需要用到的方法"><span class="nav-number">2.4.</span> <span class="nav-text">需要用到的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#inflateTable"><span class="nav-number">2.4.1.</span> <span class="nav-text">inflateTable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#resize"><span class="nav-number">2.4.2.</span> <span class="nav-text">resize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#transfer"><span class="nav-number">2.4.3.</span> <span class="nav-text">transfer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hash"><span class="nav-number">2.4.4.</span> <span class="nav-text">hash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#indexFor"><span class="nav-number">2.4.5.</span> <span class="nav-text">indexFor</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#构造方法"><span class="nav-number">2.5.</span> <span class="nav-text">构造方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#put（增、改）"><span class="nav-number">2.6.</span> <span class="nav-text">put（增、改）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#putForNullKey"><span class="nav-number">2.6.1.</span> <span class="nav-text">putForNullKey</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#addEntry"><span class="nav-number">2.6.2.</span> <span class="nav-text">addEntry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#createEntry"><span class="nav-number">2.6.3.</span> <span class="nav-text">createEntry</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#remove（删）"><span class="nav-number">2.7.</span> <span class="nav-text">remove（删）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#removeEntryForKey"><span class="nav-number">2.7.1.</span> <span class="nav-text">removeEntryForKey</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#get（查）"><span class="nav-number">2.8.</span> <span class="nav-text">get（查）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#getForNullKey"><span class="nav-number">2.8.1.</span> <span class="nav-text">getForNullKey</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getEntry"><span class="nav-number">2.8.2.</span> <span class="nav-text">getEntry</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
