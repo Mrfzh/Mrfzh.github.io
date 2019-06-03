@@ -105,16 +105,16 @@
 <meta property="og:site_name" content="FengZH的博客">
 <meta property="og:description" content="进入谷歌站点平台先进入google站点平台，点击右上角的登录，如果还没有谷歌账号的要先注册一个谷歌账号。然后添加资源，这里选择网址前缀，输入博客首页，例如：https://mrfzh.github.io">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1559050528x2890149604.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1559050558x989499252.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1559050599x989499252.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1559050633x989499252.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1559050695x989559068.png">
-<meta property="og:updated_time" content="2019-05-28T13:40:32.150Z">
+<meta property="og:image" content="https://i.ibb.co/gtxB7pD/1.png">
+<meta property="og:image" content="https://i.ibb.co/PmsDVS3/2.png">
+<meta property="og:image" content="https://i.ibb.co/D5b9K4r/3.png">
+<meta property="og:image" content="https://i.ibb.co/6wB6Ztc/4.png">
+<meta property="og:image" content="https://i.ibb.co/MCy84T8/5.png">
+<meta property="og:updated_time" content="2019-06-03T12:36:09.012Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="hexo个人博客收录谷歌">
 <meta name="twitter:description" content="进入谷歌站点平台先进入google站点平台，点击右上角的登录，如果还没有谷歌账号的要先注册一个谷歌账号。然后添加资源，这里选择网址前缀，输入博客首页，例如：https://mrfzh.github.io">
-<meta name="twitter:image" content="http://chuantu.xyz/t6/702/1559050528x2890149604.png">
+<meta name="twitter:image" content="https://i.ibb.co/gtxB7pD/1.png">
 
 
 
@@ -391,7 +391,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-05-28 21:40:32" itemprop="dateModified" datetime="2019-05-28T21:40:32+08:00">2019-05-28</time>
+                <time title="修改时间：2019-06-03 20:36:09" itemprop="dateModified" datetime="2019-06-03T20:36:09+08:00">2019-06-03</time>
               
             
           </span>
@@ -452,23 +452,23 @@
       
         <h1 id="进入谷歌站点平台"><a href="#进入谷歌站点平台" class="headerlink" title="进入谷歌站点平台"></a>进入谷歌站点平台</h1><p>先进入<a href="https://www.google.com/webmasters/" target="_blank" rel="noopener">google站点平台</a>，点击右上角的登录，如果还没有谷歌账号的要先注册一个谷歌账号。然后添加资源，这里选择网址前缀，输入博客首页，例如：<a href="https://mrfzh.github.io">https://mrfzh.github.io</a>  </p>
 <a id="more"></a>
-<p><img src="http://chuantu.xyz/t6/702/1559050528x2890149604.png" alt></p>
+<p><img src="https://i.ibb.co/gtxB7pD/1.png" alt></p>
 <p>点击继续</p>
 <h1 id="验证网站所有权"><a href="#验证网站所有权" class="headerlink" title="验证网站所有权"></a>验证网站所有权</h1><h2 id="使用HTML标记验证"><a href="#使用HTML标记验证" class="headerlink" title="使用HTML标记验证"></a>使用HTML标记验证</h2><p>我一开始使用HTML文件验证，但试了好几次都不行。后来参考别人的方法使用<strong>HTML标记</strong>验证成功。  </p>
-<p><img src="http://chuantu.xyz/t6/702/1559050558x989499252.png" alt></p>
+<p><img src="https://i.ibb.co/PmsDVS3/2.png" alt></p>
 <p>红色框部分是等会要复制的，注意是复制全部</p>
 <h2 id="修改Next主题（v7-1-0）的配置文件"><a href="#修改Next主题（v7-1-0）的配置文件" class="headerlink" title="修改Next主题（v7.1.0）的配置文件"></a>修改Next主题（v7.1.0）的配置文件</h2><p>接着打开Next主题的配置文件，将google_site_verification属性设置为true<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># Google Webmaster tools verification.</span><br><span class="line"># See: https://www.google.com/webmasters</span><br><span class="line">google_site_verification: true</span><br></pre></td></tr></table></figure></p>
 <h2 id="配置head-swig文件"><a href="#配置head-swig文件" class="headerlink" title="配置head.swig文件"></a>配置head.swig文件</h2><p>然后配置head.swig文件（根目录\themes\next-reloaded\layout_partials\head\head.swig）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;% if theme.google_site_verification %&#125;</span><br><span class="line">  &lt;meta name=&quot;google-site-verification&quot; content=&quot;X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY&quot; /&gt; </span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure></p>
 <p>将中间那行换成上面红色框部分即可，完成这项步骤后，执行下列命令生成静态文件并且部署到github<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo g -d</span><br></pre></td></tr></table></figure></p>
-<h2 id="通过验证"><a href="#通过验证" class="headerlink" title="通过验证"></a>通过验证</h2><p>打开博客首页，点击任意文章，按下F12，查看head标签中是否有验证标签<br><img src="http://chuantu.xyz/t6/702/1559050599x989499252.png" alt><br>看到有验证标签后，回到验证页面，点击验证，就可以通过验证了。</p>
+<h2 id="通过验证"><a href="#通过验证" class="headerlink" title="通过验证"></a>通过验证</h2><p>打开博客首页，点击任意文章，按下F12，查看head标签中是否有验证标签<br><img src="https://i.ibb.co/D5b9K4r/3.png" alt><br>看到有验证标签后，回到验证页面，点击验证，就可以通过验证了。</p>
 <h1 id="生成站点地图"><a href="#生成站点地图" class="headerlink" title="生成站点地图"></a>生成站点地图</h1><p>通过构建网站地图能够让搜索引擎更好的抓取你的网站内容</p>
 <h2 id="安装sitemap插件"><a href="#安装sitemap插件" class="headerlink" title="安装sitemap插件"></a>安装sitemap插件</h2><p>在hexo根目录执行下面两个命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-generator-sitemap --save</span><br></pre></td></tr></table></figure></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-generator-baidu-sitemap --save</span><br></pre></td></tr></table></figure>
 <h2 id="修改博客配置文件"><a href="#修改博客配置文件" class="headerlink" title="修改博客配置文件"></a>修改博客配置文件</h2><p>接着修改根目录下的配置文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># URL</span><br><span class="line">## If your site is put in a subdirectory, set url as &apos;http://yoursite.com/child&apos; and root as &apos;/child/&apos;</span><br><span class="line">url: https://mrfzh.github.io</span><br><span class="line">root: /</span><br><span class="line">permalink: :year/:month/:day/:title/</span><br><span class="line">permalink_defaults:</span><br></pre></td></tr></table></figure></p>
 <p>将url换成自己的博客首页，接着在文件最后手动增加以下代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 自动生成sitemap</span><br><span class="line">sitemap: </span><br><span class="line">  path: sitemap.xml</span><br><span class="line">baidusitemap: </span><br><span class="line">  path: baidusitemap.xml</span><br></pre></td></tr></table></figure></p>
 <p>执行hexo g -d命令，发现在根目录\public文件夹下新增了sitemap.xml和baidusitemap.xml这两个文件，接着要用到的文件是sitemap.xml（baidusitemap.xml是用于收录百度的，这里用不上）</p>
-<h2 id="提交谷歌站点地图"><a href="#提交谷歌站点地图" class="headerlink" title="提交谷歌站点地图"></a>提交谷歌站点地图</h2><p>接着进入谷歌站点，提交刚才验证网站的站点地图<br><img src="http://chuantu.xyz/t6/702/1559050633x989499252.png" alt><br>接着点击提交就可以了</p>
-<h1 id="等待谷歌收录"><a href="#等待谷歌收录" class="headerlink" title="等待谷歌收录"></a>等待谷歌收录</h1><p>最后谷歌搜索site:mrfzh.github.io，看下网页是否被谷歌收录<br><img src="http://chuantu.xyz/t6/702/1559050695x989559068.png" alt><br>可以看到博客文章已经被谷歌收录</p>
+<h2 id="提交谷歌站点地图"><a href="#提交谷歌站点地图" class="headerlink" title="提交谷歌站点地图"></a>提交谷歌站点地图</h2><p>接着进入谷歌站点，提交刚才验证网站的站点地图<br><img src="https://i.ibb.co/6wB6Ztc/4.png" alt><br>接着点击提交就可以了</p>
+<h1 id="等待谷歌收录"><a href="#等待谷歌收录" class="headerlink" title="等待谷歌收录"></a>等待谷歌收录</h1><p>最后谷歌搜索site:mrfzh.github.io，看下网页是否被谷歌收录<br><img src="https://i.ibb.co/MCy84T8/5.png" alt><br>可以看到博客文章已经被谷歌收录</p>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
 <li><a href="https://blog.csdn.net/sunshine940326/article/details/70936988/" target="_blank" rel="noopener">hexo高阶教程：想让你的博客被更多的人在搜索引擎中搜到吗？</a></li>
 <li><a href="https://www.cnblogs.com/php-linux/p/8493346.html" target="_blank" rel="noopener">Hexo博客收录百度和谷歌-基于Next主题</a></li>
