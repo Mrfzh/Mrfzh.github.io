@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Android IPC简介IPC的含义IPC是Inter-Process Communication的缩写，翻译过来是进程间通信的意思，指至少两个进程或线程间传送数据或信号的一些技术或方法（安卓一般是指两个进程之间进行数据交换的过程）。">
+<meta name="keywords" content="ipc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android IPC机制基础知识">
+<meta property="og:url" content="https://mrfzh.github.io/2019/06/10/Android-IPC机制基础知识/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="Android IPC简介IPC的含义IPC是Inter-Process Communication的缩写，翻译过来是进程间通信的意思，指至少两个进程或线程间传送数据或信号的一些技术或方法（安卓一般是指两个进程之间进行数据交换的过程）。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://i.ibb.co/z4mb3YD/process-test.png">
+<meta property="og:updated_time" content="2019-06-10T13:50:20.009Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android IPC机制基础知识">
+<meta name="twitter:description" content="Android IPC简介IPC的含义IPC是Inter-Process Communication的缩写，翻译过来是进程间通信的意思，指至少两个进程或线程间传送数据或信号的一些技术或方法（安卓一般是指两个进程之间进行数据交换的过程）。">
+<meta name="twitter:image" content="https://i.ibb.co/z4mb3YD/process-test.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/06/10/Android-IPC机制基础知识/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android IPC机制基础知识 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/06/10/Android-IPC机制基础知识/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android IPC机制基础知识
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-10 21:45:41 / 修改时间：21:50:20" itemprop="dateCreated datePublished" datetime="2019-06-10T21:45:41+08:00">2019-06-10</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android-IPC简介"><a href="#Android-IPC简介" class="headerlink" title="Android IPC简介"></a>Android IPC简介</h1><h2 id="IPC的含义"><a href="#IPC的含义" class="headerlink" title="IPC的含义"></a>IPC的含义</h2><p>IPC是Inter-Process Communication的缩写，翻译过来是进程间通信的意思，指至少两个进程或线程间传送数据或信号的一些技术或方法（安卓一般是指两个进程之间进行数据交换的过程）。</p>
+<a id="more"></a>
+<h2 id="线程和进程"><a href="#线程和进程" class="headerlink" title="线程和进程"></a>线程和进程</h2><ul>
+<li>线程是CPU调度的最小单位，进程是计算机系统分配资源的最小单位(严格说来是线程)。</li>
+<li>进程一般指一个执行单位，在PC和移动设备上指一个程序或者一个应用。</li>
+<li>每个进程都有自己的一部分独立的系统资源，彼此是隔离的。为了能使不同的进程互相访问资源并进行协调工作，才有了进程间通信。</li>
+<li>一个进程可以包含多个线程，因此进程和线程是包含与被包含的关系。</li>
+</ul>
+<h2 id="安卓中何时使用多进程"><a href="#安卓中何时使用多进程" class="headerlink" title="安卓中何时使用多进程"></a>安卓中何时使用多进程</h2><ul>
+<li>一个应用因为某些原因需要采用多进程模式，原因有很多，比如<ol>
+<li>加大应用可使用的内存。在早期android系统只为一个单进程的应用分配了16M的可用内存，随着手机的硬件的提升和android系统的改进，虽然可分配内存越来越多，但仍旧可以通过开启多进程来获取更多的内存来处理自己App的业务</li>
+<li>有些模块因为特殊的原因需要运行在单独的进程中</li>
+<li>运行一些”不可见人”的操作，比如获取用户的隐私数据，比如双守护进程来防止被用户杀掉</li>
+</ol>
+</li>
+<li>当应用需要向其他应用获取数据，由于是两个应用，所以必须采用IPC来获取所需的数据</li>
+</ul>
+<h1 id="Android中的多进程模式"><a href="#Android中的多进程模式" class="headerlink" title="Android中的多进程模式"></a>Android中的多进程模式</h1><h2 id="开启多进程模式"><a href="#开启多进程模式" class="headerlink" title="开启多进程模式"></a>开启多进程模式</h2><p>正常情况下，在Android中多进程指的是一个应用中存在多个进程。<br>通常，在Android中使用多进程只有一种方法，那就是给四大组件在AndroidManifest.xml文件中指定android:process属性。<br>具体用法如下图所示<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">".MainActivity"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.MAIN"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">"android.intent.category.LAUNCHER"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">".SecondActivity"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:process</span>=<span class="string">"com.feng.multiprogresstest.remote"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">service</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">".MyService"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:enabled</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:process</span>=<span class="string">":remote"</span>/&gt;</span></span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>MainActivity没有指定process属性，那么它运行在默认进程中，默认进程的进程名是包名（示例中的包名是com.feng.multiprogresstest）。  </li>
+<li>SecondActivity启动时（没有启动时不会创建进程），系统会为它创建一个名为“com.feng.multiprogresstest.remote”的进程。  </li>
+<li>同样，MyService启动时，系统也会为它创建一个名为“com.feng.multiprogresstest:remote”的进程。</li>
+</ul>
+<h3 id="查看当前进程的方法"><a href="#查看当前进程的方法" class="headerlink" title="查看当前进程的方法"></a>查看当前进程的方法</h3><p>用USB线连接手机和电脑后，在电脑的“运行”中输入“cmd”，打开后使用命令“adb shell ps com.feng.multiprogresstest（当前包名）”就可以查看当前应用正在运行的进程。<br>如下图<br><img src="https://i.ibb.co/z4mb3YD/process-test.png" alt="image"></p>
+<h3 id="process属性的两种命名方式"><a href="#process属性的两种命名方式" class="headerlink" title="process属性的两种命名方式"></a>process属性的两种命名方式</h3><p>上述示例中有两种命名：一种是“:remote”，另一种是“com.feng.multiprogresstest.remote”，他们的区别如下</p>
+<ul>
+<li>“:remote”是一种简写的方法，其进程名应是“com.feng.multiprogresstest:remote”，为包名加上当前命名。而“com.feng.multiprogresstest.remote”则是全称，进程名也是该名字。</li>
+<li>已“:”开头的进程属于当前应用的<strong>私有进程</strong>，其他应用的组件不可以和它跑在同一个进程中。而另外一种命名的进程则属于<strong>全局进程</strong>，其他应用通过ShareUID方式可以和它跑在同一个进程中。  </li>
+</ul>
+<p>一般我们都是有私有进程，很少使用全局进程。</p>
+<h3 id="ShareUID"><a href="#ShareUID" class="headerlink" title="ShareUID"></a>ShareUID</h3><p>Android系统会为每个应用分配一个唯一的UID。只有两个应用的<strong>ShareUID相同并且签名相同</strong>（此时它们可以访问对方的data目录、组件信息等，不管它们是否在同一进程）才可以跑在同一进程中。在同一进程中的两个应用可以互相访问对方的私有数据（data目录、组件信息、内存数据等）。</p>
+<h2 id="使用多进程引发的问题"><a href="#使用多进程引发的问题" class="headerlink" title="使用多进程引发的问题"></a>使用多进程引发的问题</h2><p>Android多线程虽然启动很简单，只需要设置process属性。但是启动后却会引发很多问题。</p>
+<ol>
+<li>静态成员和单例模式完全失效<blockquote>
+<p>由于Android会为每一个进程都分配一个独立的虚拟机，不同的虚拟机的内存分配不同，这就导致了同一个类在不同的虚拟机中会有不同的副本。我们修改其中一个进程中某个类的静态变量时，另一个进程的该静态变量并不会修改。</p>
+</blockquote>
+</li>
+<li>线程同步机制完全失效<blockquote>
+<p>这也跟第一点的原因一样，既然都不在同一块内存了，那么线程锁根本就锁不住其他进程的该对象。  </p>
+</blockquote>
+</li>
+<li>SharedPreferences的可靠性下降<blockquote>
+<p>SharedPreferences不支持两个进程同时去执行写操作，否则会导致一定几率的数据丢失，这是因为SharedPreferences底层是通过读/写XML文件实现的，并发写显然是可能出问题的，甚至并发读都有可能出问题。</p>
+</blockquote>
+</li>
+<li>Application会多次创建<blockquote>
+<p>这是因为不同进程拥有独立的Application，这会引发一些问题，因为一些人可能喜欢在Application中做初始化操作以及数据的传递操作，这显然是不妥当的，解决的方法就是得到每个进程的名称，如果进程的名称和我们应用的进程名称相同则做我们应用的操作，如果不是则做其他进程的操作。  </p>
+</blockquote>
+</li>
+</ol>
+<p>总的来说，不同进程的组件会拥有独立的虚拟机、Application和内存空间，在实际开发中需要注意有这引发的一些问题。我们也可以这样理解一个应用间的多进程就相当于两个不同的应用采用了SharedUID的模式。</p>
+<h1 id="IPC基础概念介绍"><a href="#IPC基础概念介绍" class="headerlink" title="IPC基础概念介绍"></a>IPC基础概念介绍</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>IPC的基础概念主要是这三方面：Serializable接口、Parcelable接口以及Binder。</p>
+<ul>
+<li>Serializable和Parcelable接口可以完成对象的序列化过程，当我们需要通过Intent和Binder传输数据时就需要使用Parcelable或者Serializable。</li>
+<li>需要把对象持久化到存储设备上或者通过网络传输给其他客户端时也需要使用Serializable来完成对象的持久化。</li>
+</ul>
+<h2 id="Serializable接口"><a href="#Serializable接口" class="headerlink" title="Serializable接口"></a>Serializable接口</h2><p>Serializable是Java所提供的一个序列化接口，使用方法比较简单</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>; </span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 其他的都是一般的实体类操作</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>就多了一个serialVersionUID，这个serialVersionUID是用来辅助序列化和反序列化的。</p>
+<h3 id="手动指定serialVersionUID的作用"><a href="#手动指定serialVersionUID的作用" class="headerlink" title="手动指定serialVersionUID的作用"></a>手动指定serialVersionUID的作用</h3><blockquote>
+<p>当我们删除了类中的某个成员变量或增加了新的成员变量后，仍能够保证我们的反序列化过程能成功，程序仍能最大限度的恢复数据。如果我们不指定serialVersionUID，那么此时程序就会崩溃。这是因为当我们的类有所改变时，系统会重新计算当前类的hash值并把它赋给serialVersionUID，这时类的serialVersionUID和序列化时的serialVersionUID不一致，导致反序列化失败，而手动指定serialVersionUID就不会有这个问题。当然，如果类结构发生了非常规性改变，例如修改类名、修改了成员变量的类型，这个时候尽管serialVersionUID一致，但反序列化还是会失败，因为此时的类结构有了毁灭性的改变。</p>
+</blockquote>
+<h3 id="哪些成员变量不参与序列化"><a href="#哪些成员变量不参与序列化" class="headerlink" title="哪些成员变量不参与序列化"></a>哪些成员变量不参与序列化</h3><ul>
+<li>静态成员变量属于类而不属于对象，所以不参与序列化过程</li>
+<li>用transient关键字修饰的成员变量不参与序列化过程</li>
+</ul>
+<h2 id="Parcelable接口"><a href="#Parcelable接口" class="headerlink" title="Parcelable接口"></a>Parcelable接口</h2><p>实现Parcelable接口比实现Serializable接口要复杂，但Parcelable接口的代码可以通过插件快速生成。这里简单说明下各个方法的作用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 内容描述，几乎所有情况都返回0，仅当当前对象存在文件描述符时返回1</span></span><br><span class="line"><span class="comment">  * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">describeContents</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 实现序列化功能</span></span><br><span class="line"><span class="comment">  * <span class="doctag">@param</span> dest</span></span><br><span class="line"><span class="comment">  * <span class="doctag">@param</span> flags</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">writeToParcel</span><span class="params">(Parcel dest, <span class="keyword">int</span> flags)</span> </span>&#123;</span><br><span class="line">     dest.writeInt(<span class="keyword">this</span>.userId);</span><br><span class="line">     dest.writeString(<span class="keyword">this</span>.userName);</span><br><span class="line">     dest.writeByte(<span class="keyword">this</span>.isLike ? (<span class="keyword">byte</span>) <span class="number">1</span> : (<span class="keyword">byte</span>) <span class="number">0</span>);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 完成反序列化</span></span><br><span class="line"><span class="comment">  * <span class="doctag">@param</span> in</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"> <span class="function"><span class="keyword">private</span> <span class="title">User</span><span class="params">(Parcel in)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">this</span>.userId = in.readInt();</span><br><span class="line">     <span class="keyword">this</span>.userName = in.readString();</span><br><span class="line">     <span class="keyword">this</span>.isLike = in.readByte() != <span class="number">0</span>;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 通过Creator来完成反序列化功能</span></span><br><span class="line"><span class="comment">  * 其内部标明了如何创建序列化对象和数组，并通过Parcel的一系列read方法来完成反序列化</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Parcelable.Creator&lt;User&gt; CREATOR = <span class="keyword">new</span> Parcelable.Creator&lt;User&gt;() &#123;</span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> User <span class="title">createFromParcel</span><span class="params">(Parcel source)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="keyword">new</span> User(source);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="keyword">public</span> User[] newArray(<span class="keyword">int</span> size) &#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="keyword">new</span> User[size];</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="Binder"><a href="#Binder" class="headerlink" title="Binder"></a>Binder</h2><h3 id="Binder是什么"><a href="#Binder是什么" class="headerlink" title="Binder是什么"></a>Binder是什么</h3><ul>
+<li>从类来看，Binder是Android中的一个类，它实现了IBinder接口</li>
+<li>从IPC角度来看，Binder是Android中的一种跨进程通信方式</li>
+<li>从物理设备来看，Binder是一种虚拟的物理设备，它的设备驱动是/dev/binder</li>
+<li>从Android Framework角度来看，Binder是ServiceManager连接各种Manager(ActivityManager、WindowManager等等)和相应ManagerService的桥梁</li>
+<li>从Android应用层来说，Binder是客户端和服务端进行通信的媒介。当bindService的时候，服务端会返回一个包含了服务端业务调用的Binder对象，通过这个Binder对象，客户端可以获取服务端提供的服务和数据，这里的服务包含普通服务和基于AIDL的服务。</li>
+</ul>
+<h3 id="通过AIDL来分析Binder的工作机制"><a href="#通过AIDL来分析Binder的工作机制" class="headerlink" title="通过AIDL来分析Binder的工作机制"></a>通过AIDL来分析Binder的工作机制</h3><p>将在另一篇文章说明，敬请期待！</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li>《Android 开发艺术探索》</li>
+<li><a href="https://blog.csdn.net/itachi85/article/details/50386748" target="_blank" rel="noopener">Android IPC机制（一）开启多进程</a> </li>
+<li><a href="https://www.jianshu.com/p/2cfa14d0d75b" target="_blank" rel="noopener">带你了解android的IPC机制</a>  </li>
+<li><a href="https://blog.csdn.net/spencer_hale/article/details/54968092" target="_blank" rel="noopener">Android开发中怎样用多进程、用多进程的好处、多进程的缺陷、解决方法</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ipc/" rel="tag"><i class="fa fa-tag"></i> ipc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/06/源码分析：广播的动态注册、发送和接收过程/" rel="next" title="源码分析：广播的动态注册、发送和接收过程">
+                <i class="fa fa-chevron-left"></i> 源码分析：广播的动态注册、发送和接收过程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/10/用AIDL来分析Binder的工作机制/" rel="prev" title="用AIDL来分析Binder的工作机制">
+                用AIDL来分析Binder的工作机制 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-IPC简介"><span class="nav-number">1.</span> <span class="nav-text">Android IPC简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IPC的含义"><span class="nav-number">1.1.</span> <span class="nav-text">IPC的含义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程和进程"><span class="nav-number">1.2.</span> <span class="nav-text">线程和进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安卓中何时使用多进程"><span class="nav-number">1.3.</span> <span class="nav-text">安卓中何时使用多进程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Android中的多进程模式"><span class="nav-number">2.</span> <span class="nav-text">Android中的多进程模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#开启多进程模式"><span class="nav-number">2.1.</span> <span class="nav-text">开启多进程模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看当前进程的方法"><span class="nav-number">2.1.1.</span> <span class="nav-text">查看当前进程的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#process属性的两种命名方式"><span class="nav-number">2.1.2.</span> <span class="nav-text">process属性的两种命名方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ShareUID"><span class="nav-number">2.1.3.</span> <span class="nav-text">ShareUID</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用多进程引发的问题"><span class="nav-number">2.2.</span> <span class="nav-text">使用多进程引发的问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IPC基础概念介绍"><span class="nav-number">3.</span> <span class="nav-text">IPC基础概念介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">3.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Serializable接口"><span class="nav-number">3.2.</span> <span class="nav-text">Serializable接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#手动指定serialVersionUID的作用"><span class="nav-number">3.2.1.</span> <span class="nav-text">手动指定serialVersionUID的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哪些成员变量不参与序列化"><span class="nav-number">3.2.2.</span> <span class="nav-text">哪些成员变量不参与序列化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parcelable接口"><span class="nav-number">3.3.</span> <span class="nav-text">Parcelable接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Binder"><span class="nav-number">3.4.</span> <span class="nav-text">Binder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Binder是什么"><span class="nav-number">3.4.1.</span> <span class="nav-text">Binder是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过AIDL来分析Binder的工作机制"><span class="nav-number">3.4.2.</span> <span class="nav-text">通过AIDL来分析Binder的工作机制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
