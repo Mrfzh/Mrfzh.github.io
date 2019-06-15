@@ -98,29 +98,18 @@
 
 
 
-  <meta name="description" content="简介红黑树是一种自平衡的二叉查找树。和AVL树类似，都是在进行插入和删除操作时通过特定操作保持二叉查找树的平衡，从而获得较高的查找性能。它查找、插入和删除的时间复杂度为O(logn)，这里的n是树中元素的数目。">
-<meta name="keywords" content="红黑树">
+  <meta name="description" content="何为中序遍历中序是相对于根节点来说的，当遍历一棵二叉树时，先遍历根节点的左子树，中间遍历根节点，最后遍历根节点的右子树。以此类推，遍历子树时也是中序遍历。">
+<meta name="keywords" content="二叉树">
 <meta property="og:type" content="article">
-<meta property="og:title" content="初步了解红黑树">
-<meta property="og:url" content="https://mrfzh.github.io/2019/05/30/初步了解红黑树/index.html">
+<meta property="og:title" content="二叉树的中序遍历（递归和非递归）">
+<meta property="og:url" content="https://mrfzh.github.io/2019/06/15/二叉树的中序遍历（递归和非递归）/index.html">
 <meta property="og:site_name" content="FengZH的博客">
-<meta property="og:description" content="简介红黑树是一种自平衡的二叉查找树。和AVL树类似，都是在进行插入和删除操作时通过特定操作保持二叉查找树的平衡，从而获得较高的查找性能。它查找、插入和删除的时间复杂度为O(logn)，这里的n是树中元素的数目。">
+<meta property="og:description" content="何为中序遍历中序是相对于根节点来说的，当遍历一棵二叉树时，先遍历根节点的左子树，中间遍历根节点，最后遍历根节点的右子树。以此类推，遍历子树时也是中序遍历。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://i.ibb.co/Ht6pPJ2/1.jpg">
-<meta property="og:image" content="https://i.ibb.co/7N8d4bn/red-black-tree4.jpg">
-<meta property="og:image" content="https://i.ibb.co/XV9vCzj/red-black-tree2.jpg">
-<meta property="og:image" content="https://i.ibb.co/X2SwLpC/red-black-tree3.jpg">
-<meta property="og:image" content="https://i.ibb.co/pb2CJ4c/red-black-tree5.jpg">
-<meta property="og:image" content="https://i.ibb.co/260xLB3/red-black-tree6.jpg">
-<meta property="og:image" content="https://i.ibb.co/qDQ3xtm/red-black-tree7.jpg">
-<meta property="og:image" content="https://i.ibb.co/PQXpS4G/red-black-tree8.jpg">
-<meta property="og:image" content="https://i.ibb.co/X8YXphJ/red-black-tree9.jpg">
-<meta property="og:image" content="https://i.ibb.co/J3J0FQc/red-black-tree10.jpg">
-<meta property="og:updated_time" content="2019-06-02T08:35:58.616Z">
+<meta property="og:updated_time" content="2019-06-15T02:17:45.683Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="初步了解红黑树">
-<meta name="twitter:description" content="简介红黑树是一种自平衡的二叉查找树。和AVL树类似，都是在进行插入和删除操作时通过特定操作保持二叉查找树的平衡，从而获得较高的查找性能。它查找、插入和删除的时间复杂度为O(logn)，这里的n是树中元素的数目。">
-<meta name="twitter:image" content="https://i.ibb.co/Ht6pPJ2/1.jpg">
+<meta name="twitter:title" content="二叉树的中序遍历（递归和非递归）">
+<meta name="twitter:description" content="何为中序遍历中序是相对于根节点来说的，当遍历一棵二叉树时，先遍历根节点的左子树，中间遍历根节点，最后遍历根节点的右子树。以此类推，遍历子树时也是中序遍历。">
 
 
 
@@ -128,7 +117,7 @@
 
   
   
-  <link rel="canonical" href="https://mrfzh.github.io/2019/05/30/初步了解红黑树/">
+  <link rel="canonical" href="https://mrfzh.github.io/2019/06/15/二叉树的中序遍历（递归和非递归）/">
 
 
 
@@ -138,7 +127,7 @@
   };
 </script>
 
-  <title>初步了解红黑树 | FengZH的博客</title>
+  <title>二叉树的中序遍历（递归和非递归） | FengZH的博客</title>
   
 
 
@@ -337,7 +326,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/05/30/初步了解红黑树/">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/06/15/二叉树的中序遍历（递归和非递归）/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="FengZH">
@@ -354,7 +343,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">初步了解红黑树
+          <h1 class="post-title" itemprop="name headline">二叉树的中序遍历（递归和非递归）
 
               
             
@@ -380,24 +369,12 @@
                 
               
 
-              <time title="创建时间：2019-05-30 14:38:44" itemprop="dateCreated datePublished" datetime="2019-05-30T14:38:44+08:00">2019-05-30</time>
+              <time title="创建时间：2019-06-15 10:15:26 / 修改时间：10:17:45" itemprop="dateCreated datePublished" datetime="2019-06-15T10:15:26+08:00">2019-06-15</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-06-02 16:35:58" itemprop="dateModified" datetime="2019-06-02T16:35:58+08:00">2019-06-02</time>
               
             
           </span>
@@ -414,7 +391,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/数据结构/" itemprop="url" rel="index"><span itemprop="name">数据结构</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/算法/" itemprop="url" rel="index"><span itemprop="name">算法</span></a></span>
 
                 
                 
@@ -456,49 +433,12 @@
       
 
       
-        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>红黑树是一种<strong>自平衡的二叉查找树</strong>。和AVL树类似，都是在进行插入和删除操作时通过特定操作保持二叉查找树的平衡，从而获得较高的查找性能。它<strong>查找、插入和删除的时间复杂度为O(logn)</strong>，这里的n是树中元素的数目。</p>
+        <h1 id="何为中序遍历"><a href="#何为中序遍历" class="headerlink" title="何为中序遍历"></a>何为中序遍历</h1><p>中序是相对于根节点来说的，当遍历一棵二叉树时，先遍历根节点的左子树，中间遍历根节点，最后遍历根节点的右子树。以此类推，遍历子树时也是中序遍历。</p>
 <a id="more"></a>
-<h1 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h1><p>除了<strong>二叉查找树</strong>的特性外，红黑树还具有下列特性：  </p>
-<ol>
-<li>节点是红色或黑色</li>
-<li>根节点是黑色</li>
-<li>每个叶子节点都是黑色的空节点（NIL节点）</li>
-<li>每个红色节点的两个子节点都是黑色。（即从每个叶子到根的所有路径上都不能有两个连续的红色节点）</li>
-<li>从一个节点（该节点任意）到其每个叶子的所有路径都包含相同数量的黑色节点。</li>
-</ol>
-<p>下图是一棵典型的红黑树：</p>
-<p><img src="https://i.ibb.co/Ht6pPJ2/1.jpg" alt></p>
-<h1 id="红黑树的调整"><a href="#红黑树的调整" class="headerlink" title="红黑树的调整"></a>红黑树的调整</h1><p>查找和修改的操作并不会改变红黑树的结构，但是当插入或删除节点的时候，红黑树的规则有可能被打破。这时就需要进行一些调整来维持红黑树的特性。</p>
-<p>调整有两种方法：<strong>变色</strong>和<strong>旋转</strong>，旋转又分为<strong>左旋转</strong>和<strong>右旋转</strong></p>
-<h2 id="变色"><a href="#变色" class="headerlink" title="变色"></a>变色</h2><p>当插入一个节点的时候，由于插入的节点为红色（如果是黑色就违背了规则5），所以如果其父节点也为红色的话，为了不破坏规则4，就需要将其父节点变为黑色，这就是其中一种<strong>变色</strong>。例如插入节点21后，要将节点22变色。</p>
-<p><img src="https://i.ibb.co/7N8d4bn/red-black-tree4.jpg" alt></p>
-<p>可以看到，这时又破坏了其他规则，所以要继续进行变色或旋转，直至满足所以规则为止。</p>
-<h2 id="左旋转"><a href="#左旋转" class="headerlink" title="左旋转"></a>左旋转</h2><p><strong>逆时针</strong>旋转红黑树的两个节点，父节点被自己的右孩子取代并成为其左孩子，原右孩子的左孩子成为原父节点的右孩子。如图：</p>
-<p><img src="https://i.ibb.co/XV9vCzj/red-black-tree2.jpg" alt></p>
-<h2 id="右旋转"><a href="#右旋转" class="headerlink" title="右旋转"></a>右旋转</h2><p><strong>顺时针</strong>旋转红黑树的两个节点，父节点被自己的左孩子取代并成为其右孩子，原左孩子的右孩子成为原父节点的左孩子。如图：</p>
-<p><img src="https://i.ibb.co/X2SwLpC/red-black-tree3.jpg" alt></p>
-<h1 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h1><h2 id="插入节点"><a href="#插入节点" class="headerlink" title="插入节点"></a>插入节点</h2><p>继续以刚才插入节点21为例：</p>
-<p><img src="https://i.ibb.co/pb2CJ4c/red-black-tree5.jpg" alt></p>
-<p>首先，把节点25及其以下节点<strong>变色</strong>：</p>
-<p><img src="https://i.ibb.co/260xLB3/red-black-tree6.jpg" alt></p>
-<p>此时节点17和节点25是连续的两个红色节点，可以把节点17变为黑色节点吗？不可以。因为这样就违背了规则4，并且<strong>不能再通过变色</strong>来维持规则4（假如将节点17变为黑色，由于17的父节点就是根节点，根据规则2，根节点必须是黑色，所以不能够将其父节点变色，这样从根节点到其右子树的叶子所经过的黑色节点数肯定大于到其左子树的叶子所经过的黑色节点数）。</p>
-<p>既然变色无法解决问题，那么就应该通过旋转了，把节点1.看作X，节点17看作Y，然后像刚才的示意图那样进行<strong>左旋转</strong>：</p>
-<p><img src="https://i.ibb.co/qDQ3xtm/red-black-tree7.jpg" alt></p>
-<p>由于根节点必须是黑色，所以需要进行<strong>变色</strong>，将根节点及左子树的部分节点变色后，结果如下：</p>
-<p><img src="https://i.ibb.co/PQXpS4G/red-black-tree8.jpg" alt></p>
-<p>因为其中两条路径(17 -&gt; 8 -&gt; 6 -&gt; NIL)的黑色节点个数是4，而其他路径的黑色节点个数是3，违背了规则5。所以还要进行旋转和变色，先将节点13看作X，节点8看作Y，项刚才的示意图那样进行<strong>右旋转</strong>：</p>
-<p><img src="https://i.ibb.co/X8YXphJ/red-black-tree9.jpg" alt></p>
-<p>然后进行<strong>变色</strong>：</p>
-<p><img src="https://i.ibb.co/J3J0FQc/red-black-tree10.jpg" alt></p>
-<p>可以看到，这时的红黑树就符号所有的规则。这一例子的调整过程较为复杂，经历了如下步骤：</p>
-<p>变色 -&gt; 左旋转 -&gt; 变色 -&gt; 右旋转 -&gt; 变色</p>
-<h1 id="实际应用"><a href="#实际应用" class="headerlink" title="实际应用"></a>实际应用</h1><ol>
-<li>JDK的集合类TreeMap和TreeSet底层就是红黑树实现的。</li>
-<li>在Java8中，HashMap也用到了红黑树。</li>
-</ol>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a href="https://mp.weixin.qq.com/s/jz1ajDUygZ7sXLQFHyfjWA" target="_blank" rel="noopener">漫画：什么是红黑树？</a></li>
-</ul>
+<h1 id="二叉树的定义"><a href="#二叉树的定义" class="headerlink" title="二叉树的定义"></a>二叉树的定义</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TreeNode</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> val;</span><br><span class="line">    TreeNode left;</span><br><span class="line">    TreeNode right;</span><br><span class="line"></span><br><span class="line">    TreeNode(<span class="keyword">int</span> x) &#123;</span><br><span class="line">        val = x;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="递归实现"><a href="#递归实现" class="headerlink" title="递归实现"></a>递归实现</h1><p>二叉树无论前序、中序还是后序遍历，利用递归都是很容易实现的。代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;Integer&gt; <span class="title">inorderTraversal_recursion</span><span class="params">(TreeNode root)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (root == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    List&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">if</span> (root.left != <span class="keyword">null</span>) &#123;</span><br><span class="line">        res.addAll(inorderTraversal_recursion(root.left));</span><br><span class="line">    &#125;</span><br><span class="line">    res.add(root.val);</span><br><span class="line">    <span class="keyword">if</span> (root.right != <span class="keyword">null</span>) &#123;</span><br><span class="line">        res.addAll(inorderTraversal_recursion(root.right));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="非递归实现"><a href="#非递归实现" class="headerlink" title="非递归实现"></a>非递归实现</h1><h2 id="一开始自己想的"><a href="#一开始自己想的" class="headerlink" title="一开始自己想的"></a>一开始自己想的</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;Integer&gt; <span class="title">inorderTraversal</span><span class="params">(TreeNode root)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (root == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    List&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    ArrayDeque&lt;TreeNode&gt; stack = <span class="keyword">new</span> ArrayDeque&lt;&gt;();</span><br><span class="line">    stack.push(root);</span><br><span class="line">    HashSet&lt;TreeNode&gt; hasFound = <span class="keyword">new</span> HashSet&lt;&gt;();   <span class="comment">//存入已遍历过的节点</span></span><br><span class="line">    hasFound.add(root);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (stack.size() != <span class="number">0</span>) &#123;</span><br><span class="line">        TreeNode pop = stack.getFirst();    <span class="comment">//栈顶元素</span></span><br><span class="line">        <span class="comment">//若栈顶元素的左孩子不为空，且没遍历过，将其入栈</span></span><br><span class="line">        <span class="keyword">if</span> (pop.left != <span class="keyword">null</span> &amp;&amp; !hasFound.contains(pop.left)) &#123;</span><br><span class="line">            stack.push(pop.left);</span><br><span class="line">            hasFound.add(pop.left);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            res.add(stack.pop().val);   <span class="comment">//取出栈顶元素</span></span><br><span class="line">            <span class="comment">//当左孩子为空时，若栈顶元素的右孩子不为空，且没遍历过，将其入栈</span></span><br><span class="line">            <span class="keyword">if</span> (pop.right != <span class="keyword">null</span> &amp;&amp; !hasFound.contains(pop.right)) &#123;</span><br><span class="line">                stack.push(pop.right);</span><br><span class="line">                hasFound.add(pop.right);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="优化后的"><a href="#优化后的" class="headerlink" title="优化后的"></a>优化后的</h2><p>这个优化版本参考了LeetCode的官方题解。优化后的版本和我开始写的版本最大的区别就是不需要另外用一个HashSet来存储遍历过的节点，实现如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;Integer&gt; <span class="title">inorderTraversal_stack</span><span class="params">(TreeNode root)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (root == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    List&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    Stack&lt;TreeNode&gt; stack = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line">    TreeNode curr = root;   <span class="comment">//存储当前遍历到的节点</span></span><br><span class="line">    <span class="keyword">while</span> (curr != <span class="keyword">null</span> || !stack.isEmpty()) &#123;</span><br><span class="line">        <span class="comment">//若当前节点不为空，将当前节点及其下面的左孩子都入栈</span></span><br><span class="line">        <span class="keyword">while</span> (curr != <span class="keyword">null</span>) &#123;</span><br><span class="line">            stack.push(curr);</span><br><span class="line">            curr = curr.left;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//此时curr为空，栈顶节点出栈</span></span><br><span class="line">        curr = stack.pop();</span><br><span class="line">        res.add(curr.val);</span><br><span class="line">        <span class="comment">//开始遍历栈顶节点的右孩子</span></span><br><span class="line">        curr = curr.right;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -533,7 +473,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/红黑树/" rel="tag"><i class="fa fa-tag"></i> 红黑树</a>
+            <a href="/tags/二叉树/" rel="tag"><i class="fa fa-tag"></i> 二叉树</a>
           
         </div>
       
@@ -546,8 +486,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/05/27/LeetCode第56题：合并区间/" rel="next" title="LeetCode第56题：合并区间">
-                <i class="fa fa-chevron-left"></i> LeetCode第56题：合并区间
+              <a href="/2019/06/10/用AIDL来分析Binder的工作机制/" rel="next" title="用AIDL来分析Binder的工作机制">
+                <i class="fa fa-chevron-left"></i> 用AIDL来分析Binder的工作机制
               </a>
             
           </div>
@@ -555,10 +495,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/06/02/HashMap源码分析（JDK1-7）/" rel="prev" title="HashMap源码分析（JDK1.7）">
-                HashMap源码分析（JDK1.7） <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -777,7 +713,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#特性"><span class="nav-number">2.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#红黑树的调整"><span class="nav-number">3.</span> <span class="nav-text">红黑树的调整</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#变色"><span class="nav-number">3.1.</span> <span class="nav-text">变色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#左旋转"><span class="nav-number">3.2.</span> <span class="nav-text">左旋转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#右旋转"><span class="nav-number">3.3.</span> <span class="nav-text">右旋转</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#例子"><span class="nav-number">4.</span> <span class="nav-text">例子</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#插入节点"><span class="nav-number">4.1.</span> <span class="nav-text">插入节点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实际应用"><span class="nav-number">5.</span> <span class="nav-text">实际应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#何为中序遍历"><span class="nav-number">1.</span> <span class="nav-text">何为中序遍历</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二叉树的定义"><span class="nav-number">2.</span> <span class="nav-text">二叉树的定义</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#递归实现"><span class="nav-number">3.</span> <span class="nav-text">递归实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#非递归实现"><span class="nav-number">4.</span> <span class="nav-text">非递归实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一开始自己想的"><span class="nav-number">4.1.</span> <span class="nav-text">一开始自己想的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优化后的"><span class="nav-number">4.2.</span> <span class="nav-text">优化后的</span></a></li></ol></li></ol></div>
             
 
           </div>
