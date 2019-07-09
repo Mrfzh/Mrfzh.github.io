@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="WindowManager的定义在实际使用中无法直接访问Window，对Window的访问必须通过WindowManager。 WindowManager是一个接口，它继承于ViewManager接口，ViewManager的定义如下：123456public interface ViewManager&amp;#123;    public void addView(View view, ViewGro">
+<meta name="keywords" content="window">
+<meta property="og:type" content="article">
+<meta property="og:title" content="源码分析：Window的内部机制">
+<meta property="og:url" content="https://mrfzh.github.io/2019/07/09/源码分析：Window的内部机制/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="WindowManager的定义在实际使用中无法直接访问Window，对Window的访问必须通过WindowManager。 WindowManager是一个接口，它继承于ViewManager接口，ViewManager的定义如下：123456public interface ViewManager&amp;#123;    public void addView(View view, ViewGro">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-07-09T05:52:22.124Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="源码分析：Window的内部机制">
+<meta name="twitter:description" content="WindowManager的定义在实际使用中无法直接访问Window，对Window的访问必须通过WindowManager。 WindowManager是一个接口，它继承于ViewManager接口，ViewManager的定义如下：123456public interface ViewManager&amp;#123;    public void addView(View view, ViewGro">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/07/09/源码分析：Window的内部机制/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>源码分析：Window的内部机制 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/07/09/源码分析：Window的内部机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">源码分析：Window的内部机制
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-09 13:51:22 / 修改时间：13:52:22" itemprop="dateCreated datePublished" datetime="2019-07-09T13:51:22+08:00">2019-07-09</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="WindowManager的定义"><a href="#WindowManager的定义" class="headerlink" title="WindowManager的定义"></a>WindowManager的定义</h1><p>在实际使用中无法直接访问Window，对Window的访问必须通过WindowManager。</p>
+<p>WindowManager是一个接口，它继承于ViewManager接口，ViewManager的定义如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ViewManager</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addView</span><span class="params">(View view, ViewGroup.LayoutParams params)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateViewLayout</span><span class="params">(View view, ViewGroup.LayoutParams params)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">removeView</span><span class="params">(View view)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这三个方法都是对View进行操作。这说明View才是Window存在的实体。</p>
+<p>为了分析Window的内部机制，这里就从这三个方法开始，分别分析Window的添加、更新和删除过程。</p>
+<a id="more"></a>
+<h1 id="Window的添加过程"><a href="#Window的添加过程" class="headerlink" title="Window的添加过程"></a>Window的添加过程</h1><h2 id="WindowManagerImpl-addView"><a href="#WindowManagerImpl-addView" class="headerlink" title="WindowManagerImpl#addView"></a>WindowManagerImpl#addView</h2><p>WindowManager是一个接口，它的真正实现是WindowManagerImpl。在WindowManagerImpl中三个操作的实现是：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addView</span><span class="params">(@NonNull View view, @NonNull ViewGroup.LayoutParams params)</span> </span>&#123;</span><br><span class="line">    applyDefaultToken(params);</span><br><span class="line">    mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateViewLayout</span><span class="params">(@NonNull View view, @NonNull ViewGroup.LayoutParams params)</span> </span>&#123;</span><br><span class="line">    applyDefaultToken(params);</span><br><span class="line">    mGlobal.updateViewLayout(view, params);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">removeView</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">    mGlobal.removeView(view, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中mGlobal是一个WindowManagerGlobal实例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();</span><br></pre></td></tr></table></figure></p>
+<p>所以WindowManagerImpl并没有实现这三个操作，而是交由WindowManagerGlobal来实现，WindowManager的这种工作模式是典型的桥接模式，将所有的操作委托给WindowManagerGlobal来实现。</p>
+<h2 id="WindowManagerGlobal-addView"><a href="#WindowManagerGlobal-addView" class="headerlink" title="WindowManagerGlobal#addView"></a>WindowManagerGlobal#addView</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addView</span><span class="params">(View view, ViewGroup.LayoutParams params,</span></span></span><br><span class="line"><span class="function"><span class="params">        Display display, Window parentWindow)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//一些参数的检查</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//如果是子View的话，需要调整一些布局参数</span></span><br><span class="line">    <span class="keyword">final</span> WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;</span><br><span class="line">    <span class="keyword">if</span> (parentWindow != <span class="keyword">null</span>) &#123;</span><br><span class="line">        parentWindow.adjustLayoutParamsForSubWindow(wparams);</span><br><span class="line">    &#125; <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    ViewRootImpl root;</span><br><span class="line">    View panelParentView = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//创建ViewRootImpl</span></span><br><span class="line">        root = <span class="keyword">new</span> ViewRootImpl(view.getContext(), display);</span><br><span class="line"></span><br><span class="line">        view.setLayoutParams(wparams);</span><br><span class="line">        <span class="comment">//将View添加至列表</span></span><br><span class="line">        mViews.add(view);</span><br><span class="line">        mRoots.add(root);</span><br><span class="line">        mParams.add(wparams);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//更新界面</span></span><br><span class="line">        root.setView(view, wparams, panelParentView);</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中，WindowManagerGlobal的几个重要实例变量如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//mViews存储的是所有Window所对应的View</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;View&gt; mViews = <span class="keyword">new</span> ArrayList&lt;View&gt;();</span><br><span class="line"><span class="comment">//mRoots存储的是所有Window所对应的ViewRootImpl</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;ViewRootImpl&gt; mRoots = <span class="keyword">new</span> ArrayList&lt;ViewRootImpl&gt;();</span><br><span class="line"><span class="comment">//mParams存储的是所有Window所对应的布局参数</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;WindowManager.LayoutParams&gt; mParams =</span><br><span class="line">        <span class="keyword">new</span> ArrayList&lt;WindowManager.LayoutParams&gt;();</span><br><span class="line"><span class="comment">//mDyingViews存储的是那些正在被删除的View对象</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ArraySet&lt;View&gt; mDyingViews = <span class="keyword">new</span> ArraySet&lt;View&gt;();</span><br></pre></td></tr></table></figure></p>
+<p>创建完ViewRootImpl并将View添加至列表后，将会调用ViewRootImpl的setView方法更新界面</p>
+<h2 id="ViewRootImpl-setView"><a href="#ViewRootImpl-setView" class="headerlink" title="ViewRootImpl#setView"></a>ViewRootImpl#setView</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setView</span><span class="params">(View view, WindowManager.LayoutParams attrs, View panelParentView)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mView == <span class="keyword">null</span>) &#123;</span><br><span class="line">            mView = view;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//完成异步刷新请求</span></span><br><span class="line">            requestLayout();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">            </span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                mOrigWindowType = mWindowAttributes.type;</span><br><span class="line">                mAttachInfo.mRecomputeGlobalAttributes = <span class="keyword">true</span>;</span><br><span class="line">                collectViewAttributes();</span><br><span class="line">                </span><br><span class="line">                <span class="comment">//mWindowSession是一个IWindowSession对象，</span></span><br><span class="line">                <span class="comment">//IWindowSession是一个AIDL接口，真正的实现类是Session</span></span><br><span class="line">                <span class="comment">//所以这里是调用Session的addToDisplay方法</span></span><br><span class="line">                res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,</span><br><span class="line">                        getHostVisibility(), mDisplay.getDisplayId(),</span><br><span class="line">                        mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,</span><br><span class="line">                        mAttachInfo.mOutsets, mInputChannel);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">                mAdded = <span class="keyword">false</span>;</span><br><span class="line">                mView = <span class="keyword">null</span>;</span><br><span class="line">                mAttachInfo.mRootView = <span class="keyword">null</span>;</span><br><span class="line">                mInputChannel = <span class="keyword">null</span>;</span><br><span class="line">                mFallbackEventHandler.setView(<span class="keyword">null</span>);</span><br><span class="line">                unscheduleTraversals();</span><br><span class="line">                setAccessibilityFocus(<span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Adding window failed"</span>, e);</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (restore) &#123;</span><br><span class="line">                    attrs.restore();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，首先调用requestLayout方法完成异步刷新，接着调用Session的addToDisplay方法最终完成Window的添加，这是一个IPC的调用。</p>
+<h2 id="Session-addToDisplay"><a href="#Session-addToDisplay" class="headerlink" title="Session#addToDisplay"></a>Session#addToDisplay</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">addToDisplay</span><span class="params">(IWindow window, <span class="keyword">int</span> seq, WindowManager.LayoutParams attrs,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">int</span> viewVisibility, <span class="keyword">int</span> displayId, Rect outContentInsets, Rect outStableInsets,</span></span></span><br><span class="line"><span class="function"><span class="params">        Rect outOutsets, InputChannel outInputChannel)</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">    <span class="comment">//mService是一个WindowManagerService对象</span></span><br><span class="line">    <span class="keyword">return</span> mService.addWindow(<span class="keyword">this</span>, window, seq, attrs, viewVisibility, displayId,</span><br><span class="line">            outContentInsets, outStableInsets, outOutsets, outInputChannel);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，最终是通过WindowManagerService的addWindow方法完成Window的添加</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>Window的添加从WindowManagerImpl的addView方法开始，但WindowManagerImpl并没有做什么，而是交由WindowManagerGlobal来实现。WindowManagerGlobal先创建ViewRootImpl，并调用ViewRootImpl的setView方法更新界面。在更新界面时，首先调用requestLayout方法完成异步刷新，之后进行一次IPC调用，最终通过WindowManagerService的addWindow方法完成Window的添加。</p>
+<h1 id="Window的更新过程"><a href="#Window的更新过程" class="headerlink" title="Window的更新过程"></a>Window的更新过程</h1><h2 id="WindowManagerGlobal-updateViewLayout"><a href="#WindowManagerGlobal-updateViewLayout" class="headerlink" title="WindowManagerGlobal#updateViewLayout"></a>WindowManagerGlobal#updateViewLayout</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateViewLayout</span><span class="params">(View view, ViewGroup.LayoutParams params)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (view == <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"view must not be null"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (!(params <span class="keyword">instanceof</span> WindowManager.LayoutParams)) &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Params must be WindowManager.LayoutParams"</span>);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">final</span> WindowManager.LayoutParams wparams = (WindowManager.LayoutParams)params;</span><br><span class="line"><span class="comment">//更新View的LayoutParams</span></span><br><span class="line">      view.setLayoutParams(wparams);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">          <span class="keyword">int</span> index = findViewLocked(view, <span class="keyword">true</span>);</span><br><span class="line">          ViewRootImpl root = mRoots.get(index);</span><br><span class="line">          mParams.remove(index);</span><br><span class="line">          mParams.add(index, wparams);</span><br><span class="line">	<span class="comment">//更新ViewRootImpl的LayoutParams</span></span><br><span class="line">          root.setLayoutParams(wparams, <span class="keyword">false</span>);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，首先更新View的LayoutParams，接着更新ViewRootImpl的LayoutParams，ViewRootImpl会通过scheduleTraversals方法让View重新开始三大工作流程，并调用Session的relayout方法更新Window，最终通过WindowManagerService的relayoutWindow方法更新Window。</p>
+<h1 id="Window的删除过程"><a href="#Window的删除过程" class="headerlink" title="Window的删除过程"></a>Window的删除过程</h1><h2 id="WindowManagerGlobal-removeView"><a href="#WindowManagerGlobal-removeView" class="headerlink" title="WindowManagerGlobal#removeView"></a>WindowManagerGlobal#removeView</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">removeView</span><span class="params">(View view, <span class="keyword">boolean</span> immediate)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (view == <span class="keyword">null</span>) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"view must not be null"</span>);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">         <span class="keyword">int</span> index = findViewLocked(view, <span class="keyword">true</span>);</span><br><span class="line">         View curView = mRoots.get(index).getView();</span><br><span class="line"></span><br><span class="line"><span class="comment">//调用该方法来做进一步的删除</span></span><br><span class="line">         removeViewLocked(index, immediate);</span><br><span class="line">         <span class="keyword">if</span> (curView == view) &#123;</span><br><span class="line">             <span class="keyword">return</span>;</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Calling with view "</span> + view</span><br><span class="line">                 + <span class="string">" but the ViewAncestor is attached to "</span> + curView);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>调用removeViewLocked方法做进一步的删除</p>
+<h2 id="WindowManagerGlobal-removeViewLocked"><a href="#WindowManagerGlobal-removeViewLocked" class="headerlink" title="WindowManagerGlobal#removeViewLocked"></a>WindowManagerGlobal#removeViewLocked</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">removeViewLocked</span><span class="params">(<span class="keyword">int</span> index, <span class="keyword">boolean</span> immediate)</span> </span>&#123;</span><br><span class="line">      ViewRootImpl root = mRoots.get(index);</span><br><span class="line">      View view = root.getView();</span><br><span class="line"></span><br><span class="line">      <span class="comment">//...</span></span><br><span class="line">      </span><br><span class="line"><span class="comment">//通过ViewRootImpl来完成删除工作</span></span><br><span class="line">      <span class="keyword">boolean</span> deferred = root.die(immediate);</span><br><span class="line">      <span class="keyword">if</span> (view != <span class="keyword">null</span>) &#123;</span><br><span class="line">          view.assignParent(<span class="keyword">null</span>);</span><br><span class="line">          <span class="keyword">if</span> (deferred) &#123;</span><br><span class="line">              <span class="comment">//将该View添加至待删除列表</span></span><br><span class="line">              mDyingViews.add(view);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>通过ViewRootImpl的die方法来完成删除工作</p>
+<h2 id="ViewRootImpl-die"><a href="#ViewRootImpl-die" class="headerlink" title="ViewRootImpl#die"></a>ViewRootImpl#die</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">die</span><span class="params">(<span class="keyword">boolean</span> immediate)</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//同步删除，直接调用doDie方法</span></span><br><span class="line">    <span class="keyword">if</span> (immediate &amp;&amp; !mIsInTraversal) &#123;</span><br><span class="line">        doDie();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//异步删除，发送消息，ViewRootImpl的Handler收到此消息后执行doDie方法</span></span><br><span class="line">    mHandler.sendEmptyMessage(MSG_DIE);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在die方法中，判断是同步删除还是异步删除。同步删除直接调用doDie方法，异步删除则先发送一条消息，ViewRootImpl的Handler收到此消息后再执行doDie方法。</p>
+<h2 id="ViewRootImpl-doDie"><a href="#ViewRootImpl-doDie" class="headerlink" title="ViewRootImpl#doDie"></a>ViewRootImpl#doDie</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">doDie</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    checkThread();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (mAdded) &#123;</span><br><span class="line">            <span class="comment">//在该方法中真正删除View</span></span><br><span class="line">            dispatchDetachedFromWindow();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">    WindowManagerGlobal.getInstance().doRemoveView(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>真正删除View的逻辑在dispatchDetachedFromWindow方法中</p>
+<h2 id="ViewRootImpl-dispatchDetachedFromWindow"><a href="#ViewRootImpl-dispatchDetachedFromWindow" class="headerlink" title="ViewRootImpl#dispatchDetachedFromWindow"></a>ViewRootImpl#dispatchDetachedFromWindow</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">dispatchDetachedFromWindow</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mView != <span class="keyword">null</span> &amp;&amp; mView.mAttachInfo != <span class="keyword">null</span>) &#123;</span><br><span class="line">        mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(<span class="keyword">false</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//在该方法中会调用onDetachedFromWindow方法</span></span><br><span class="line">        mView.dispatchDetachedFromWindow();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//回收工作：清除数据和消息、异常回调等</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//通过Session的remove方法删除Window</span></span><br><span class="line">        mWindowSession.remove(mWindow);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法主要做了这几件事：</p>
+<ol>
+<li>调用View的dispatchDetachedFromWindow方法，该方法会调用onDetachedFromWindow方法，我们可以在这个方法的内部做一些资源回收工作，例如终止动画和线程。</li>
+<li>进行回收工作：清除数据和消息、移除回调等。</li>
+<li>通过Session的remove方法删除Window，并最终调用WindowManagerService的removeWindow方法来删除Window。</li>
+</ol>
+<h2 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h2><p>WindowManagerGlobal将删除操作交给ViewRootImpl，ViewRootImpl在删除的时候先判断是同步删除还是异步删除。同步删除直接调用doDie方法，异步删除则先发送一条消息，ViewRootImpl的Handler收到此消息后再执行doDie方法。最终，ViewRootImpl在删除时主要做了这几件事：</p>
+<ol>
+<li>回调View的onDetachedFromWindow方法，我们可以重写该方法，并在该方法做一些资源回收工作，例如终止动画和线程。</li>
+<li>进行回收工作：清除数据和消息、移除回调等。</li>
+<li>跨进程调用WindowManagerService的removeWindow方法最终删除Window。</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li>《Android 开发艺术探索》</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/window/" rel="tag"><i class="fa fa-tag"></i> window</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/08/Android动画/" rel="next" title="Android动画">
+                <i class="fa fa-chevron-left"></i> Android动画
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/09/源码分析：Window的创建过程/" rel="prev" title="源码分析：Window的创建过程">
+                源码分析：Window的创建过程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WindowManager的定义"><span class="nav-number">1.</span> <span class="nav-text">WindowManager的定义</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Window的添加过程"><span class="nav-number">2.</span> <span class="nav-text">Window的添加过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WindowManagerImpl-addView"><span class="nav-number">2.1.</span> <span class="nav-text">WindowManagerImpl#addView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WindowManagerGlobal-addView"><span class="nav-number">2.2.</span> <span class="nav-text">WindowManagerGlobal#addView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViewRootImpl-setView"><span class="nav-number">2.3.</span> <span class="nav-text">ViewRootImpl#setView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Session-addToDisplay"><span class="nav-number">2.4.</span> <span class="nav-text">Session#addToDisplay</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">2.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Window的更新过程"><span class="nav-number">3.</span> <span class="nav-text">Window的更新过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WindowManagerGlobal-updateViewLayout"><span class="nav-number">3.1.</span> <span class="nav-text">WindowManagerGlobal#updateViewLayout</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Window的删除过程"><span class="nav-number">4.</span> <span class="nav-text">Window的删除过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WindowManagerGlobal-removeView"><span class="nav-number">4.1.</span> <span class="nav-text">WindowManagerGlobal#removeView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WindowManagerGlobal-removeViewLocked"><span class="nav-number">4.2.</span> <span class="nav-text">WindowManagerGlobal#removeViewLocked</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViewRootImpl-die"><span class="nav-number">4.3.</span> <span class="nav-text">ViewRootImpl#die</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViewRootImpl-doDie"><span class="nav-number">4.4.</span> <span class="nav-text">ViewRootImpl#doDie</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViewRootImpl-dispatchDetachedFromWindow"><span class="nav-number">4.5.</span> <span class="nav-text">ViewRootImpl#dispatchDetachedFromWindow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结-1"><span class="nav-number">4.6.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
