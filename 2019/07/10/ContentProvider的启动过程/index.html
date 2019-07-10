@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言ContentProvider是一种内容共享型组件，它通过Binder向其他组件或应用提供数据。 当ContentProvider所在进程启动时，ContentProvider会同时启动并被发布到AMS中。需要注意的是，这时ContentProvider的onCreate先于Application的onCreate执行。 外界无法直接访问ContentProvider，只能通过AMS根据Uri">
+<meta name="keywords" content="contentProvider">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ContentProvider的启动过程">
+<meta property="og:url" content="https://mrfzh.github.io/2019/07/10/ContentProvider的启动过程/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="前言ContentProvider是一种内容共享型组件，它通过Binder向其他组件或应用提供数据。 当ContentProvider所在进程启动时，ContentProvider会同时启动并被发布到AMS中。需要注意的是，这时ContentProvider的onCreate先于Application的onCreate执行。 外界无法直接访问ContentProvider，只能通过AMS根据Uri">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-07-10T06:15:47.272Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ContentProvider的启动过程">
+<meta name="twitter:description" content="前言ContentProvider是一种内容共享型组件，它通过Binder向其他组件或应用提供数据。 当ContentProvider所在进程启动时，ContentProvider会同时启动并被发布到AMS中。需要注意的是，这时ContentProvider的onCreate先于Application的onCreate执行。 外界无法直接访问ContentProvider，只能通过AMS根据Uri">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/07/10/ContentProvider的启动过程/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>ContentProvider的启动过程 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/07/10/ContentProvider的启动过程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ContentProvider的启动过程
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-10 14:14:17 / 修改时间：14:15:47" itemprop="dateCreated datePublished" datetime="2019-07-10T14:14:17+08:00">2019-07-10</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>ContentProvider是一种内容共享型组件，它通过Binder向其他组件或应用提供数据。</p>
+<p>当ContentProvider所在进程启动时，ContentProvider会同时启动并被发布到AMS中。需要注意的是，这时ContentProvider的onCreate先于Application的onCreate执行。</p>
+<p>外界无法直接访问ContentProvider，只能通过AMS根据Uri获取对应ContentProvider的Binder接口IContentProvider，然后再通过IContentProvider来访问ContentProvider中的数据源。</p>
+<p>访问ContentProvider需要通过ContentResolver，ContentResolver是一个抽象类，通过Context的getContentResolver方法获取。真正实现是ApplicationContentResolver（ContextImpl的内部类）。当ContentProvider所在的进程未启动时，第一次访问ContentResolver的方法时，就会启动该进程和ContentProvider。</p>
+<a id="more"></a>
+<p>通过增删改查四个方法的任何一个都可以触发ContentProvider的启动，这里选择query方法分析：</p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="ContentResolver-query"><a href="#ContentResolver-query" class="headerlink" title="ContentResolver#query"></a>ContentResolver#query</h2><p>在ContentResolver的query方法中，需要先要获取IContentProvider对象<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="meta">@Nullable</span> <span class="function">Cursor <span class="title">query</span><span class="params">(<span class="keyword">final</span> @RequiresPermission.Read @NonNull Uri uri,</span></span></span><br><span class="line"><span class="function"><span class="params">        @Nullable String[] projection, @Nullable Bundle queryArgs,</span></span></span><br><span class="line"><span class="function"><span class="params">        @Nullable CancellationSignal cancellationSignal)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    IContentProvider unstableProvider = acquireUnstableProvider(uri);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">        stableProvider = acquireProvider(uri);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>acquireUnstableProvider方法最终也是调用acquireProvider方法，所以接下来看ApplicationContentResolver的acquireProvider方法：</p>
+<h2 id="ApplicationContentResolver-acquireProvider"><a href="#ApplicationContentResolver-acquireProvider" class="headerlink" title="ApplicationContentResolver#acquireProvider"></a>ApplicationContentResolver#acquireProvider</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> IContentProvider <span class="title">acquireProvider</span><span class="params">(Context context, String auth)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//mMainThread是ActivityThread对象</span></span><br><span class="line">    <span class="keyword">return</span> mMainThread.acquireProvider(context,</span><br><span class="line">            ContentProvider.getAuthorityWithoutUserId(auth),</span><br><span class="line">            resolveUserIdFromAuthority(auth), <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ApplicationContentResolver交给ActivityThread来处理，继续看ActivityThread的acquireProvider方法：</p>
+<h2 id="ActivityThread-acquireProvider"><a href="#ActivityThread-acquireProvider" class="headerlink" title="ActivityThread#acquireProvider"></a>ActivityThread#acquireProvider</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> IContentProvider <span class="title">acquireProvider</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">          Context c, String auth, <span class="keyword">int</span> userId, <span class="keyword">boolean</span> stable)</span> </span>&#123;</span><br><span class="line"><span class="comment">//先查找是否已经存在目标ContentProvider，如果存在就直接返回</span></span><br><span class="line">      <span class="keyword">final</span> IContentProvider provider = acquireExistingProvider(c, auth, userId, stable);</span><br><span class="line">      <span class="keyword">if</span> (provider != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">return</span> provider;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      ContentProviderHolder holder = <span class="keyword">null</span>;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">	<span class="comment">//发送进程间请求，让AMS启动目标ContentProvider</span></span><br><span class="line">          holder = ActivityManager.getService().getContentProvider(</span><br><span class="line">                  getApplicationThread(), auth, userId, stable);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (RemoteException ex) &#123;</span><br><span class="line">          <span class="keyword">throw</span> ex.rethrowFromSystemServer();</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (holder == <span class="keyword">null</span>) &#123;</span><br><span class="line">          Slog.e(TAG, <span class="string">"Failed to find provider info for "</span> + auth);</span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//修改引用计数</span></span><br><span class="line">      holder = installProvider(c, holder, holder.info,</span><br><span class="line">              <span class="keyword">true</span> <span class="comment">/*noisy*/</span>, holder.noReleaseNeeded, stable);</span><br><span class="line">      <span class="keyword">return</span> holder.provider;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>ActivityThread会先查找是否已经存在目标ContentProvider，如果存在就直接返回已存在的ContentProvider。否则通知AMS启动目标ContentProvider，最后通过installProvider方法修改引用数量。</p>
+<p>在AMS中，首先启动ContentProvider所在的进程，然后再启动ContentProvider。新进程启动后，其入口方法为ActivityThread的main方法：</p>
+<h2 id="ActivityThread-main"><a href="#ActivityThread-main" class="headerlink" title="ActivityThread#main"></a>ActivityThread#main</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//创建ActivityThread实例，并调用attach方法进行一系列初始化</span></span><br><span class="line">      ActivityThread thread = <span class="keyword">new</span> ActivityThread();</span><br><span class="line">      thread.attach(<span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">      <span class="comment">//...</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中会创建ActivityThread实例，并调用其attach方法进行一系列初始化。</p>
+<h3 id="ActivityThread-attach"><a href="#ActivityThread-attach" class="headerlink" title="ActivityThread#attach"></a>ActivityThread#attach</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">attach</span><span class="params">(<span class="keyword">boolean</span> system)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">        <span class="keyword">final</span> IActivityManager mgr = ActivityManager.getService();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//mAppThread是一个ApplicationThread对象</span></span><br><span class="line">            mgr.attachApplication(mAppThread);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException ex) &#123;</span><br><span class="line">            <span class="keyword">throw</span> ex.rethrowFromSystemServer();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在attach中，会通过AMS的attachApplication方法将ApplicationThread对象传递给AMS</p>
+<h2 id="ActivityManagerService-attachApplication"><a href="#ActivityManagerService-attachApplication" class="headerlink" title="ActivityManagerService#attachApplication"></a>ActivityManagerService#attachApplication</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">attachApplication</span><span class="params">(IApplicationThread thread)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> callingPid = Binder.getCallingPid();</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">long</span> origId = Binder.clearCallingIdentity();</span><br><span class="line">        attachApplicationLocked(thread, callingPid);</span><br><span class="line">        Binder.restoreCallingIdentity(origId);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续调用attachApplicationLocked方法</p>
+<h3 id="ActivityManagerService-attachApplicationLocked"><a href="#ActivityManagerService-attachApplicationLocked" class="headerlink" title="ActivityManagerService#attachApplicationLocked"></a>ActivityManagerService#attachApplicationLocked</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">attachApplicationLocked</span><span class="params">(IApplicationThread thread,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">int</span> pid)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (app.instr != <span class="keyword">null</span>) &#123;</span><br><span class="line">            thread.bindApplication(processName, appInfo, providers,</span><br><span class="line">                    app.instr.mClass,</span><br><span class="line">                    profilerInfo, app.instr.mArguments,</span><br><span class="line">                    app.instr.mWatcher,</span><br><span class="line">                    app.instr.mUiAutomationConnection, testMode,</span><br><span class="line">                    mBinderTransactionTrackingEnabled, enableTrackAllocation,</span><br><span class="line">                    isRestrictedBackupMode || !normalMode, app.persistent,</span><br><span class="line">                    <span class="keyword">new</span> Configuration(getGlobalConfiguration()), app.compat,</span><br><span class="line">                    getCommonServicesLocked(app.isolated),</span><br><span class="line">                    mCoreSettingsObserver.getCoreSettingsLocked(),</span><br><span class="line">                    buildSerial);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            thread.bindApplication(processName, appInfo, providers, <span class="keyword">null</span>, profilerInfo,</span><br><span class="line">                    <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, testMode,</span><br><span class="line">                    mBinderTransactionTrackingEnabled, enableTrackAllocation,</span><br><span class="line">                    isRestrictedBackupMode || !normalMode, app.persistent,</span><br><span class="line">                    <span class="keyword">new</span> Configuration(getGlobalConfiguration()), app.compat,</span><br><span class="line">                    getCommonServicesLocked(app.isolated),</span><br><span class="line">                    mCoreSettingsObserver.getCoreSettingsLocked(),</span><br><span class="line">                    buildSerial);</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>又调用了ApplicationThread的bindApplication方法</p>
+<h2 id="ActivityThread-ApplicationThread-bindApplication"><a href="#ActivityThread-ApplicationThread-bindApplication" class="headerlink" title="ActivityThread.ApplicationThread#bindApplication"></a>ActivityThread.ApplicationThread#bindApplication</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">bindApplication</span><span class="params">(String processName, ApplicationInfo appInfo,</span></span></span><br><span class="line"><span class="function"><span class="params">        List&lt;ProviderInfo&gt; providers, ComponentName instrumentationName,</span></span></span><br><span class="line"><span class="function"><span class="params">        ProfilerInfo profilerInfo, Bundle instrumentationArgs,</span></span></span><br><span class="line"><span class="function"><span class="params">        IInstrumentationWatcher instrumentationWatcher,</span></span></span><br><span class="line"><span class="function"><span class="params">        IUiAutomationConnection instrumentationUiConnection, <span class="keyword">int</span> debugMode,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> enableBinderTracking, <span class="keyword">boolean</span> trackAllocation,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> isRestrictedBackupMode, <span class="keyword">boolean</span> persistent, Configuration config,</span></span></span><br><span class="line"><span class="function"><span class="params">        CompatibilityInfo compatInfo, Map services, Bundle coreSettings,</span></span></span><br><span class="line"><span class="function"><span class="params">        String buildSerial)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    AppBindData data = <span class="keyword">new</span> AppBindData();</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    sendMessage(H.BIND_APPLICATION, data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法发送一条消息给mH，mH对这条消息的处理是：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">AppBindData data = (AppBindData)msg.obj;</span><br><span class="line">handleBindApplication(data);</span><br></pre></td></tr></table></figure></p>
+<p>继续看ActivityThread的handleBindApplication方法：</p>
+<h2 id="ActivityThread-handleBindApplication"><a href="#ActivityThread-handleBindApplication" class="headerlink" title="ActivityThread#handleBindApplication"></a>ActivityThread#handleBindApplication</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">handleBindApplication</span><span class="params">(AppBindData data)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    </span><br><span class="line">            <span class="keyword">if</span> (!ArrayUtils.isEmpty(data.providers)) &#123;</span><br><span class="line">                installContentProviders(app, data.providers);</span><br><span class="line">                <span class="comment">//...</span></span><br><span class="line">            &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，通过调用installContentProviders方法，来启动该进程的ContentProvider。</p>
+<h3 id="ActivityThread-installContentProviders"><a href="#ActivityThread-installContentProviders" class="headerlink" title="ActivityThread#installContentProviders"></a>ActivityThread#installContentProviders</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">installContentProviders</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">        Context context, List&lt;ProviderInfo&gt; providers)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> ArrayList&lt;ContentProviderHolder&gt; results = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (ProviderInfo cpi : providers) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">//启动ContentProvider</span></span><br><span class="line">        ContentProviderHolder cph = installProvider(context, <span class="keyword">null</span>, cpi,</span><br><span class="line">                <span class="keyword">false</span> <span class="comment">/*noisy*/</span>, <span class="keyword">true</span> <span class="comment">/*noReleaseNeeded*/</span>, <span class="keyword">true</span> <span class="comment">/*stable*/</span>);</span><br><span class="line">        <span class="keyword">if</span> (cph != <span class="keyword">null</span>) &#123;</span><br><span class="line">            cph.noReleaseNeeded = <span class="keyword">true</span>;</span><br><span class="line">            results.add(cph);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//AMS把启动的ContentProvider存储在ProviderMap中</span></span><br><span class="line">        ActivityManager.getService().publishContentProviders(</span><br><span class="line">            getApplicationThread(), results);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RemoteException ex) &#123;</span><br><span class="line">        <span class="keyword">throw</span> ex.rethrowFromSystemServer();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，遍历provider集合，启动每个ContentProvider，最后把启动的ContentProvider存储在AMS的ProviderMap中。下面看一下启动ContentProvider的installProvider方法：</p>
+<h3 id="ActivityThread-installProvider"><a href="#ActivityThread-installProvider" class="headerlink" title="ActivityThread#installProvider"></a>ActivityThread#installProvider</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ContentProviderHolder <span class="title">installProvider</span><span class="params">(Context context,</span></span></span><br><span class="line"><span class="function"><span class="params">        ContentProviderHolder holder, ProviderInfo info,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> noisy, <span class="keyword">boolean</span> noReleaseNeeded, <span class="keyword">boolean</span> stable)</span> </span>&#123;</span><br><span class="line">    ContentProvider localProvider = <span class="keyword">null</span>;</span><br><span class="line">    IContentProvider provider;</span><br><span class="line">    <span class="keyword">if</span> (holder == <span class="keyword">null</span> || holder.provider == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">final</span> java.lang.ClassLoader cl = c.getClassLoader();</span><br><span class="line">            <span class="comment">//创建ContentProvider，并获得它的IContentProvider实例</span></span><br><span class="line">            localProvider = (ContentProvider)cl.</span><br><span class="line">                loadClass(info.name).newInstance();</span><br><span class="line">            provider = localProvider.getIContentProvider();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">            </span><br><span class="line">            localProvider.attachInfo(c, info);</span><br><span class="line">        &#125; </span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，先创建完ContentProvider，并获得它的IContentProvider实例。然后，通过ContentProvider的attachInfo方法来调用它的onCreate方法。</p>
+<p>至此，ContentProvider启动完成。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>ContentResolver调用增删改查的任意一个方法都可以触发ContentProvider的启动，要访问ContentProvider需先获得ContentProvider的IContentProvider对象，ContentResolver将这个任务交给ActivityThread。ActivityThread会先查找是否已经存在目标ContentProvider，如果存在就直接返回已存在的ContentProvider。否则通知AMS启动目标ContentProvider。</p>
+<p>在AMS中，首先启动ContentProvider所在的进程，新进程启动后，其入口方法为ActivityThread的main方法，ActivityThread会将ApplicationThread对象传递给AMS，AMS之后又会通过该ApplicationThread对象通知ActivityThread启动该进程的ContentProvider，ActivityThread会创建每个ContentProvider并调用其onCreate方法，最后把启动的ContentProvider存储在AMS的ProviderMap中。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li>《Android 开发艺术探索》</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/contentProvider/" rel="tag"><i class="fa fa-tag"></i> contentProvider</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/09/源码分析：Window的创建过程/" rel="next" title="源码分析：Window的创建过程">
+                <i class="fa fa-chevron-left"></i> 源码分析：Window的创建过程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">24</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ContentResolver-query"><span class="nav-number">2.1.</span> <span class="nav-text">ContentResolver#query</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ApplicationContentResolver-acquireProvider"><span class="nav-number">2.2.</span> <span class="nav-text">ApplicationContentResolver#acquireProvider</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ActivityThread-acquireProvider"><span class="nav-number">2.3.</span> <span class="nav-text">ActivityThread#acquireProvider</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ActivityThread-main"><span class="nav-number">2.4.</span> <span class="nav-text">ActivityThread#main</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ActivityThread-attach"><span class="nav-number">2.4.1.</span> <span class="nav-text">ActivityThread#attach</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ActivityManagerService-attachApplication"><span class="nav-number">2.5.</span> <span class="nav-text">ActivityManagerService#attachApplication</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ActivityManagerService-attachApplicationLocked"><span class="nav-number">2.5.1.</span> <span class="nav-text">ActivityManagerService#attachApplicationLocked</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ActivityThread-ApplicationThread-bindApplication"><span class="nav-number">2.6.</span> <span class="nav-text">ActivityThread.ApplicationThread#bindApplication</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ActivityThread-handleBindApplication"><span class="nav-number">2.7.</span> <span class="nav-text">ActivityThread#handleBindApplication</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ActivityThread-installContentProviders"><span class="nav-number">2.7.1.</span> <span class="nav-text">ActivityThread#installContentProviders</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ActivityThread-installProvider"><span class="nav-number">2.7.2.</span> <span class="nav-text">ActivityThread#installProvider</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
