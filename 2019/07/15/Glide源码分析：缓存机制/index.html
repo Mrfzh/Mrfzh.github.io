@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言Glide作为一个强大的图片加载框架，必然有着一套完整且优秀的缓存机制。本文将基于Glide-4.9.0版本，对Glide的缓存机制进行源码分析。">
+<meta name="keywords" content="源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Glide源码分析：缓存机制">
+<meta property="og:url" content="https://mrfzh.github.io/2019/07/15/Glide源码分析：缓存机制/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="前言Glide作为一个强大的图片加载框架，必然有着一套完整且优秀的缓存机制。本文将基于Glide-4.9.0版本，对Glide的缓存机制进行源码分析。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-07-15T05:03:11.768Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Glide源码分析：缓存机制">
+<meta name="twitter:description" content="前言Glide作为一个强大的图片加载框架，必然有着一套完整且优秀的缓存机制。本文将基于Glide-4.9.0版本，对Glide的缓存机制进行源码分析。">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/07/15/Glide源码分析：缓存机制/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Glide源码分析：缓存机制 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/07/15/Glide源码分析：缓存机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Glide源码分析：缓存机制
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-15 13:02:21 / 修改时间：13:03:11" itemprop="dateCreated datePublished" datetime="2019-07-15T13:02:21+08:00">2019-07-15</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Glide作为一个强大的图片加载框架，必然有着一套完整且优秀的缓存机制。本文将基于Glide-4.9.0版本，对Glide的缓存机制进行源码分析。</p>
+<a id="more"></a>
+<h1 id="缓存相关的类"><a href="#缓存相关的类" class="headerlink" title="缓存相关的类"></a>缓存相关的类</h1><p>下面先介绍一下Glide缓存涉及到的一些类：</p>
+<h2 id="ActiveResources"><a href="#ActiveResources" class="headerlink" title="ActiveResources"></a>ActiveResources</h2><p>ActiveResources是<strong>第一级缓存</strong>，表示当前正在活动的资源。当资源加载成功，或者通过其他缓存获得资源后都会将其添加到ActiveResources中。当资源被gc后，就会将其移除出ActiveResources。</p>
+<p>ActiveResources通过Map来存储数据，数据保存在WeakReference中<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ResourceWeakReference继承于WeakReference&lt;EngineResource&lt;?&gt;&gt;</span></span><br><span class="line"><span class="keyword">final</span> Map&lt;Key, ResourceWeakReference&gt; activeEngineResources = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br></pre></td></tr></table></figure></p>
+<p>此外，还有一个引用队列<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ReferenceQueue&lt;EngineResource&lt;?&gt;&gt; resourceReferenceQueue = <span class="keyword">new</span> ReferenceQueue&lt;&gt;();</span><br></pre></td></tr></table></figure></p>
+<p>当一个弱引用对象被gc掉之后，其对应的Reference对象会加入到引用队列中。从引用队列获取到被gc掉的弱引用对象后，就可以将该对象从ActiveResources中删除。</p>
+<h2 id="MemoryCache"><a href="#MemoryCache" class="headerlink" title="MemoryCache"></a>MemoryCache</h2><p>MemoryCache（内存缓存）是第二级缓存，如果ActiveResources没有获取到资源就从这里获取。</p>
+<p>它的实现类是LruResourceCache，继承于LruCahce。主要的实现在LruCache中，LruCache使用LRU算法进行缓存。它的内部使用LinkedHashMap存储数据，LinkedHashMap内部可以设置为按照访问顺序进行排序，最近最少访问的在前面，这很适合LRU算法，在清除缓存的时候，只要从前面的元素开始删除，一直删除到满足容量即可。</p>
+<h3 id="LruCache"><a href="#LruCache" class="headerlink" title="LruCache"></a>LruCache</h3><p>看下LruCache中存取数据的几个方法：</p>
+<p>get方法获取指定数据<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Y <span class="title">get</span><span class="params">(@NonNull T key)</span> </span>&#123;</span><br><span class="line"><span class="comment">//获取缓存数据</span></span><br><span class="line">   <span class="keyword">return</span> cache.get(key);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>remove方法删除指定数据<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Y <span class="title">remove</span><span class="params">(@NonNull T key)</span> </span>&#123;</span><br><span class="line"><span class="comment">//从缓存中删除指定数据</span></span><br><span class="line">   <span class="keyword">final</span> Y value = cache.remove(key);</span><br><span class="line"><span class="comment">//如果删除成功，就更新当前缓存容量，并返回删除数据</span></span><br><span class="line">   <span class="keyword">if</span> (value != <span class="keyword">null</span>) &#123;</span><br><span class="line">     currentSize -= getSize(value);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> value;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>put方法添加缓存数据<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Y <span class="title">put</span><span class="params">(@NonNull T key, @Nullable Y item)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//获取资源的大小</span></span><br><span class="line">   <span class="keyword">final</span> <span class="keyword">int</span> itemSize = getSize(item);</span><br><span class="line"><span class="comment">//资源大小超出容量限制，不缓存该资源，并回调该资源的移除</span></span><br><span class="line">   <span class="keyword">if</span> (itemSize &gt;= maxSize) &#123;</span><br><span class="line">     onItemEvicted(key, item);</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">//如果资源不为空，更新当前缓存容量</span></span><br><span class="line">   <span class="keyword">if</span> (item != <span class="keyword">null</span>) &#123;</span><br><span class="line">     currentSize += itemSize;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">//将当前资源添加进缓存中</span></span><br><span class="line">   <span class="meta">@Nullable</span> <span class="keyword">final</span> Y old = cache.put(key, item);</span><br><span class="line"><span class="comment">//如果该key之前有其他资源，更新当前缓存容量，并回调该资源的移除</span></span><br><span class="line">   <span class="keyword">if</span> (old != <span class="keyword">null</span>) &#123;</span><br><span class="line">     currentSize -= getSize(old);</span><br><span class="line"></span><br><span class="line">     <span class="keyword">if</span> (!old.equals(item)) &#123;</span><br><span class="line">       onItemEvicted(key, old);</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">//从缓存中删除最近最少使用的数据，直到满足指定容量</span></span><br><span class="line">   evict();</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> old;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这几个方法还是比较好理解的，代码中都有注释。</p>
+<h2 id="MemorySizeCalculator"><a href="#MemorySizeCalculator" class="headerlink" title="MemorySizeCalculator"></a>MemorySizeCalculator</h2><p>MemoryCache在创建Glide实例时初始化，内存缓存的初始化容量从MemorySizeCalculator中获得，代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">memoryCache = <span class="keyword">new</span> LruResourceCache(memorySizeCalculator.getMemoryCacheSize());</span><br></pre></td></tr></table></figure></p>
+<p>getMemoryCacheSize方法如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getMemoryCacheSize</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> memoryCacheSize;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中memoryCacheSize在MemorySizeCalculator初始化时指定，MemorySizeCalculator的初始化也是发生在Glide实例创建时：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (memorySizeCalculator == <span class="keyword">null</span>) &#123;</span><br><span class="line">  memorySizeCalculator = <span class="keyword">new</span> MemorySizeCalculator.Builder(context).build();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里采用了Builder模式，在其内部类Builder的build方法中调用了MemorySizeCalculator的构造方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"> MemorySizeCalculator(MemorySizeCalculator.Builder builder) &#123;</span><br><span class="line"> </span><br><span class="line"><span class="comment">//ArrayPool的容量默认为4MB，低内存设备为2MB</span></span><br><span class="line">   arrayPoolSize =</span><br><span class="line">       isLowMemoryDevice(builder.activityManager)</span><br><span class="line">           ? builder.arrayPoolSizeBytes / LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR</span><br><span class="line">           : builder.arrayPoolSizeBytes;</span><br><span class="line"><span class="comment">//最大容量为：当前进程可用内存 * 0.4；对低内存设备，为当前进程可以内存 * 0.33</span></span><br><span class="line">   <span class="keyword">int</span> maxSize =</span><br><span class="line">       getMaxSize(</span><br><span class="line">           builder.activityManager, builder.maxSizeMultiplier, builder.lowMemoryMaxSizeMultiplier);</span><br><span class="line"></span><br><span class="line"><span class="comment">//计算一张大小为屏幕大小，格式为ARGB_8888的图片占用的内存大小（包括BitmapPool和MemoryCache）</span></span><br><span class="line">   <span class="keyword">int</span> widthPixels = builder.screenDimensions.getWidthPixels();</span><br><span class="line">   <span class="keyword">int</span> heightPixels = builder.screenDimensions.getHeightPixels();</span><br><span class="line">   <span class="keyword">int</span> screenSize = widthPixels * heightPixels * BYTES_PER_ARGB_8888_PIXEL;</span><br><span class="line">   <span class="keyword">int</span> targetBitmapPoolSize = Math.round(screenSize * builder.bitmapPoolScreens);</span><br><span class="line">   <span class="keyword">int</span> targetMemoryCacheSize = Math.round(screenSize * builder.memoryCacheScreens);</span><br><span class="line"></span><br><span class="line"><span class="comment">//去掉ArrayPool占用的内存后，剩余的内存大小</span></span><br><span class="line">   <span class="keyword">int</span> availableSize = maxSize - arrayPoolSize;</span><br><span class="line"></span><br><span class="line"><span class="comment">//BitmapPool和MemoryCache的内存相加不超过可用内存大小</span></span><br><span class="line">   <span class="keyword">if</span> (targetMemoryCacheSize + targetBitmapPoolSize &lt;= availableSize) &#123;</span><br><span class="line">     memoryCacheSize = targetMemoryCacheSize;</span><br><span class="line">     bitmapPoolSize = targetBitmapPoolSize;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">//超出限制的话，两者按照比例平分可用大小</span></span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="keyword">float</span> part = availableSize / (builder.bitmapPoolScreens + builder.memoryCacheScreens);</span><br><span class="line">     memoryCacheSize = Math.round(part * builder.memoryCacheScreens);</span><br><span class="line">     bitmapPoolSize = Math.round(part * builder.bitmapPoolScreens);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，构造方法中指定了 BitmapPool 和 MemoryCache 可用的内存大小。 BitmapPool 是用来复用 Bitmap，从而避免重复创建 Bitmap 而带来的内存浪费。</p>
+<p>小结一下计算BitmapPool和MemoryCache可用内存的步骤：</p>
+<ol>
+<li>设置ArrayPool的容量，默认为4MB，低内存设备为2MB（安卓版本低于4.4默认为低内存，其它版本由系统判断）</li>
+<li>设置最大容量，默认为当前进程可用内存 <em> 0.4，低内存设备 </em> 0.3</li>
+<li>设置可用内存容量为最大容量减去ArrayPool的容量</li>
+<li>计算一张大小为屏幕大小，格式为ARGB_8888的图片占用的内存大小（包括BitmapPool和MemoryCache），如果两者内存相加不超过可用容量，那么计算得出的内存大小即为各自的可用内存。如果相加后超出限制的话，两者按照比例平分可用内存。</li>
+</ol>
+<h1 id="过程分析"><a href="#过程分析" class="headerlink" title="过程分析"></a>过程分析</h1><p>在执行Request的时候，会调用SingleRequest的onSizeReady方法进行加载数据：</p>
+<h2 id="SingleRequest-onSizeReady"><a href="#SingleRequest-onSizeReady" class="headerlink" title="SingleRequest#onSizeReady"></a>SingleRequest#onSizeReady</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">onSizeReady</span><span class="params">(<span class="keyword">int</span> width, <span class="keyword">int</span> height)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> (status != Status.WAITING_FOR_SIZE) &#123;</span><br><span class="line">     <span class="keyword">return</span>;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">//Request的状态变为RUNNING</span></span><br><span class="line">   status = Status.RUNNING;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//加载资源</span></span><br><span class="line">   loadStatus =</span><br><span class="line">       engine.load(</span><br><span class="line">           glideContext,</span><br><span class="line">           model,</span><br><span class="line">           requestOptions.getSignature(),</span><br><span class="line">           <span class="keyword">this</span>.width,</span><br><span class="line">           <span class="keyword">this</span>.height,</span><br><span class="line">           requestOptions.getResourceClass(),</span><br><span class="line">           transcodeClass,</span><br><span class="line">           priority,</span><br><span class="line">           requestOptions.getDiskCacheStrategy(),</span><br><span class="line">           requestOptions.getTransformations(),</span><br><span class="line">           requestOptions.isTransformationRequired(),</span><br><span class="line">           requestOptions.isScaleOnlyOrNoTransform(),</span><br><span class="line">           requestOptions.getOptions(),</span><br><span class="line">           requestOptions.isMemoryCacheable(),</span><br><span class="line">           requestOptions.getUseUnlimitedSourceGeneratorsPool(),</span><br><span class="line">           requestOptions.getUseAnimationPool(),</span><br><span class="line">           requestOptions.getOnlyRetrieveFromCache(),</span><br><span class="line">           <span class="keyword">this</span>,</span><br><span class="line">           callbackExecutor);</span><br><span class="line"></span><br><span class="line">   <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>在真正加载资源前，将Request的状态变为RUNNING。之后调用Engine的load方法真正加载资源：</p>
+<h2 id="Engine-load"><a href="#Engine-load" class="headerlink" title="Engine#load"></a>Engine#load</h2><p>该方法首先生成缓存key，该key是一个EngineKey对象，由传入的多个参数生成。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">//生成缓存key（该key是一个EngineKey对象）</span></span><br><span class="line">EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations,</span><br><span class="line">       resourceClass, transcodeClass, options);</span><br></pre></td></tr></table></figure></p>
+<h3 id="ActiveResources缓存"><a href="#ActiveResources缓存" class="headerlink" title="ActiveResources缓存"></a>ActiveResources缓存</h3><p>接着根据该缓存key获取缓存资源，首先从ActiveResources中获取缓存：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//从ActiveResources（弱引用）中获取缓存</span></span><br><span class="line">   EngineResource&lt;?&gt; active = loadFromActiveResources(key, isMemoryCacheable);</span><br><span class="line">   <span class="keyword">if</span> (active != <span class="keyword">null</span>) &#123;</span><br><span class="line">     <span class="comment">//获取到缓存资源，回调onResourceReady方法</span></span><br><span class="line">     cb.onResourceReady(active, DataSource.MEMORY_CACHE);</span><br><span class="line"></span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure></p>
+<p>loadFromActiveResources方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">private</span> EngineResource&lt;?&gt; loadFromActiveResources(Key key, <span class="keyword">boolean</span> isMemoryCacheable) &#123;</span><br><span class="line">   <span class="keyword">if</span> (!isMemoryCacheable) &#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">//获取缓存资源</span></span><br><span class="line">   EngineResource&lt;?&gt; active = activeResources.get(key);</span><br><span class="line"><span class="comment">//如果获取到缓存资源，就更新资源获取次数</span></span><br><span class="line">   <span class="keyword">if</span> (active != <span class="keyword">null</span>) &#123;</span><br><span class="line">     active.acquire();</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> active;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="内存缓存"><a href="#内存缓存" class="headerlink" title="内存缓存"></a>内存缓存</h3><p>如果ActiveResources中获取不到，就从内存中获取缓存，如果成功获取到缓存，就将缓存从内存中删除并将添加到ActiceResources中：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//如果ActiveResources中获取不到，就从内存中获取缓存</span></span><br><span class="line">   EngineResource&lt;?&gt; cached = loadFromCache(key, isMemoryCacheable);</span><br><span class="line">   <span class="keyword">if</span> (cached != <span class="keyword">null</span>) &#123;</span><br><span class="line">     <span class="comment">//获取到缓存资源，回调onResourceReady方法</span></span><br><span class="line">     cb.onResourceReady(cached, DataSource.MEMORY_CACHE);</span><br><span class="line"></span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure></p>
+<p>loadFromCache方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">private</span> EngineResource&lt;?&gt; loadFromCache(Key key, <span class="keyword">boolean</span> isMemoryCacheable) &#123;</span><br><span class="line">   <span class="keyword">if</span> (!isMemoryCacheable) &#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//从内存中获取缓存，获取到缓存后，将缓存从内存中删除</span></span><br><span class="line">   EngineResource&lt;?&gt; cached = getEngineResourceFromCache(key);</span><br><span class="line"><span class="comment">//如果获取到缓存</span></span><br><span class="line">   <span class="keyword">if</span> (cached != <span class="keyword">null</span>) &#123;</span><br><span class="line">  <span class="comment">//更新资源的获取次数</span></span><br><span class="line">     cached.acquire();</span><br><span class="line">  <span class="comment">//将获取到的资源添加到ActiceResources中</span></span><br><span class="line">     activeResources.activate(key, cached);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> cached;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="磁盘缓存"><a href="#磁盘缓存" class="headerlink" title="磁盘缓存"></a>磁盘缓存</h3><p>如果在内存中获取不到缓存，就要执行以下步骤<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">EngineJob&lt;?&gt; current = jobs.get(key, onlyRetrieveFromCache);</span><br><span class="line"><span class="keyword">if</span> (current != <span class="keyword">null</span>) &#123;</span><br><span class="line"></span><br><span class="line">  current.addCallback(cb, callbackExecutor);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> LoadStatus(cb, current);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中jobs为Jobs对象，看Jobs的get方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">EngineJob&lt;?&gt; get(Key key, <span class="keyword">boolean</span> onlyRetrieveFromCache) &#123;</span><br><span class="line">  <span class="keyword">return</span> getJobMap(onlyRetrieveFromCache).get(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>继续看getJobMap方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Map&lt;Key, EngineJob&lt;?&gt;&gt; getJobMap(<span class="keyword">boolean</span> onlyRetrieveFromCache) &#123;</span><br><span class="line">  <span class="keyword">return</span> onlyRetrieveFromCache ? onlyCacheJobs : jobs;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中：onlyCacheJobs和jobs的定义如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;Key, EngineJob&lt;?&gt;&gt; jobs = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;Key, EngineJob&lt;?&gt;&gt; onlyCacheJobs = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br></pre></td></tr></table></figure></p>
+<p>最终，返回一个EngineJob对象，并且第一次加载的话返回null，继续执行下面语句<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">EngineJob&lt;R&gt; engineJob =</span><br><span class="line">    engineJobFactory.build(</span><br><span class="line">        key,</span><br><span class="line">        isMemoryCacheable,</span><br><span class="line">        useUnlimitedSourceExecutorPool,</span><br><span class="line">        useAnimationPool,</span><br><span class="line">        onlyRetrieveFromCache);</span><br><span class="line"></span><br><span class="line">DecodeJob&lt;R&gt; decodeJob =</span><br><span class="line">    decodeJobFactory.build(</span><br><span class="line">        glideContext,</span><br><span class="line">        model,</span><br><span class="line">        key,</span><br><span class="line">        signature,</span><br><span class="line">        width,</span><br><span class="line">        height,</span><br><span class="line">        resourceClass,</span><br><span class="line">        transcodeClass,</span><br><span class="line">        priority,</span><br><span class="line">        diskCacheStrategy,</span><br><span class="line">        transformations,</span><br><span class="line">        isTransformationRequired,</span><br><span class="line">        isScaleOnlyOrNoTransform,</span><br><span class="line">        onlyRetrieveFromCache,</span><br><span class="line">        options,</span><br><span class="line">        engineJob);</span><br><span class="line"></span><br><span class="line">jobs.put(key, engineJob);</span><br><span class="line"></span><br><span class="line">engineJob.addCallback(cb, callbackExecutor);</span><br><span class="line">engineJob.start(decodeJob);</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> <span class="keyword">new</span> LoadStatus(cb, engineJob);</span><br></pre></td></tr></table></figure></p>
+<p>先创建EngineJob和DecodeJob，然后将EngineJob加到Jobs的Map中保存起来。EngineJob主要用于执行DecodeJob以及管理加载完成的回调，DecodeJob是一个Runnable，负责从磁盘或网络中加载数据。</p>
+<p>EngineJob通过start方法执行DecodeJob<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(DecodeJob&lt;R&gt; decodeJob)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.decodeJob = decodeJob;</span><br><span class="line">  GlideExecutor executor = decodeJob.willDecodeFromCache()</span><br><span class="line">      ? diskCacheExecutor</span><br><span class="line">      : getActiveSourceExecutor();</span><br><span class="line">  executor.execute(decodeJob);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，DecodeJob是在线程池里执行的，DecodeJob的run中又调用了runWrapped方法：</p>
+<h4 id="DecodeJob-runWrapped"><a href="#DecodeJob-runWrapped" class="headerlink" title="DecodeJob#runWrapped"></a>DecodeJob#runWrapped</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">runWrapped</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">switch</span> (runReason) &#123;</span><br><span class="line"> <span class="comment">//第一次调用runWrapped时，为INITIALIZE状态</span></span><br><span class="line">    <span class="keyword">case</span> INITIALIZE:</span><br><span class="line">   <span class="comment">//获取下一状态</span></span><br><span class="line">      stage = getNextStage(Stage.INITIALIZE);</span><br><span class="line"><span class="comment">//根据状态获得对应的DataFetcherGenerator</span></span><br><span class="line">      currentGenerator = getNextGenerator();</span><br><span class="line">      runGenerators();</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SWITCH_TO_SOURCE_SERVICE:</span><br><span class="line">      runGenerators();</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> DECODE_DATA:</span><br><span class="line">      decodeFromRetrievedData();</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unrecognized run reason: "</span> + runReason);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中状态的变化如下：</p>
+<h4 id="DecodeJob-getNextStage"><a href="#DecodeJob-getNextStage" class="headerlink" title="DecodeJob#getNextStage"></a>DecodeJob#getNextStage</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Stage <span class="title">getNextStage</span><span class="params">(Stage current)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">switch</span> (current) &#123;</span><br><span class="line">    <span class="keyword">case</span> INITIALIZE:</span><br><span class="line">   <span class="comment">//如果要从RESOURCE_CACHE获取缓存，下一状态为RESOURCE_CACHE，否则跳过RESOURCE_CACHE</span></span><br><span class="line">      <span class="keyword">return</span> diskCacheStrategy.decodeCachedResource()</span><br><span class="line">          ? Stage.RESOURCE_CACHE : getNextStage(Stage.RESOURCE_CACHE);</span><br><span class="line">    <span class="keyword">case</span> RESOURCE_CACHE:</span><br><span class="line">   <span class="comment">//如果要从DATA_CACHE获取缓存，下一状态为DATA_CACHE，否则跳过DATA_CACHE</span></span><br><span class="line">      <span class="keyword">return</span> diskCacheStrategy.decodeCachedData()</span><br><span class="line">          ? Stage.DATA_CACHE : getNextStage(Stage.DATA_CACHE);</span><br><span class="line">    <span class="keyword">case</span> DATA_CACHE:</span><br><span class="line"><span class="comment">//如果用户仅从缓存中获取资源，就跳过从数据源获取数据的步骤</span></span><br><span class="line">      <span class="keyword">return</span> onlyRetrieveFromCache ? Stage.FINISHED : Stage.SOURCE;</span><br><span class="line">    <span class="keyword">case</span> SOURCE:</span><br><span class="line">    <span class="keyword">case</span> FINISHED:</span><br><span class="line">      <span class="keyword">return</span> Stage.FINISHED;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Unrecognized stage: "</span> + current);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意区分两种状态：在runWrapped方法中的状态为RunReason，在getNextStage方法中的状态为Stage。</p>
+<p>在获取下一State时，调用DiskCacheStrategy对象的decodeCachedResource方法，用户可以通过设置相应的DiskCacheStrategy对象来配置Glide的硬盘缓存，用法如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Glide.with(MainActivity.<span class="keyword">this</span>)</span><br><span class="line">        .applyDefaultRequestOptions(<span class="keyword">new</span> RequestOptions()</span><br><span class="line">            .diskCacheStrategy(DiskCacheStrategy.NONE))</span><br><span class="line">        .load(url)</span><br><span class="line">        .into(mPicIv);</span><br></pre></td></tr></table></figure></p>
+<p>调用diskCacheStrategy方法并传入DiskCacheStrategy.NONE后，就可以禁止掉硬盘缓存。硬盘缓存策略共有以下几种：</p>
+<ul>
+<li>DiskCacheStrategy.NONE：不缓存任何内容</li>
+<li>DiskCacheStrategy.DATA：只缓存原始图片</li>
+<li>DiskCacheStrategy.RESOURCE：只缓存转换后的图片</li>
+<li>DiskCacheStrategy.ALL：既缓存原始图片，也缓存转换后的图片</li>
+<li>DiskCacheStrategy.AUTOMATIC：让Glide根据图片资源智能选择策略（默认）</li>
+</ul>
+<p>回到runWrapped方法，在确定了state后，根据state获得对应的DataFetcherGenerator，看getNextGenerator方法：</p>
+<h4 id="DecodeJob-getNextGenerator"><a href="#DecodeJob-getNextGenerator" class="headerlink" title="DecodeJob#getNextGenerator"></a>DecodeJob#getNextGenerator</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> DataFetcherGenerator <span class="title">getNextGenerator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">switch</span> (stage) &#123;</span><br><span class="line">    <span class="keyword">case</span> RESOURCE_CACHE:</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> ResourceCacheGenerator(decodeHelper, <span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">case</span> DATA_CACHE:</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> DataCacheGenerator(decodeHelper, <span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">case</span> SOURCE:</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> SourceGenerator(decodeHelper, <span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">case</span> FINISHED:</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unrecognized stage: "</span> + stage);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获得相应DataFetcherGenerator后，执行runGenerators方法：</p>
+<h4 id="DecodeJob-runGenerators"><a href="#DecodeJob-runGenerators" class="headerlink" title="DecodeJob#runGenerators"></a>DecodeJob#runGenerators</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">runGenerators</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">boolean</span> isStarted = <span class="keyword">false</span>;</span><br><span class="line">  <span class="comment">//如果在执行DataFetcherGenerator的startNext方法加载到缓存数据后，就不再进入循环体</span></span><br><span class="line">  <span class="keyword">while</span> (!isCancelled &amp;&amp; currentGenerator != <span class="keyword">null</span></span><br><span class="line">      &amp;&amp; !(isStarted = currentGenerator.startNext())) &#123;</span><br><span class="line">    <span class="comment">//上一状态没有获取到缓存，获取下一状态和与该状态对应的DataFetcherGenerator</span></span><br><span class="line">    stage = getNextStage(stage);</span><br><span class="line">    currentGenerator = getNextGenerator();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//RunReason变为SWITCH_TO_SOURCE_SERVICE状态，然后重新执行DecodeJob（即又执行runWrapped方法，</span></span><br><span class="line">    <span class="comment">//不过此时可能是在另一个子线程中执行）</span></span><br><span class="line">    <span class="keyword">if</span> (stage == Stage.SOURCE) &#123;</span><br><span class="line">      reschedule();</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// We've run out of stages and generators, give up.</span></span><br><span class="line">  <span class="keyword">if</span> ((stage == Stage.FINISHED || isCancelled) &amp;&amp; !isStarted) &#123;</span><br><span class="line">    notifyFailed();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先会执行对应Generator的startNext方法，假如state为RESOURCE_CACHE（磁盘缓存策略为DiskCacheStrategy.RESOURCE或DiskCacheStrategy.ALL），则执行ResourceCacheGenerator的startNext方法：</p>
+<h4 id="ResourceCacheGenerator-startNext"><a href="#ResourceCacheGenerator-startNext" class="headerlink" title="ResourceCacheGenerator#startNext"></a>ResourceCacheGenerator#startNext</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">startNext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="comment">//...</span></span><br><span class="line">   </span><br><span class="line">   <span class="keyword">while</span> (modelLoaders == <span class="keyword">null</span> || !hasNextModelLoader()) &#123;</span><br><span class="line">     <span class="comment">//...</span></span><br><span class="line">     </span><br><span class="line">     <span class="comment">//得到缓存key</span></span><br><span class="line">     currentKey =</span><br><span class="line">         <span class="keyword">new</span> ResourceCacheKey(<span class="comment">// NOPMD AvoidInstantiatingObjectsInLoops</span></span><br><span class="line">             helper.getArrayPool(),</span><br><span class="line">             sourceId,</span><br><span class="line">             helper.getSignature(),</span><br><span class="line">             helper.getWidth(),</span><br><span class="line">             helper.getHeight(),</span><br><span class="line">             transformation,</span><br><span class="line">             resourceClass,</span><br><span class="line">             helper.getOptions());</span><br><span class="line">             </span><br><span class="line">  <span class="comment">//helper.getDiskCache()最终调用的是Engine.LazyDiskCacheProvider的getDiskCache方法</span></span><br><span class="line">  <span class="comment">//该方法返回一个DiskCache接口对象，其实现类是DiskLruCacheWrapper</span></span><br><span class="line">  <span class="comment">//之后通过DiskLruCacheWrapper的get方法获得缓存文件cacheFile</span></span><br><span class="line">     cacheFile = helper.getDiskCache().get(currentKey);</span><br><span class="line">     <span class="keyword">if</span> (cacheFile != <span class="keyword">null</span>) &#123;</span><br><span class="line">       sourceKey = sourceId;</span><br><span class="line">	<span class="comment">//取得能够加载这个缓存文件的Loaders</span></span><br><span class="line">       modelLoaders = helper.getModelLoaders(cacheFile);</span><br><span class="line">       modelLoaderIndex = <span class="number">0</span>;</span><br><span class="line">	<span class="comment">//如果获取到了modelLoaders，就会退出循环</span></span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   loadData = <span class="keyword">null</span>;</span><br><span class="line">   <span class="keyword">boolean</span> started = <span class="keyword">false</span>;</span><br><span class="line">   <span class="keyword">while</span> (!started &amp;&amp; hasNextModelLoader()) &#123;</span><br><span class="line">     ModelLoader&lt;File, ?&gt; modelLoader = modelLoaders.get(modelLoaderIndex++);</span><br><span class="line">  <span class="comment">//先通过ModelLoader构造出LoadData对象</span></span><br><span class="line">     loadData = modelLoader.buildLoadData(cacheFile,</span><br><span class="line">         helper.getWidth(), helper.getHeight(), helper.getOptions());</span><br><span class="line">     <span class="keyword">if</span> (loadData != <span class="keyword">null</span> &amp;&amp; helper.hasLoadPath(loadData.fetcher.getDataClass())) &#123;</span><br><span class="line">       started = <span class="keyword">true</span>;</span><br><span class="line">	<span class="comment">//通过DataFetcher的loadData方法，加载缓存文件的数据</span></span><br><span class="line">       loadData.fetcher.loadData(helper.getPriority(), <span class="keyword">this</span>);</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//加载缓存文件的数据后，返回true</span></span><br><span class="line">   <span class="keyword">return</span> started;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，如果能够获取到缓存文件，就先得到能够加载这个缓存文件的ModelLoaders，之后通过ModelLoader构造出对应的LoadData，最后通过该LoadData的DataFetcher的loadData方法加载缓存文件的数据。</p>
+<p>假如这里调用的ByteBufferFetcher的loadData方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">loadData</span><span class="params">(@NonNull Priority priority,</span></span></span><br><span class="line"><span class="function"><span class="params">    @NonNull DataCallback&lt;? <span class="keyword">super</span> ByteBuffer&gt; callback)</span> </span>&#123;</span><br><span class="line">  ByteBuffer result;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    result = ByteBufferUtil.fromFile(file);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">    callback.onLoadFailed(e);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  callback.onDataReady(result);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>成功的话会回调onDataReady方法，将加载到的数据传出去，先存放在DecodeJob中，之后进行相关操作：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDataFetcherReady</span><span class="params">(Key sourceKey, Object data, DataFetcher&lt;?&gt; fetcher,</span></span></span><br><span class="line"><span class="function"><span class="params">    DataSource dataSource, Key attemptedKey)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">this</span>.currentData = data;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>而失败的话会回调onLoadFailed方法，也是在DecodeJob中处理<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDataFetcherFailed</span><span class="params">(Key attemptedKey, Exception e, DataFetcher&lt;?&gt; fetcher,</span></span></span><br><span class="line"><span class="function"><span class="params">    DataSource dataSource)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (Thread.currentThread() != currentThread) &#123;</span><br><span class="line">    runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;</span><br><span class="line">    callback.reschedule(<span class="keyword">this</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    runGenerators();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，在加载数据失败后不会就此结束，而是重新执行runGenerators方法再次尝试获取数据。</p>
+<p>对于第二种情况，假如state为DATA_CACHE（磁盘缓存策略为DiskCacheStrategy.DATA或DiskCacheStrategy.ALL），则执行DataCacheGenerator的startNext方法，该方法的过程ResourceCacheGenerator类似，就不多说了。</p>
+<p>现在看第三种情况，当state为SOURCE时，对应的Generator为SourceGenerator，同样调用SourceGenerator的startNext方法：</p>
+<h4 id="SourceGenerator-startNext"><a href="#SourceGenerator-startNext" class="headerlink" title="SourceGenerator#startNext"></a>SourceGenerator#startNext</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">startNext</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="comment">//如果已经获取到数据，更新磁盘缓存</span></span><br><span class="line">   <span class="keyword">if</span> (dataToCache != <span class="keyword">null</span>) &#123;</span><br><span class="line">     Object data = dataToCache;</span><br><span class="line">     dataToCache = <span class="keyword">null</span>;</span><br><span class="line">     cacheData(data);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//如果可以在磁盘缓存中加载到数据，就不再执行后面的操作</span></span><br><span class="line">   <span class="keyword">if</span> (sourceCacheGenerator != <span class="keyword">null</span> &amp;&amp; sourceCacheGenerator.startNext()) &#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   sourceCacheGenerator = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">   loadData = <span class="keyword">null</span>;</span><br><span class="line">   <span class="keyword">boolean</span> started = <span class="keyword">false</span>;</span><br><span class="line">   <span class="keyword">while</span> (!started &amp;&amp; hasNextModelLoader()) &#123;</span><br><span class="line">  <span class="comment">//先获得LoadData对象</span></span><br><span class="line">     loadData = helper.getLoadData().get(loadDataListIndex++);</span><br><span class="line">     <span class="keyword">if</span> (loadData != <span class="keyword">null</span></span><br><span class="line">         &amp;&amp; (helper.getDiskCacheStrategy().isDataCacheable(loadData.fetcher.getDataSource())</span><br><span class="line">         || helper.hasLoadPath(loadData.fetcher.getDataClass()))) &#123;</span><br><span class="line">       started = <span class="keyword">true</span>;</span><br><span class="line">	<span class="comment">//通过DataFetcher的loadData方法加载数据</span></span><br><span class="line">       loadData.fetcher.loadData(helper.getPriority(), <span class="keyword">this</span>);</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> started;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法中，如果已经获取到了数据，就将数据添加到磁盘缓存中，之后如果可以从磁盘缓存加载数据就不再执行后面操作。否则的话，同样是先通过相应的ModelLoader获得LoadData对象，然后通过LoadData中的DataFetcher的loadData方法加载数据（例如通过url从网络加载图片资源）。</p>
+<p>如果加载数据成功，会先在SourceGenerator中回调onDataReady方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDataReady</span><span class="params">(Object data)</span> </span>&#123;</span><br><span class="line">   DiskCacheStrategy diskCacheStrategy = helper.getDiskCacheStrategy();</span><br><span class="line"><span class="comment">//判断是否要缓存到磁盘中</span></span><br><span class="line">   <span class="keyword">if</span> (data != <span class="keyword">null</span> &amp;&amp; diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) &#123;</span><br><span class="line">  <span class="comment">//如果要缓存到磁盘中，会先把数据保存起来，之后重新进入startNext方法（可能在其他子线程），将数据缓存到磁盘。</span></span><br><span class="line">     dataToCache = data;</span><br><span class="line">     cb.reschedule();</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="comment">//不缓存到磁盘的话，就将数据传递出去，存放在DecodeJob中</span></span><br><span class="line">     cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,</span><br><span class="line">         loadData.fetcher.getDataSource(), originalKey);</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>加载成功时，会判断是否要缓存到磁盘（如果是从网络加载的资源，当磁盘缓存策略为DiskCacheStrategy.DATA和DiskCacheStrategy.ALL时，会缓存起来），要缓存到磁盘时，会重新进入startNext方法并将数据缓存到磁盘。如果不缓存到硬盘就将数据传递出去。</p>
+<p>如果加载数据失败，同样会重新执行runGenerators方法再次尝试获取数据。</p>
+<p>分析到这里，Engine的load方法算是分析完毕了，这个方法是真正用于加载数据的，通过该方法可以了解到Glide的缓存机制。这里小结一下Engine的load方法的执行步骤：</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><h3 id="Engine-load的执行步骤"><a href="#Engine-load的执行步骤" class="headerlink" title="Engine#load的执行步骤"></a>Engine#load的执行步骤</h3><ol>
+<li>生成缓存key：该key是一个EngineKey对象，由传入的多个参数生成。之后通过缓存key获取缓存资源</li>
+<li>首先从ActiveResources中获取缓存，ActiveResources是第一级缓存，它通过HashMap来存储数据，数据保存在WeakReference中，此外还有一个引用队列，当某个数据的弱引用对象被gc掉之后，其对应的Reference对象会加入到引用队列中。从引用队列获取到被gc掉的弱引用对象后就可以将这些对象从ActiveResources中删除。</li>
+<li>如果ActiveResources中获取不到，就从内存中获取，内存缓存是第二级缓存。内存缓存使用了LRU算法，内部使用LinkedHashMap存储数据。LinkedHashMap内部可以设置为按照访问顺序进行排序，最近最少访问的在前面，很适合LRU算法。如果成功获取到缓存，就将缓存从内存中删除并将添加到ActiceResources中。</li>
+<li>如果内存中也获取不到缓存，就会创建EngineJob和DecodeJob，DecodeJob是一个Runnable。EngineJob将DecodeJob提交到线程池中执行。DecodeJob根据资源的磁盘缓存策略，是缓存原图还是缓存转换后的图片，从磁盘中获取不同的缓存文件，获取缓存文件成功后，先得到能够加载该缓存文件的ModelLoader，之后通过ModelLoader构造出对应的LoadData，最后通过该LoadData的DataFetcher加载缓存文件的数据。加载数据成功会将数据传递出去，失败的话会重新尝试获取缓存文件并加载数据。</li>
+<li>如果不能从磁盘中得到缓存，会继续在DecodeJob中通过相应的ModelLoader获得LoadData对象并加载数据，不过这次是从数据源加载数据，例如从通过url从网络加载数据。加载数据成功后，会判断是否要缓存到磁盘要缓存到磁盘时，会重新进入startNext方法并将数据缓存到磁盘。如果不缓存到硬盘就将数据传递出去。加载数据失败的话会重新尝试加载，因为可能其他的ModelLoader可以加载成功，所以要不断尝试，直到所有ModelLoader都尝试完。</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://www.jianshu.com/p/73260a46291c" target="_blank" rel="noopener">什么时候使用ReferenceQueue？</a></li>
+<li><a href="https://blog.csdn.net/guolin_blog/article/details/54895665" target="_blank" rel="noopener">Android图片加载框架最全解析（三），深入探究Glide的缓存机制</a></li>
+<li><a href="https://www.jianshu.com/p/2942a57401eb" target="_blank" rel="noopener">让你快速上手的Glide4.x教程</a></li>
+<li><a href="https://juejin.im/entry/5aa11f826fb9a028d663bfe0" target="_blank" rel="noopener">Glide 4.6.1源码解析（1）– 加载流程</a></li>
+<li><a href="https://www.jianshu.com/p/62b7f990ee83" target="_blank" rel="noopener">Glide 源码分析解读-缓存模块-基于最新版Glide 4.9.0</a></li>
+<li><a href="https://www.jianshu.com/p/9bb50924d42a" target="_blank" rel="noopener">Glide 源码分析解读-基于最新版Glide 4.9.0</a></li>
+<li><a href="https://juejin.im/post/5c8a00c2e51d4532763bc0fb" target="_blank" rel="noopener">Glide源码解析-加载流程</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/11/ThreadPoolExecutor-源码分析/" rel="next" title="ThreadPoolExecutor 源码分析">
+                <i class="fa fa-chevron-left"></i> ThreadPoolExecutor 源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">42</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#缓存相关的类"><span class="nav-number">2.</span> <span class="nav-text">缓存相关的类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ActiveResources"><span class="nav-number">2.1.</span> <span class="nav-text">ActiveResources</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MemoryCache"><span class="nav-number">2.2.</span> <span class="nav-text">MemoryCache</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LruCache"><span class="nav-number">2.2.1.</span> <span class="nav-text">LruCache</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MemorySizeCalculator"><span class="nav-number">2.3.</span> <span class="nav-text">MemorySizeCalculator</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#过程分析"><span class="nav-number">3.</span> <span class="nav-text">过程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SingleRequest-onSizeReady"><span class="nav-number">3.1.</span> <span class="nav-text">SingleRequest#onSizeReady</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Engine-load"><span class="nav-number">3.2.</span> <span class="nav-text">Engine#load</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ActiveResources缓存"><span class="nav-number">3.2.1.</span> <span class="nav-text">ActiveResources缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存缓存"><span class="nav-number">3.2.2.</span> <span class="nav-text">内存缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘缓存"><span class="nav-number">3.2.3.</span> <span class="nav-text">磁盘缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DecodeJob-runWrapped"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">DecodeJob#runWrapped</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DecodeJob-getNextStage"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">DecodeJob#getNextStage</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DecodeJob-getNextGenerator"><span class="nav-number">3.2.3.3.</span> <span class="nav-text">DecodeJob#getNextGenerator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DecodeJob-runGenerators"><span class="nav-number">3.2.3.4.</span> <span class="nav-text">DecodeJob#runGenerators</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ResourceCacheGenerator-startNext"><span class="nav-number">3.2.3.5.</span> <span class="nav-text">ResourceCacheGenerator#startNext</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SourceGenerator-startNext"><span class="nav-number">3.2.3.6.</span> <span class="nav-text">SourceGenerator#startNext</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">3.3.</span> <span class="nav-text">小结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Engine-load的执行步骤"><span class="nav-number">3.3.1.</span> <span class="nav-text">Engine#load的执行步骤</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
