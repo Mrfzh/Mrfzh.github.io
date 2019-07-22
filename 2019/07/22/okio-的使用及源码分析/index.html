@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="简介okio 补充了 java.io 和 java.nio 的内容，使得数据访问、存储和处理更加便捷。本文将简单介绍一下 okio 的使用以及基于 okio-1.17.0 版本，对 okio 的源码进行分析，最后总结一下 okio 的优点。">
+<meta name="keywords" content="源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="okio 的使用及源码分析">
+<meta property="og:url" content="https://mrfzh.github.io/2019/07/22/okio-的使用及源码分析/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="简介okio 补充了 java.io 和 java.nio 的内容，使得数据访问、存储和处理更加便捷。本文将简单介绍一下 okio 的使用以及基于 okio-1.17.0 版本，对 okio 的源码进行分析，最后总结一下 okio 的优点。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-07-22T07:25:34.602Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="okio 的使用及源码分析">
+<meta name="twitter:description" content="简介okio 补充了 java.io 和 java.nio 的内容，使得数据访问、存储和处理更加便捷。本文将简单介绍一下 okio 的使用以及基于 okio-1.17.0 版本，对 okio 的源码进行分析，最后总结一下 okio 的优点。">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/07/22/okio-的使用及源码分析/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>okio 的使用及源码分析 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/07/22/okio-的使用及源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">okio 的使用及源码分析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-22 15:24:44 / 修改时间：15:25:34" itemprop="dateCreated datePublished" datetime="2019-07-22T15:24:44+08:00">2019-07-22</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>okio 补充了 java.io 和 java.nio 的内容，使得数据访问、存储和处理更加便捷。本文将简单介绍一下 okio 的使用以及基于 okio-1.17.0 版本，对 okio 的源码进行分析，最后总结一下 okio 的优点。</p>
+<a id="more"></a>
+<h1 id="一些重要的类"><a href="#一些重要的类" class="headerlink" title="一些重要的类"></a>一些重要的类</h1><h2 id="ByteString-和-Buffer"><a href="#ByteString-和-Buffer" class="headerlink" title="ByteString 和 Buffer"></a>ByteString 和 Buffer</h2><p>ByteString 和 Buffer 是 okio 的两个核心基础类</p>
+<ul>
+<li><p>ByteString 是一个不可变的字节序列。String 提供了对于字符数据的各种操作，但对于二进制数据，却没有这样的存在。ByteString 的出现填补了这个空缺，它提供了对二进制数据的各种操作，例如提取子串、判等、获取位置等，也能将数据编解码为十六进制、base64 和 UTF-8 格式。</p>
+</li>
+<li><p>Buffer 是一个可变的字节序列，就像 ArrayList 一样，不需要考虑它的容量。在写入和读取元素的时候，就像队列一样，从它的头部读取数据，尾部写入数据。Buffer 实现了 BufferSource 和 BufferSink，提供了访问数据缓冲区所需的一切 API。</p>
+</li>
+</ul>
+<p>其他：</p>
+<ul>
+<li>把一个 String 编码为 utf8 时，会引用原 String，后面解码时就可以直接返回了</li>
+</ul>
+<h2 id="Source-和-Sink"><a href="#Source-和-Sink" class="headerlink" title="Source 和 Sink"></a>Source 和 Sink</h2><p>Source 和 Sink 类似于 InputStream 和 OutputStream，都是 IO 操作的顶级接口。其中 Source 为输入流、Sink 为输出流。它们还有一些新特性：</p>
+<ol>
+<li>提供超时机制</li>
+<li>API 更加简洁，易于实现，例如 Source 仅仅声明了 read, close, timeout 方法</li>
+<li>为了更方便地处理数据，还提供了 BufferedSource 和 BufferedSink 接口</li>
+<li>不再区分字节流和字符流，它们都是数据，可以按照各种类型进行读写</li>
+<li>便于测试，Buffer 同时实现了 BufferedSource 和 BufferedSink，便于编写测试代码</li>
+</ol>
+<h2 id="RealBufferedSource-和-RealBufferedSink"><a href="#RealBufferedSource-和-RealBufferedSink" class="headerlink" title="RealBufferedSource 和 RealBufferedSink"></a>RealBufferedSource 和 RealBufferedSink</h2><p>RealBufferedSource 和 RealBufferedSink 分别实现了 BufferedSource 和 BufferedSink 接口。</p>
+<p>它们都有一个 Buffer 成员变量，在执行方法时，它们并没有做什么，实际调用的是 Buffer 的该方法。这体现了装饰模式。所以这也说明了 <strong>BufferedSource 和 BufferedSink 接口的真正实现都在 Buffer 中</strong>。</p>
+<p>为什么不各自实现呢？</p>
+<blockquote>
+<p>因为 BufferedSource 和 BufferedSink 的高效实现有很大部分是共通的，为了避免同样的逻辑重复两遍，就把读写操作都在 Buffer 中实现，这样逻辑更加紧凑，也方便修改。</p>
+<p>另一方面，Buffer 的实现可以满足“两用数据缓冲区”的需求，即可以从头部读取数据，也可以向尾部添加数据。对于单独的读和写，也提供了两个委托类：RealBufferedSource 和 RealBufferedSink。</p>
+</blockquote>
+<h1 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h1><h2 id="读取文本"><a href="#读取文本" class="headerlink" title="读取文本"></a>读取文本</h2><p>以官方 demo 为例，这里读取的是一个 File 文件：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readLines</span><span class="params">(File file)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> (Source fileSource = Okio.source(file);</span><br><span class="line">       BufferedSource bufferedSource = Okio.buffer(fileSource)) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">      String line = bufferedSource.readUtf8Line();</span><br><span class="line">      <span class="keyword">if</span> (line == <span class="keyword">null</span>) <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (line.contains(<span class="string">"square"</span>)) &#123;</span><br><span class="line">        System.out.println(line);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，主要步骤如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 构建 Source</span></span><br><span class="line">Source fileSource = Okio.source(file);</span><br><span class="line"><span class="comment">// 2. 构建 BufferedSource（RealBufferedSource）</span></span><br><span class="line">BufferedSource bufferedSource = Okio.buffer(fileSource);</span><br><span class="line"><span class="comment">// 3. 从 BufferedSource 中读取文本</span></span><br><span class="line"><span class="comment">// 在 dmeo 中是按 utf8 格式逐行读取</span></span><br><span class="line">String line = bufferedSource.readUtf8Line();</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>根据 InputStream、File、Path 或 Socket（最终都转化为 InputStream）构建 Source</li>
+<li>根据 Source 构建 BufferedSource（RealBufferedSource）</li>
+<li>从 BufferedSource 中读取文本，demo 中是按 utf8 格式逐行读取。如此之外，还可以按字节读取。如果文件是自动定义的特殊结构，还可以使用 readInt、readLong 等方法。</li>
+</ol>
+<h2 id="写入文本"><a href="#写入文本" class="headerlink" title="写入文本"></a>写入文本</h2><p>继续看官方 demo：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">writeEnv</span><span class="params">(File file)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> (Sink fileSink = Okio.sink(file);</span><br><span class="line">       BufferedSink bufferedSink = Okio.buffer(fileSink)) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (Map.Entry&lt;String, String&gt; entry : System.getenv().entrySet()) &#123;</span><br><span class="line">      bufferedSink.writeUtf8(entry.getKey());</span><br><span class="line">      bufferedSink.writeUtf8(<span class="string">"="</span>);</span><br><span class="line">      bufferedSink.writeUtf8(entry.getValue());</span><br><span class="line">      bufferedSink.writeUtf8(<span class="string">"\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，主要步骤和读取文本时类似：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 构建 Sink</span></span><br><span class="line">Sink fileSink = Okio.sink(file);</span><br><span class="line"><span class="comment">// 2. 构建 BufferedSink</span></span><br><span class="line">BufferedSink bufferedSink = Okio.buffer(fileSink);</span><br><span class="line"><span class="comment">// 3. 向 BufferedSink 写入文本</span></span><br><span class="line">bufferedSink.writeUtf8(<span class="string">"要写入的文本"</span>);</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>根据 OutputStream、File、Path 或 Socket（最终都转化为 OutputStream）构建 Sink</li>
+<li>根据 Sink 构建 BufferedSink（RealBufferedSink）</li>
+<li>向 BufferedSink 写入文本，除了写入 Stirng，还可以写入 byte[]、int、long。</li>
+</ol>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="Segment"><a href="#Segment" class="headerlink" title="Segment"></a>Segment</h2><p>Segment 的字面意思是片段。okio 将 Buffer 分割成一个个 Segment，Segment 内部维护着固定长度的 byte 数组，数据存储在 byte 数组中，同时 Segment 拥有前面节点和后面节点的引用，是一个双向链表。</p>
+<h3 id="成员变量"><a href="#成员变量" class="headerlink" title="成员变量"></a>成员变量</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 每个 Segment 所含的字节数量</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SIZE = <span class="number">8192</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 要进行分割时，如果要分割的字节数达到该值，才进行 Segment 共享</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SHARE_MINIMUM = <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 存储数据</span></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">byte</span>[] data;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 下一可读位置</span></span><br><span class="line"><span class="keyword">int</span> pos;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第一个可写位置</span></span><br><span class="line"><span class="keyword">int</span> limit;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当前 Segment 存储的数据是否被其他 Segment 或 ByteString 使用</span></span><br><span class="line"><span class="keyword">boolean</span> shared;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 是否为当前数据的拥有者并可以继续写入数据</span></span><br><span class="line"><span class="keyword">boolean</span> owner;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指向下一个 Segment</span></span><br><span class="line">Segment next;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指向前一个 Segment</span></span><br><span class="line">Segment prev;</span><br></pre></td></tr></table></figure>
+<h3 id="构造方法"><a href="#构造方法" class="headerlink" title="构造方法"></a>构造方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Segment() &#123;</span><br><span class="line">  <span class="keyword">this</span>.data = <span class="keyword">new</span> <span class="keyword">byte</span>[SIZE];</span><br><span class="line">  <span class="keyword">this</span>.owner = <span class="keyword">true</span>;</span><br><span class="line">  <span class="keyword">this</span>.shared = <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Segment(<span class="keyword">byte</span>[] data, <span class="keyword">int</span> pos, <span class="keyword">int</span> limit, <span class="keyword">boolean</span> shared, <span class="keyword">boolean</span> owner) &#123;</span><br><span class="line">  <span class="keyword">this</span>.data = data;</span><br><span class="line">  <span class="keyword">this</span>.pos = pos;</span><br><span class="line">  <span class="keyword">this</span>.limit = limit;</span><br><span class="line">  <span class="keyword">this</span>.shared = shared;</span><br><span class="line">  <span class="keyword">this</span>.owner = owner;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有两个构造方法，其中无参构造方法 owner 为 true、shared 为 false，说明数据的拥有者只有自己，没有被共享。</p>
+<p>另一构造方法，则可以根据需要，返回相应的 Segment：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Returns a new segment that shares the underlying byte array with this. Adjusting pos and limit</span></span><br><span class="line"><span class="comment"> * are safe but writes are forbidden. This also marks the current segment as shared, which</span></span><br><span class="line"><span class="comment"> * prevents it from being pooled.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">final</span> Segment <span class="title">sharedCopy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  shared = <span class="keyword">true</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> Segment(data, pos, limit, <span class="keyword">true</span>, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Returns a new segment that its own private copy of the underlying byte array. */</span></span><br><span class="line"><span class="function"><span class="keyword">final</span> Segment <span class="title">unsharedCopy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> Segment(data.clone(), pos, limit, <span class="keyword">false</span>, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面来看下 Segment 的几个方法：</p>
+<h3 id="pop"><a href="#pop" class="headerlink" title="pop"></a>pop</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="meta">@Nullable</span> <span class="function">Segment <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Segment result = next != <span class="keyword">this</span> ? next : <span class="keyword">null</span>;</span><br><span class="line">  prev.next = next;</span><br><span class="line">  next.prev = prev;</span><br><span class="line">  next = <span class="keyword">null</span>;</span><br><span class="line">  prev = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>pop 方法将自己移除出链表，并将自己的前后两个节点连接起来，最后返回下一个 Segment。</p>
+<p>既然有 pop 方法，那当然还有 push 方法：</p>
+<h3 id="push"><a href="#push" class="headerlink" title="push"></a>push</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Segment <span class="title">push</span><span class="params">(Segment segment)</span> </span>&#123;</span><br><span class="line">  segment.prev = <span class="keyword">this</span>;</span><br><span class="line">  segment.next = next;</span><br><span class="line">  next.prev = segment;</span><br><span class="line">  next = segment;</span><br><span class="line">  <span class="keyword">return</span> segment;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>push 方法传入一个 Segment，将该 Segment 插入到自己后面并返回插入的 Segment。</p>
+<h3 id="writeTo"><a href="#writeTo" class="headerlink" title="writeTo"></a>writeTo</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">writeTo</span><span class="params">(Segment sink, <span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line"><span class="comment">// 不能对无法写入数据的 Segment 操作</span></span><br><span class="line">   <span class="keyword">if</span> (!sink.owner) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">   <span class="keyword">if</span> (sink.limit + byteCount &gt; SIZE) &#123;</span><br><span class="line">     <span class="comment">// 正在共享的 Segment</span></span><br><span class="line">     <span class="keyword">if</span> (sink.shared) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">     <span class="keyword">if</span> (sink.limit + byteCount - sink.pos &gt; SIZE) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">  <span class="comment">// 可能由于前面使用了 read 方法取出数据时导致 pos 后移（pos &gt; 0）</span></span><br><span class="line">  <span class="comment">// 这里先将从 pos 开始的数据移回到开头，即索引为 0 处，并更新 pos 和 limit</span></span><br><span class="line">     System.arraycopy(sink.data, sink.pos, sink.data, <span class="number">0</span>, sink.limit - sink.pos);</span><br><span class="line">     sink.limit -= sink.pos;</span><br><span class="line">     sink.pos = <span class="number">0</span>;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">// 本 Segment 从 pos 开始取 byteCount 个字节写入到 sink </span></span><br><span class="line">   System.arraycopy(data, pos, sink.data, sink.limit, byteCount);</span><br><span class="line"><span class="comment">// 更新 sink 的可写位置和自己的下一读取位置</span></span><br><span class="line">   sink.limit += byteCount;</span><br><span class="line">   pos += byteCount;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法从自己的 pos 位置开始，读取一定数量的字节并写入到另一 Segment 中。这是一种数据的转移，主要用于 Segment 的压缩。</p>
+<h3 id="compact（压缩机制）"><a href="#compact（压缩机制）" class="headerlink" title="compact（压缩机制）"></a>compact（压缩机制）</h3><p>因为每个 Segment 的存储的数据长度是固定的，如果经过一段时间后，每个 Segment 的数据长度不一，可能有些 Segment 只有很小的数据。这时就可以通过 Segment 的压缩机制进行优化，该机制通过 compact 方法实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">compact</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="comment">// 上一节点就是自己，说明只有一个节点，无法压缩</span></span><br><span class="line">   <span class="keyword">if</span> (prev == <span class="keyword">this</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException();</span><br><span class="line"><span class="comment">// 如果上一节点的数据不只自己拥有，那么不能压缩</span></span><br><span class="line">   <span class="keyword">if</span> (!prev.owner) <span class="keyword">return</span>; <span class="comment">// Cannot compact: prev isn't writable.</span></span><br><span class="line"><span class="comment">// 当前自己拥有的数据量</span></span><br><span class="line">   <span class="keyword">int</span> byteCount = limit - pos;</span><br><span class="line"><span class="comment">// 计算上一节点的可写入数据量</span></span><br><span class="line">   <span class="keyword">int</span> availableByteCount = SIZE - prev.limit + (prev.shared ? <span class="number">0</span> : prev.pos);</span><br><span class="line"><span class="comment">// 上一节点不足以容纳自己的数据，无法压缩</span></span><br><span class="line">   <span class="keyword">if</span> (byteCount &gt; availableByteCount) <span class="keyword">return</span>;</span><br><span class="line"><span class="comment">// 将自己的数据写入到上一节点</span></span><br><span class="line">   writeTo(prev, byteCount);</span><br><span class="line"><span class="comment">// 将自己从链表中删除</span></span><br><span class="line">   pop();</span><br><span class="line"><span class="comment">// 回收</span></span><br><span class="line">   SegmentPool.recycle(<span class="keyword">this</span>);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>在进行压缩时，如果上一个 Segment 可以写入数据并足以容纳自己的数据，就将自己的数据写入到上一节点，然后将自己从链表中删除并回收。</p>
+<h3 id="split（共享机制）"><a href="#split（共享机制）" class="headerlink" title="split（共享机制）"></a>split（共享机制）</h3><p>split 方法可以从某个 Segment 中分割出一个新的 Segment。其中新 Segment 包含 [pos, pos + byteCount) 的数据，而原 Segment 只剩下 [pos + byteCount, limit) 的数据。最后新 Segment 会插入到原 Segment 的前面。具体看下该方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Segment <span class="title">split</span><span class="params">(<span class="keyword">int</span> byteCount)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (byteCount &lt;= <span class="number">0</span> || byteCount &gt; limit - pos) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">   </span><br><span class="line">   Segment prefix;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 只有当数据量比较大时，才共享当前 Segment</span></span><br><span class="line">   <span class="keyword">if</span> (byteCount &gt;= SHARE_MINIMUM) &#123;</span><br><span class="line">     prefix = sharedCopy();</span><br><span class="line">   &#125; </span><br><span class="line"><span class="comment">// 数据量较少时不共享，将数据复制到新的 Segment</span></span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">     prefix = SegmentPool.take();</span><br><span class="line">     System.arraycopy(data, pos, prefix.data, <span class="number">0</span>, byteCount);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 更新新 Segment 的可写位置</span></span><br><span class="line">   prefix.limit = prefix.pos + byteCount;</span><br><span class="line"><span class="comment">// 更新本 Segment 的下一读取位置</span></span><br><span class="line">   pos += byteCount;</span><br><span class="line"><span class="comment">// 将新 Segment 插入到自己前面</span></span><br><span class="line">   prev.push(prefix);</span><br><span class="line"><span class="comment">// 返回新的 Segment</span></span><br><span class="line">   <span class="keyword">return</span> prefix;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>在进行分割时，如果要分割的数据量比较巨大，那么将进行数据共享而不是数据复制，也就是说新 Segment 和原 Segment 引用同一个 byte 数组。而数据量比较小时，不会进行共享，因为太多的共享会导致 Segment 链变长，这时会进行复制。</p>
+<p>如果是进行复制的话，新 Segment 的实例是通过 SegmentPool.take() 获得的。下面就分析一些 SegmentPool：</p>
+<h2 id="SegmentPool"><a href="#SegmentPool" class="headerlink" title="SegmentPool"></a>SegmentPool</h2><p>SegmentPool 主要复制 Segment 的回收和闲置 Segment 的管理。Buffer 使用的 Segment 是从 SegmentPool 中获取的，这样可以避免频繁地创建和销毁 Segment。</p>
+<p>这个类比较简单，只有三个成员变量，分别如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SegmentPool 的最大存储字节数</span></span><br><span class="line"><span class="comment">// 一个 Segment 存储 8 * 1024 个字节，所以 SegmentPool 只能存 8 个 Segment</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> MAX_SIZE = <span class="number">64</span> * <span class="number">1024</span>; <span class="comment">// 64 KiB.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 一个存储回收 Segment 的单向链表</span></span><br><span class="line"><span class="keyword">static</span> <span class="meta">@Nullable</span> Segment next;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当前所有 Segment 存储的总字节数</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">long</span> byteCount;</span><br></pre></td></tr></table></figure></p>
+<p>SegmentPool 只有两个方法，一个是回收 Segment，一个是获取 Segment。</p>
+<h3 id="take"><a href="#take" class="headerlink" title="take"></a>take</h3><p>take 方法用于获取 Segment：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> Segment <span class="title">take</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">synchronized</span> (SegmentPool.class) &#123;</span><br><span class="line">    <span class="keyword">if</span> (next != <span class="keyword">null</span>) &#123;</span><br><span class="line">      Segment result = next;</span><br><span class="line">      next = result.next;</span><br><span class="line">      result.next = <span class="keyword">null</span>;</span><br><span class="line">      byteCount -= Segment.SIZE;</span><br><span class="line">      <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> Segment(); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果当前池里没有 Segment 就新建一个 Segment 返回，否则就从单向链表中取一个 Segment 返回。</p>
+<h3 id="recycle"><a href="#recycle" class="headerlink" title="recycle"></a>recycle</h3><p>recycle 方法用于回收 Segment：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">recycle</span><span class="params">(Segment segment)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (segment.next != <span class="keyword">null</span> || segment.prev != <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line"><span class="comment">// 不能回收共享的 Segment</span></span><br><span class="line">   <span class="keyword">if</span> (segment.shared) <span class="keyword">return</span>; </span><br><span class="line">   <span class="keyword">synchronized</span> (SegmentPool.class) &#123;</span><br><span class="line">     <span class="keyword">if</span> (byteCount + Segment.SIZE &gt; MAX_SIZE) <span class="keyword">return</span>; <span class="comment">// Pool is full.</span></span><br><span class="line">     byteCount += Segment.SIZE;</span><br><span class="line">     segment.next = next;</span><br><span class="line">     segment.pos = segment.limit = <span class="number">0</span>;</span><br><span class="line">     next = segment;</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>共享状态的 Segment 不能回收，如果池没满就将回收该 Segment，将其加入单向链表中。</p>
+<h2 id="Buffer"><a href="#Buffer" class="headerlink" title="Buffer"></a>Buffer</h2><p>Buffer 存储的是可变字节序列，内部使用 Segment 来存储元素，Segment 是一个双向循环链表，它的内部有一个 byte 数组用于存储元素。</p>
+<p>Buffer 使用 Segment 的好处是：当元素要从一个 Buffer 移到另一个 Buffer 的时候，并不用进行数组元素的拷贝，只要改变 Segment 的所有者即可。</p>
+<p>Buffer 既可以读，也可以写，下面分别调两个方法看一下读写的过程。</p>
+<p>首先看 readByte 方法，该方法读取一个字节：</p>
+<h3 id="readByte"><a href="#readByte" class="headerlink" title="readByte"></a>readByte</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">@Override</span> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">byte</span> <span class="title">readByte</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (size == <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"size == 0"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从头开始读</span></span><br><span class="line">   Segment segment = head;</span><br><span class="line">   <span class="keyword">int</span> pos = segment.pos;</span><br><span class="line">   <span class="keyword">int</span> limit = segment.limit;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">byte</span>[] data = segment.data;</span><br><span class="line">   <span class="keyword">byte</span> b = data[pos++];</span><br><span class="line">   size -= <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取元素后，若头 Segment 没有元素了，就从链表中删除并回收该 Segment</span></span><br><span class="line">   <span class="keyword">if</span> (pos == limit) &#123;</span><br><span class="line">     head = segment.pop();</span><br><span class="line">     SegmentPool.recycle(segment);</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     segment.pos = pos;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> b;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，读取元素的时候是从头开始读的。如果读取元素后，头 Segment 没有元素了，就从链表中删除并回收该 Segment。</p>
+<p>继续看一个写的方法，这里看 writeByte：</p>
+<h3 id="writeByte"><a href="#writeByte" class="headerlink" title="writeByte"></a>writeByte</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">@Override</span> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> Buffer <span class="title">writeByte</span><span class="params">(<span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line"><span class="comment">// 返回一个满足所需容量的尾 Segment</span></span><br><span class="line">   Segment tail = writableSegment(<span class="number">1</span>);</span><br><span class="line"><span class="comment">// 写入字节</span></span><br><span class="line">   tail.data[tail.limit++] = (<span class="keyword">byte</span>) b;</span><br><span class="line">   size += <span class="number">1</span>;</span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function">Segment <span class="title">writableSegment</span><span class="params">(<span class="keyword">int</span> minimumCapacity)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (minimumCapacity &lt; <span class="number">1</span> || minimumCapacity &gt; Segment.SIZE) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 头 Segment 为空，则先创建一个双向循环链表</span></span><br><span class="line">   <span class="keyword">if</span> (head == <span class="keyword">null</span>) &#123;</span><br><span class="line">     head = SegmentPool.take(); </span><br><span class="line">     <span class="keyword">return</span> head.next = head.prev = head;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 找到尾 Segment，从尾部写入</span></span><br><span class="line">   Segment tail = head.prev;</span><br><span class="line"><span class="comment">// 若不满足容量，或者不能写入数据，就在尾部添加一个 Segment</span></span><br><span class="line">   <span class="keyword">if</span> (tail.limit + minimumCapacity &gt; Segment.SIZE || !tail.owner) &#123;</span><br><span class="line">     tail = tail.push(SegmentPool.take()); <span class="comment">// Append a new empty segment to fill up.</span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> tail;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，写入时是从尾部写入的，如果此时头结点为空，就会新建一个双向循环链表。如果尾 Segment 容量不足或不能写入数据，就会在尾部添加一个 Segment。</p>
+<h2 id="超时机制"><a href="#超时机制" class="headerlink" title="超时机制"></a>超时机制</h2><h3 id="Timeout"><a href="#Timeout" class="headerlink" title="Timeout"></a>Timeout</h3><p>以输出流 Sink 为例，当我们用下面的方法包装输出流的时候：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Sink <span class="title">sink</span><span class="params">(OutputStream out)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> sink(out, <span class="keyword">new</span> Timeout());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>真正调用的是带两个参数的 sink 方法，第二个参数就是 TimeOut：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Sink <span class="title">sink</span><span class="params">(<span class="keyword">final</span> OutputStream out, <span class="keyword">final</span> Timeout timeout)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (out == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"out == null"</span>);</span><br><span class="line">  <span class="keyword">if</span> (timeout == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"timeout == null"</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> Sink() &#123;</span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(Buffer source, <span class="keyword">long</span> byteCount)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    </span><br><span class="line">      <span class="keyword">while</span> (byteCount &gt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="comment">// 进行了超时判断</span></span><br><span class="line">        timeout.throwIfReached();</span><br><span class="line">          </span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Timeout <span class="title">timeout</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> timeout;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在写入数据的时候，通过调用 Timeout 的 throwIfReached 方法进行了超时判断，该方法如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">throwIfReached</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line"><span class="comment">// 线程被 interrupted</span></span><br><span class="line">   <span class="keyword">if</span> (Thread.interrupted()) &#123;</span><br><span class="line">     Thread.currentThread().interrupt(); <span class="comment">// Retain interrupted status.</span></span><br><span class="line">     <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedIOException(<span class="string">"interrupted"</span>);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 到达超时时间</span></span><br><span class="line">   <span class="keyword">if</span> (hasDeadline &amp;&amp; deadlineNanoTime - System.nanoTime() &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">     <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedIOException(<span class="string">"deadline reached"</span>);</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>除了 Timeout 外，还有一个 AsyncTimeout。</p>
+<h3 id="AsyncTimeout"><a href="#AsyncTimeout" class="headerlink" title="AsyncTimeout"></a>AsyncTimeout</h3><p>AsyncTimeout 继承于 Timeout，TimeOut 用于同步计时，即在同一个线程中执行 IO 操作和计时，而 AsyncTimeout 提供了异步计时的功能。</p>
+<p>首先看一下 AsyncTimeOut 的成员变量：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一次最多可以写入 64K 数据，超过该容量可能会导致在慢连接中超时，故做出限制</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TIMEOUT_WRITE_SIZE = <span class="number">64</span> * <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// AsyncTimeout 单链表的头结点</span></span><br><span class="line"><span class="keyword">static</span> <span class="meta">@Nullable</span> AsyncTimeout head;</span><br><span class="line"><span class="comment">// 下一节点</span></span><br><span class="line"><span class="keyword">private</span> <span class="meta">@Nullable</span> AsyncTimeout next;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断当前节点是否已经入队</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">boolean</span> inQueue;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 超时时间</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">long</span> timeoutAt;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，AsyncTimeout 是一个单链表。</p>
+<p>什么时候会使用到 AsyncTimeout 呢？</p>
+<p>当我们对 Socket 进行包装时就引入了异步计时机制，之所以在对 Socket 写操作时采取异步超时，是由 Socket 自身的性质决定的，Socket 经常会阻塞自己，无法同步计时，只能采取异步方式。</p>
+<p>该过程从 Okio 的sink方法看起：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Sink <span class="title">sink</span><span class="params">(Socket socket)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (socket == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"socket == null"</span>);</span><br><span class="line">  <span class="keyword">if</span> (socket.getOutputStream() == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"socket's output stream == null"</span>);</span><br><span class="line">  <span class="comment">// 把 Socket 封装到 AsyncTimeout 中</span></span><br><span class="line">  AsyncTimeout timeout = timeout(socket);</span><br><span class="line">  <span class="comment">// 得到 Sink</span></span><br><span class="line">  Sink sink = sink(socket.getOutputStream(), timeout);</span><br><span class="line">  <span class="comment">// AsyncTimeout 对 Sink 进行包装</span></span><br><span class="line">  <span class="keyword">return</span> timeout.sink(sink);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>该方法中，首先把 Socket 封装到 AsyncTimeout 中，得到 Sink 后，AsyncTimeout 会对 Sink 进行包装。</p>
+<h4 id="AsyncTimeout-sink"><a href="#AsyncTimeout-sink" class="headerlink" title="AsyncTimeout#sink"></a>AsyncTimeout#sink</h4><p>包装过程调用的是 AsyncTimeout 的 sink 方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Sink <span class="title">sink</span><span class="params">(<span class="keyword">final</span> Sink sink)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> Sink() &#123;</span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(Buffer source, <span class="keyword">long</span> byteCount)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> throwOnTimeout = <span class="keyword">false</span>;</span><br><span class="line">        enter();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          sink.write(source, toWrite);</span><br><span class="line">          byteCount -= toWrite;</span><br><span class="line">          throwOnTimeout = <span class="keyword">true</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">          <span class="keyword">throw</span> exit(e);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">          exit(throwOnTimeout);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// ...        </span></span><br><span class="line"></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里只分析 write 过程，首先看 enter 方法：</p>
+<h4 id="AsyncTimeout-enter"><a href="#AsyncTimeout-enter" class="headerlink" title="AsyncTimeout#enter"></a>AsyncTimeout#enter</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">enter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (inQueue) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unbalanced enter/exit"</span>);</span><br><span class="line">  <span class="keyword">long</span> timeoutNanos = timeoutNanos();</span><br><span class="line">  <span class="keyword">boolean</span> hasDeadline = hasDeadline();</span><br><span class="line">  <span class="keyword">if</span> (timeoutNanos == <span class="number">0</span> &amp;&amp; !hasDeadline) &#123;</span><br><span class="line">    <span class="keyword">return</span>; <span class="comment">// No timeout and no deadline? Don't bother with the queue.</span></span><br><span class="line">  &#125;</span><br><span class="line">  inQueue = <span class="keyword">true</span>;</span><br><span class="line">  scheduleTimeout(<span class="keyword">this</span>, timeoutNanos, hasDeadline);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先判断了一下入队状态，真正的调用是在 scheduleTimeout 方法中：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">scheduleTimeout</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">     AsyncTimeout node, <span class="keyword">long</span> timeoutNanos, <span class="keyword">boolean</span> hasDeadline)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 还未开启 Watchdog 线程，先开启 Watchdog 线程</span></span><br><span class="line">   <span class="keyword">if</span> (head == <span class="keyword">null</span>) &#123;</span><br><span class="line">     head = <span class="keyword">new</span> AsyncTimeout();</span><br><span class="line">     <span class="keyword">new</span> Watchdog().start();</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置超时时间</span></span><br><span class="line">   <span class="keyword">long</span> now = System.nanoTime();</span><br><span class="line">   <span class="keyword">if</span> (timeoutNanos != <span class="number">0</span> &amp;&amp; hasDeadline) &#123;</span><br><span class="line">     node.timeoutAt = now + Math.min(timeoutNanos, node.deadlineNanoTime() - now);</span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (timeoutNanos != <span class="number">0</span>) &#123;</span><br><span class="line">     node.timeoutAt = now + timeoutNanos;</span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (hasDeadline) &#123;</span><br><span class="line">     node.timeoutAt = node.deadlineNanoTime();</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="keyword">throw</span> <span class="keyword">new</span> AssertionError();</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当前 AsyncTimeout 的剩余时间</span></span><br><span class="line">   <span class="keyword">long</span> remainingNanos = node.remainingNanos(now);</span><br><span class="line">   <span class="keyword">for</span> (AsyncTimeout prev = head; <span class="keyword">true</span>; prev = prev.next) &#123;</span><br><span class="line">  <span class="comment">// 找到插入位置（如果某节点的下一个节点为 null或下一节点的剩余时间更长，就插入到该节点后面）</span></span><br><span class="line">     <span class="keyword">if</span> (prev.next == <span class="keyword">null</span> || remainingNanos &lt; prev.next.remainingNanos(now)) &#123;</span><br><span class="line">       node.next = prev.next;</span><br><span class="line">       prev.next = node;</span><br><span class="line">	<span class="comment">// 如果插入到了最前面</span></span><br><span class="line">       <span class="keyword">if</span> (prev == head) &#123;</span><br><span class="line">         AsyncTimeout.class.notify(); <span class="comment">// Wake up the watchdog when inserting at the front.</span></span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">break</span>;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>该方法中，如果还未开启 Watchdog 线程，先开启 Watchdog 线程。然后设定超时时间以及将当前 AsyncTimeout 插入到链表的合适位置。</p>
+<p>先看一下  Watchdog 线程：</p>
+<h4 id="AsyncTimeout-Watchdog"><a href="#AsyncTimeout-Watchdog" class="headerlink" title="AsyncTimeout#Watchdog"></a>AsyncTimeout#Watchdog</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Watchdog</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        AsyncTimeout timedOut;</span><br><span class="line">        <span class="keyword">synchronized</span> (AsyncTimeout.class) &#123;</span><br><span class="line">	<span class="comment">// 得到超时的节点</span></span><br><span class="line">          timedOut = awaitTimeout();</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 未找到超时节点，但链表还有节点，再次尝试</span></span><br><span class="line">          <span class="keyword">if</span> (timedOut == <span class="keyword">null</span>) <span class="keyword">continue</span>;</span><br><span class="line">          </span><br><span class="line">          <span class="comment">// 链表没有节点了，将 head 置空，并退出线程</span></span><br><span class="line">          <span class="keyword">if</span> (timedOut == head) &#123;</span><br><span class="line">            head = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 回调，外部重新改方法进行超时处理，例如关闭 Socket</span></span><br><span class="line">        timedOut.timedOut();</span><br><span class="line">      &#125; <span class="keyword">catch</span> (InterruptedException ignored) &#123;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，真正进行超时判断的是 awaitTimeout 方法：</p>
+<h4 id="AsyncTimeout-awaitTimeout"><a href="#AsyncTimeout-awaitTimeout" class="headerlink" title="AsyncTimeout#awaitTimeout"></a>AsyncTimeout#awaitTimeout</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">static</span> <span class="meta">@Nullable</span> <span class="function">AsyncTimeout <span class="title">awaitTimeout</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 拿到下一节点</span></span><br><span class="line">   AsyncTimeout node = head.next;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> (node == <span class="keyword">null</span>) &#123;</span><br><span class="line">     <span class="keyword">long</span> startNanos = System.nanoTime();</span><br><span class="line">  <span class="comment">// 等待一段时间</span></span><br><span class="line">     AsyncTimeout.class.wait(IDLE_TIMEOUT_MILLIS);</span><br><span class="line">  <span class="comment">// 经过一段时间后还没有节点，就会返回 head，否则返回 null</span></span><br><span class="line">     <span class="keyword">return</span> head.next == <span class="keyword">null</span> &amp;&amp; (System.nanoTime() - startNanos) &gt;= IDLE_TIMEOUT_NANOS</span><br><span class="line">         ? head  <span class="comment">// The idle timeout elapsed.</span></span><br><span class="line">         : <span class="keyword">null</span>; <span class="comment">// The situation has changed.</span></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 该节点剩余的时间</span></span><br><span class="line">   <span class="keyword">long</span> waitNanos = node.remainingNanos(System.nanoTime());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果该节点还未超时，继续等待，等待时间结束后返回 null</span></span><br><span class="line">   <span class="keyword">if</span> (waitNanos &gt; <span class="number">0</span>) &#123;</span><br><span class="line">     <span class="keyword">long</span> waitMillis = waitNanos / <span class="number">1000000L</span>;</span><br><span class="line">     waitNanos -= (waitMillis * <span class="number">1000000L</span>);</span><br><span class="line">     AsyncTimeout.class.wait(waitMillis, (<span class="keyword">int</span>) waitNanos);</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 移除并返回超时的节点</span></span><br><span class="line">   head.next = node.next;</span><br><span class="line">   node.next = <span class="keyword">null</span>;</span><br><span class="line">   <span class="keyword">return</span> node;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法主要是为了得到超时的节点，并将超时的节点移除出链表。</p>
+<p>下面回到 sink，继续看 write 方法，在调用完 enter 方法后，会调用 Buffer 的 write 方法进行写入，无论是写入过程抛出了异常，还是最后正常结束，都会在 finally 块中调用 exit(boolean) 方法：</p>
+<h4 id="AsyncTimeout-exit"><a href="#AsyncTimeout-exit" class="headerlink" title="AsyncTimeout#exit"></a>AsyncTimeout#exit</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">exit</span><span class="params">(<span class="keyword">boolean</span> throwOnTimeout)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">  <span class="comment">// 是否超时</span></span><br><span class="line">  <span class="keyword">boolean</span> timedOut = exit();</span><br><span class="line">  <span class="keyword">if</span> (timedOut &amp;&amp; throwOnTimeout) <span class="keyword">throw</span> newTimeoutException(<span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">exit</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!inQueue) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">  inQueue = <span class="keyword">false</span>;</span><br><span class="line">  <span class="keyword">return</span> cancelScheduledTimeout(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** Returns true if the timeout occurred. */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">boolean</span> <span class="title">cancelScheduledTimeout</span><span class="params">(AsyncTimeout node)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 从链表找到该节点并移除，能找到说明未超时</span></span><br><span class="line">  <span class="keyword">for</span> (AsyncTimeout prev = head; prev != <span class="keyword">null</span>; prev = prev.next) &#123;</span><br><span class="line">    <span class="keyword">if</span> (prev.next == node) &#123;</span><br><span class="line">      prev.next = node.next;</span><br><span class="line">      node.next = <span class="keyword">null</span>;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 未找到该节点，说明发生了超时，在 Watchdog 线程中删除了该节点</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，如果发现超时的话，就会抛出异常，没有超时的话，就将 AsyncTimeout 移除出单链表。</p>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>AsyncTimeout 用于异步计时，采取异步是为了应对某些读写时会发生阻塞的情况，例如对 Socket 进行写操作时，Socket 经常会阻塞自己，无法同步计时，只能采取异步方式。</p>
+<p>在开始读写操作前，会给 AsyncTimeout 设置超时时间，并将其加入到一个单链表中，单链表中的节点按照剩余时间由短到长排列。在另一个线程里，会对这条链表进行监控，找到超时的节点，找到后回调给外界，外界就可以进行相应的回收处理，例如关闭 Socket。在读写操作完成后，如果没有发生超时，就将该 AsyncTimeout 从单链表中删除；如果发生超时，就会抛出异常。</p>
+<h1 id="okio-的优点"><a href="#okio-的优点" class="headerlink" title="okio 的优点"></a>okio 的优点</h1><ol>
+<li>使用方便</li>
+</ol>
+<ul>
+<li>不再区分字节流和字符流，只有 Source 和 Sink，分别对应输入流和输出流。</li>
+<li>Buffer 实现了 BufferedSource 和 BufferedSink，同时具有读和写的功能，提供了读写所需的一切 API。</li>
+<li>提供了 ByteString，可以很方便地对二进制数据进行各种操作和进行各种值的转换。</li>
+</ul>
+<ol start="2">
+<li>速度快</li>
+</ol>
+<ul>
+<li>okio 对 Buffer 存储的数据进行了分块处理，每个 Segment 用一个双向循环链表连接起来，这样在进行 IO 操作时就可以以块为单位进行操作，提高吞吐量。</li>
+<li>由于 Buffer 是以 Segment 链表来管理元素，所以在 Buffer 间要转移元素的时候，并不用进行数组元素的拷贝，只要改变链表头指针的所有者即可。</li>
+<li>ByteString 会保留一份对原来 String 的引用，这样当你把 UTF-8 的 String 转换为 ByteString 后，下次再要解码出 String 时就直接返回之前的 String，速度非常快。</li>
+</ul>
+<ol start="3">
+<li>提供超时机制</li>
+</ol>
+<ul>
+<li>内部会根据不同情况进行同步计时或异步计时，超时后会抛出异常，不会阻塞线程。而且不仅在 IO 操作有超时判断，在 flush、close 等方法也有超时判断。</li>
+</ul>
+<ol start="4">
+<li>内存复用</li>
+</ol>
+<ul>
+<li>okio 有一个 SegmentPool，可以用来回收和获取空闲 Segment。在高频率通信时，可以有效避免频繁的 GC。</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://github.com/square/okio" target="_blank" rel="noopener">square/okio</a></li>
+<li><a href="https://www.jianshu.com/p/3e0935bf2d45" target="_blank" rel="noopener">Okio深入分析——基础使用部分</a></li>
+<li><a href="https://blog.piasy.com/2016/08/04/Understand-Okio/index.html#11bytestring" target="_blank" rel="noopener">拆轮子系列：拆 Okio</a></li>
+<li><a href="https://www.jianshu.com/p/f5941bcf3a2d" target="_blank" rel="noopener">OKHttp源码解析(五)–OKIO简介及FileSystem</a></li>
+<li><a href="https://blog.csdn.net/yhaolpz/article/details/54948521" target="_blank" rel="noopener">Okio源码分析</a></li>
+<li><a href="https://blog.csdn.net/u010577768/article/details/78135222" target="_blank" rel="noopener">关于Okio的优点缓存byte[]，避免频繁GC</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/21/二叉树的-dfs-和-bfs（java-实现）/" rel="next" title="二叉树的 dfs 和 bfs（java 实现）">
+                <i class="fa fa-chevron-left"></i> 二叉树的 dfs 和 bfs（java 实现）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">49</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一些重要的类"><span class="nav-number">2.</span> <span class="nav-text">一些重要的类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ByteString-和-Buffer"><span class="nav-number">2.1.</span> <span class="nav-text">ByteString 和 Buffer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Source-和-Sink"><span class="nav-number">2.2.</span> <span class="nav-text">Source 和 Sink</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RealBufferedSource-和-RealBufferedSink"><span class="nav-number">2.3.</span> <span class="nav-text">RealBufferedSource 和 RealBufferedSink</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#简单使用"><span class="nav-number">3.</span> <span class="nav-text">简单使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#读取文本"><span class="nav-number">3.1.</span> <span class="nav-text">读取文本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写入文本"><span class="nav-number">3.2.</span> <span class="nav-text">写入文本</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">4.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Segment"><span class="nav-number">4.1.</span> <span class="nav-text">Segment</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#成员变量"><span class="nav-number">4.1.1.</span> <span class="nav-text">成员变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构造方法"><span class="nav-number">4.1.2.</span> <span class="nav-text">构造方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pop"><span class="nav-number">4.1.3.</span> <span class="nav-text">pop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#push"><span class="nav-number">4.1.4.</span> <span class="nav-text">push</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#writeTo"><span class="nav-number">4.1.5.</span> <span class="nav-text">writeTo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#compact（压缩机制）"><span class="nav-number">4.1.6.</span> <span class="nav-text">compact（压缩机制）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#split（共享机制）"><span class="nav-number">4.1.7.</span> <span class="nav-text">split（共享机制）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SegmentPool"><span class="nav-number">4.2.</span> <span class="nav-text">SegmentPool</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#take"><span class="nav-number">4.2.1.</span> <span class="nav-text">take</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#recycle"><span class="nav-number">4.2.2.</span> <span class="nav-text">recycle</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Buffer"><span class="nav-number">4.3.</span> <span class="nav-text">Buffer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#readByte"><span class="nav-number">4.3.1.</span> <span class="nav-text">readByte</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#writeByte"><span class="nav-number">4.3.2.</span> <span class="nav-text">writeByte</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#超时机制"><span class="nav-number">4.4.</span> <span class="nav-text">超时机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Timeout"><span class="nav-number">4.4.1.</span> <span class="nav-text">Timeout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AsyncTimeout"><span class="nav-number">4.4.2.</span> <span class="nav-text">AsyncTimeout</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AsyncTimeout-sink"><span class="nav-number">4.4.2.1.</span> <span class="nav-text">AsyncTimeout#sink</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AsyncTimeout-enter"><span class="nav-number">4.4.2.2.</span> <span class="nav-text">AsyncTimeout#enter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AsyncTimeout-Watchdog"><span class="nav-number">4.4.2.3.</span> <span class="nav-text">AsyncTimeout#Watchdog</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AsyncTimeout-awaitTimeout"><span class="nav-number">4.4.2.4.</span> <span class="nav-text">AsyncTimeout#awaitTimeout</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AsyncTimeout-exit"><span class="nav-number">4.4.2.5.</span> <span class="nav-text">AsyncTimeout#exit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#小结"><span class="nav-number">4.4.2.6.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#okio-的优点"><span class="nav-number">5.</span> <span class="nav-text">okio 的优点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
