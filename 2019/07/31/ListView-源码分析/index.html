@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言虽然现在在展示数据的时候，更多的是使用 RecyclerView 而不是 ListView。但了解 ListView 还是很有必要的，通过了解 ListView，既可以帮助理解更加复杂的 RecyclerView，也可以更进一步地理解 ListView 和 RecyclerView 的区别。本文将基于 API28 分析 ListView 源码。">
+<meta name="keywords" content="源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ListView 源码分析">
+<meta property="og:url" content="https://mrfzh.github.io/2019/07/31/ListView-源码分析/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="前言虽然现在在展示数据的时候，更多的是使用 RecyclerView 而不是 ListView。但了解 ListView 还是很有必要的，通过了解 ListView，既可以帮助理解更加复杂的 RecyclerView，也可以更进一步地理解 ListView 和 RecyclerView 的区别。本文将基于 API28 分析 ListView 源码。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-07-31T10:41:06.058Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ListView 源码分析">
+<meta name="twitter:description" content="前言虽然现在在展示数据的时候，更多的是使用 RecyclerView 而不是 ListView。但了解 ListView 还是很有必要的，通过了解 ListView，既可以帮助理解更加复杂的 RecyclerView，也可以更进一步地理解 ListView 和 RecyclerView 的区别。本文将基于 API28 分析 ListView 源码。">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/07/31/ListView-源码分析/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>ListView 源码分析 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/07/31/ListView-源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ListView 源码分析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-31 18:40:24 / 修改时间：18:41:06" itemprop="dateCreated datePublished" datetime="2019-07-31T18:40:24+08:00">2019-07-31</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>虽然现在在展示数据的时候，更多的是使用 RecyclerView 而不是 ListView。但了解 ListView 还是很有必要的，通过了解 ListView，既可以帮助理解更加复杂的 RecyclerView，也可以更进一步地理解 ListView 和 RecyclerView 的区别。本文将基于 API28 分析 ListView 源码。</p>
+<a id="more"></a>
+<h1 id="RecycleBin"><a href="#RecycleBin" class="headerlink" title="RecycleBin"></a>RecycleBin</h1><p>RecycleBin 是 AbsListView 中的一个内部类，所以继承于 AbsListView 的子类，也就是 ListView 和 GridView，都可以使用这个类。RecycleBin 机制是 ListView 能够实现成百上千条数据都不会 OOM 的一个重要原因。</p>
+<h2 id="类注释"><a href="#类注释" class="headerlink" title="类注释"></a>类注释</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The RecycleBin facilitates reuse of views across layouts. The RecycleBin has two levels of</span></span><br><span class="line"><span class="comment"> * storage: ActiveViews and ScrapViews. ActiveViews are those views which were onscreen at the</span></span><br><span class="line"><span class="comment"> * start of a layout. By construction, they are displaying current information. At the end of</span></span><br><span class="line"><span class="comment"> * layout, all views in ActiveViews are demoted to ScrapViews. ScrapViews are old views that</span></span><br><span class="line"><span class="comment"> * could potentially be used by the adapter to avoid allocating views unnecessarily.</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>通过类注释，可以得知：</p>
+<p>RecycleBin 有两个重要的存储：ActiveViews 和 ScrapViews。ActiveViews 是在布局开始时在屏幕上显示的那些视图。在布局结束时，ActiveViews 中的所有视图都降级为 ScrapViews。ScrapViews 是适配器可能使用的旧视图，避免不必要地重新分配视图。</p>
+<h2 id="主要成员变量"><a href="#主要成员变量" class="headerlink" title="主要成员变量"></a>主要成员变量</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> View[] mActiveViews = <span class="keyword">new</span> View[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 之所以使用集合数组，是因为可能有多种类型的 item，同一类型的废弃 item 放在同一 list 中</span></span><br><span class="line"><span class="keyword">private</span> ArrayList&lt;View&gt;[] mScrapViews;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指向 scrapViews[0]（只有一种类型 item 的时候使用它）</span></span><br><span class="line"><span class="keyword">private</span> ArrayList&lt;View&gt; mCurrentScrap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> ArrayList&lt;View&gt; mSkippedScrap;</span><br></pre></td></tr></table></figure>
+<h2 id="主要方法"><a href="#主要方法" class="headerlink" title="主要方法"></a>主要方法</h2><p>先看一下主要的方法：</p>
+<ul>
+<li><strong>void fillActiveViews(int childCount, int firstActivePosition)</strong>：第一个参数表示要存储的 View 的数量，第二个参数表示 ListView 中第一个可见元素的索引。调用该方法后就可以根据参数将 ListView 中的指定元素存储到 mActiveViews 数组中。</li>
+<li><strong>View getActiveView(int position)</strong>：根据索引获取相应的 ActiveView，获取到后就将该 View 从 ActiveViews 从移除，下次再获取该位置的 ActiveView，将会返回 false，也就是说 ActiveView 不能被重复利用。</li>
+<li><strong>void addScrapView(View scrap, int position)</strong>：该方法将一个废弃（比如滚动出了屏幕）的 View 缓存起来。RecycleBin 中使用 mScrapViews 和 mCurrentScrap 来存储废弃的 View。</li>
+<li><strong>View getScrapView(int position)</strong>：根据索引找到对应类型的 ScrapViews，并从中获取一个 ScrapView 返回。</li>
+<li><strong>public void setViewTypeCount(int viewTypeCount)</strong>：Adapter 可以重写 getViewTypeCount() 方法来表示 ListView 有几种类型的 item，而 setViewTypeCount 根据类型数来初始化 mScrapViews 数组，mCurrentScrap 指向第 0 号数组，所以如果只有一种类型，就可以使用 mCurrentScrap；如果有多种类型，就使用 mScrapViews。</li>
+</ul>
+<h1 id="onLayout"><a href="#onLayout" class="headerlink" title="onLayout"></a>onLayout</h1><p>View 的三大流程中，对于 ListView 而言，onMeasure 并没有什么特别的，因为它终归是一个 View，占用的空间最多也就是整个屏幕。onDraw 也没有什么意义，因为 ListView 本身并不负责绘制，绘制的任务交由子元素自己完成。ListView 大部分的神奇功能都是在 onLayout 中完成的，因此下面分析一些 ListView 的 onLayout过程。</p>
+<p>ListView 并没有重写 onLayout 方法，重写 onLayout 的逻辑在其父类 AbsListView 中：</p>
+<h2 id="AbsListView-onLayout"><a href="#AbsListView-onLayout" class="headerlink" title="AbsListView#onLayout"></a>AbsListView#onLayout</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onLayout</span><span class="params">(<span class="keyword">boolean</span> changed, <span class="keyword">int</span> l, <span class="keyword">int</span> t, <span class="keyword">int</span> r, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onLayout(changed, l, t, r, b);</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    layoutChildren();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>主要看 layoutChildren 方法，该方法对子元素进行布局，该方法在 AbsListView 是一个空方法，ListView 重写了该方法：</p>
+<h2 id="ListView-layoutChildren"><a href="#ListView-layoutChildren" class="headerlink" title="ListView#layoutChildren"></a>ListView#layoutChildren</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">layoutChildren</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">final</span> <span class="keyword">int</span> childrenTop = mListPadding.top;</span><br><span class="line">	<span class="comment">// 当前拥有的子 View 个数，第一次 layout 时子 View 个数为 0</span></span><br><span class="line">          <span class="keyword">final</span> <span class="keyword">int</span> childCount = getChildCount();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 在调用 adapter.notifyDatasetChanged() 方法时，dataChanged 为 true</span></span><br><span class="line">	<span class="comment">// 默认情况下，dataChanged 为 false</span></span><br><span class="line">          <span class="keyword">boolean</span> dataChanged = mDataChanged;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">          <span class="keyword">final</span> <span class="keyword">int</span> firstPosition = mFirstPosition;</span><br><span class="line">          <span class="keyword">final</span> RecycleBin recycleBin = mRecycler;</span><br><span class="line">          <span class="keyword">if</span> (dataChanged) &#123;</span><br><span class="line">		<span class="comment">// 将当前所有 item 的 View 添加到 RecycleBin 的 ScrapViews 中保存起来</span></span><br><span class="line">              <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</span><br><span class="line">                  recycleBin.addScrapView(getChildAt(i), firstPosition+i);</span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// 将当前所有 item 的 View 添加到 RecycleBin 的 ActiveViews 中保存起来</span></span><br><span class="line">              recycleBin.fillActiveViews(childCount, firstPosition);</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 清除所有子 View</span></span><br><span class="line">          detachAllViewsFromParent();</span><br><span class="line">          recycleBin.removeSkippedScrap();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 通常情况下，mLayoutMode 为 LAYOUT_NORMAL，走 default</span></span><br><span class="line">          <span class="keyword">switch</span> (mLayoutMode) &#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	</span><br><span class="line">          <span class="keyword">default</span>:</span><br><span class="line">		<span class="comment">// 第一次 onLayout 时，childCount 为 0</span></span><br><span class="line">              <span class="keyword">if</span> (childCount == <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="comment">// 判断布局是从上往下还是从下往上，默认为从上往下，进入 if 块</span></span><br><span class="line">                  <span class="keyword">if</span> (!mStackFromBottom) &#123;</span><br><span class="line">                      <span class="keyword">final</span> <span class="keyword">int</span> position = lookForSelectablePosition(<span class="number">0</span>, <span class="keyword">true</span>);</span><br><span class="line">                      setSelectedPositionInt(position);</span><br><span class="line">                      sel = fillFromTop(childrenTop);</span><br><span class="line">                  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                      <span class="keyword">final</span> <span class="keyword">int</span> position = lookForSelectablePosition(mItemCount - <span class="number">1</span>, <span class="keyword">false</span>);</span><br><span class="line">                      setSelectedPositionInt(position);</span><br><span class="line">                      sel = fillUp(mItemCount - <span class="number">1</span>, childrenBottom);</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125; </span><br><span class="line">		<span class="comment">// 非第一次 onLayout，childCount 不为 0，包括两种情况：</span></span><br><span class="line">		<span class="comment">// 1. 首次布局中的第二次 onLayout</span></span><br><span class="line">		<span class="comment">// 2. 后续已经存在子 View，但数据发送改变时，例如调用了 adapter.nitifyDatasetChanged()</span></span><br><span class="line">		<span class="keyword">else</span> &#123;</span><br><span class="line">                  <span class="keyword">if</span> (mSelectedPosition &gt;= <span class="number">0</span> &amp;&amp; mSelectedPosition &lt; mItemCount) &#123;</span><br><span class="line">                      sel = fillSpecific(mSelectedPosition,</span><br><span class="line">                              oldSel == <span class="keyword">null</span> ? childrenTop : oldSel.getTop());</span><br><span class="line">                  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mFirstPosition &lt; mItemCount) &#123;</span><br><span class="line">                      sel = fillSpecific(mFirstPosition,</span><br><span class="line">                              oldFirst == <span class="keyword">null</span> ? childrenTop : oldFirst.getTop());</span><br><span class="line">                  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                      sel = fillSpecific(<span class="number">0</span>, childrenTop);</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">              <span class="keyword">break</span>;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 将未使用的 ActiveViews 移动到 ScrapViews 中</span></span><br><span class="line">          recycleBin.scrapActiveViews();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 布局完成后，重置 layoutMode 和 mDataChanged </span></span><br><span class="line">          mLayoutMode = LAYOUT_NORMAL;</span><br><span class="line">          mDataChanged = <span class="keyword">false</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">      &#125; <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法较长，只列出了主要代码。重点看 switch 块，这里根据 layoutMode 进行布局，一般走 default。现在先分析第一次 onLayout 的情况，默认从上往下布局，调用 fillFromTop 方法：</p>
+<h2 id="ListView-fillFromTop"><a href="#ListView-fillFromTop" class="headerlink" title="ListView#fillFromTop"></a>ListView#fillFromTop</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> View <span class="title">fillFromTop</span><span class="params">(<span class="keyword">int</span> nextTop)</span> </span>&#123;</span><br><span class="line">    mFirstPosition = Math.min(mFirstPosition, mSelectedPosition);</span><br><span class="line">    mFirstPosition = Math.min(mFirstPosition, mItemCount - <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (mFirstPosition &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        mFirstPosition = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> fillDown(mFirstPosition, nextTop);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法先保证 mFirstPosition 的合理性，之后调用了 fillDown 方法：</p>
+<h2 id="ListView-fillDown"><a href="#ListView-fillDown" class="headerlink" title="ListView#fillDown"></a>ListView#fillDown</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> View <span class="title">fillDown</span><span class="params">(<span class="keyword">int</span> pos, <span class="keyword">int</span> nextTop)</span> </span>&#123;</span><br><span class="line">      View selectedView = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">int</span> end = (mBottom - mTop);</span><br><span class="line">      <span class="keyword">if</span> ((mGroupFlags &amp; CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) &#123;</span><br><span class="line">          end -= mListPadding.bottom;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当子元素超出当前屏幕或全部子元素遍历完时，退出循环</span></span><br><span class="line">      <span class="keyword">while</span> (nextTop &lt; end &amp;&amp; pos &lt; mItemCount) &#123;</span><br><span class="line">          <span class="keyword">boolean</span> selected = pos == mSelectedPosition;</span><br><span class="line">	<span class="comment">// 添加子 View</span></span><br><span class="line">          View child = makeAndAddView(pos, nextTop, <span class="keyword">true</span>, mListPadding.left, selected);</span><br><span class="line"></span><br><span class="line">          nextTop = child.getBottom() + mDividerHeight;</span><br><span class="line">          <span class="keyword">if</span> (selected) &#123;</span><br><span class="line">              selectedView = child;</span><br><span class="line">          &#125;</span><br><span class="line">          pos++;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      setVisibleRangeHint(mFirstPosition, mFirstPosition + getChildCount() - <span class="number">1</span>);</span><br><span class="line">      <span class="keyword">return</span> selectedView;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>重点看 makeAndAddView 方法，该方法用于添加子 View</p>
+<h2 id="ListView-makeAndAddView"><a href="#ListView-makeAndAddView" class="headerlink" title="ListView#makeAndAddView"></a>ListView#makeAndAddView</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> View <span class="title">makeAndAddView</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">int</span> y, <span class="keyword">boolean</span> flow, <span class="keyword">int</span> childrenLeft,</span></span></span><br><span class="line"><span class="function"><span class="params">          <span class="keyword">boolean</span> selected)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (!mDataChanged) &#123;</span><br><span class="line">	<span class="comment">// 先尝试从 ActiveView 中获取</span></span><br><span class="line">          <span class="keyword">final</span> View activeView = mRecycler.getActiveView(position);</span><br><span class="line">          <span class="keyword">if</span> (activeView != <span class="keyword">null</span>) &#123;</span><br><span class="line">              setupChild(activeView, position, y, flow, childrenLeft, selected, <span class="keyword">true</span>);</span><br><span class="line">              <span class="keyword">return</span> activeView;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过 obtainView 方法获取子 View</span></span><br><span class="line">      <span class="keyword">final</span> View child = obtainView(position, mIsScrap);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 测量和放置子 View</span></span><br><span class="line">      setupChild(child, position, y, flow, childrenLeft, selected, mIsScrap[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> child;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法先从 RecycleBin 的 ActiveViews 或通过 obtainView 方法获取子 View，再通过 setupChild 方法测量和放置子 View。</p>
+<p>第一次 layout 时，RecycleBin 并没有缓存 ActiveViews，所以只能通过 obtainView 方法获取子 View，ListView 并没有该方法，该方法在其父类 AbsListView 中</p>
+<h2 id="AbsListView-obtainView"><a href="#AbsListView-obtainView" class="headerlink" title="AbsListView#obtainView"></a>AbsListView#obtainView</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function">View <span class="title">obtainView</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">boolean</span>[] isScrap)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 从 ScrapViews 中获取一个 scrapView</span></span><br><span class="line">      <span class="keyword">final</span> View scrapView = mRecycler.getScrapView(position);</span><br><span class="line"><span class="comment">// 从 Adapter 的 getView 方法获取子 View，并将刚才得到的 scrapView 作为第二个参数传入</span></span><br><span class="line">      <span class="keyword">final</span> View child = mAdapter.getView(position, scrapView, <span class="keyword">this</span>);</span><br><span class="line">      <span class="keyword">if</span> (scrapView != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">if</span> (child != scrapView) &#123;</span><br><span class="line">		<span class="comment">// 该 scrapView 没有被用户利用，将其返回到 ScrapViews 中</span></span><br><span class="line">              mRecycler.addScrapView(scrapView, position);</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">if</span> (child.isTemporarilyDetached()) &#123;</span><br><span class="line">                  isScrap[<span class="number">0</span>] = <span class="keyword">true</span>;</span><br><span class="line">                  child.dispatchFinishTemporaryDetach();</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                  isScrap[<span class="number">0</span>] = <span class="keyword">false</span>;</span><br><span class="line">              &#125;</span><br><span class="line"></span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> child;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法，先从 ScrapViews 中获取一个 scrapView，之后调用 Adapter 的 getView 方法获取子 View，并将刚才得到的 scrapView 作为第二个参数传入。</p>
+<p>在第一次 layout 中，由于 scrapView 为 null，所以所有的子 View 都是通过 LayoutInflater 的 inflate 方法加载出来的，相对比较耗时，不过一开始只会加载第一屏的数据，这样就保证了 ListView 的内容能够迅速显示在屏幕上。</p>
+<h2 id="第二次-layout"><a href="#第二次-layout" class="headerlink" title="第二次 layout"></a>第二次 layout</h2><p>在某些手机版本中（9.0 版本好像没有这种情况），View 在展示到界面上时会经历两次 onLayout。如果 ListView 进行了两次 onLayout 的话，就会存在一份重复的元素了。因此 ListView 在 layoutChildren 中对第二次 layout 做了处理，非常巧妙地解决了这个问题。</p>
+<p>下面就来分析一些 ListView 的第二次 layout 过程，首先看 layoutChildren 方法中的变化：</p>
+<h3 id="ListView-layoutChildren-1"><a href="#ListView-layoutChildren-1" class="headerlink" title="ListView#layoutChildren"></a>ListView#layoutChildren</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">layoutChildren</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 当前拥有的子 View 个数，第二次 layout 时子 View 个数不为 0</span></span><br><span class="line">          <span class="keyword">final</span> <span class="keyword">int</span> childCount = getChildCount();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 将当前所有 item 的 View 添加到 RecycleBin 的 ActiveViews 中保存起来</span></span><br><span class="line">          recycleBin.fillActiveViews(childCount, firstPosition);</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 清除所有子 View</span></span><br><span class="line">          detachAllViewsFromParent();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 通常情况下，mLayoutMode 为 LAYOUT_NORMAL，走 default</span></span><br><span class="line">          <span class="keyword">switch</span> (mLayoutMode) &#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	</span><br><span class="line">          <span class="keyword">default</span>:</span><br><span class="line">              <span class="keyword">if</span> (childCount == <span class="number">0</span>) &#123;<span class="comment">// ...&#125;</span></span><br><span class="line">              <span class="comment">// 第二次 layout 时进入 else 块</span></span><br><span class="line">		<span class="keyword">else</span> &#123;</span><br><span class="line">		    <span class="comment">// 一开始没有选中 item，mSelectedPosition 的值为 -1</span></span><br><span class="line">		    <span class="comment">// 所以不会进入 if 块，而是调用 fillSpecific 方法</span></span><br><span class="line">                  <span class="keyword">if</span> (mSelectedPosition &gt;= <span class="number">0</span> &amp;&amp; mSelectedPosition &lt; mItemCount) &#123;</span><br><span class="line">                      sel = fillSpecific(mSelectedPosition,</span><br><span class="line">                              oldSel == <span class="keyword">null</span> ? childrenTop : oldSel.getTop());</span><br><span class="line">                  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mFirstPosition &lt; mItemCount) &#123;</span><br><span class="line">                      sel = fillSpecific(mFirstPosition,</span><br><span class="line">                              oldFirst == <span class="keyword">null</span> ? childrenTop : oldFirst.getTop());</span><br><span class="line">                  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                      sel = fillSpecific(<span class="number">0</span>, childrenTop);</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">              <span class="keyword">break</span>;</span><br><span class="line">          &#125;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">      &#125; <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>在第二次 layout 中，子 View 数量不为 0，所有子 View 先添加到 RecycleBin 的 ActiveViews 中保存起来。然后清除所有旧的子 View。由于子 View 数量不为 0，之后会调用 fillSpecific 方法：</p>
+<h3 id="ListView-fillSpecific"><a href="#ListView-fillSpecific" class="headerlink" title="ListView#fillSpecific"></a>ListView#fillSpecific</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> View <span class="title">fillSpecific</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">int</span> top)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">boolean</span> tempIsSelected = position == mSelectedPosition;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取并设置当前 position 的子 View</span></span><br><span class="line">      View temp = makeAndAddView(position, top, <span class="keyword">true</span>, mListPadding.left, tempIsSelected);</span><br><span class="line">      <span class="comment">// Possibly changed again in fillUp if we add rows above this one.</span></span><br><span class="line">      mFirstPosition = position;</span><br><span class="line"></span><br><span class="line">      View above;</span><br><span class="line">      View below;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 以 position 为中心，分别向上和向下获取并设置其他子 View</span></span><br><span class="line">      <span class="keyword">if</span> (!mStackFromBottom) &#123;</span><br><span class="line">          above = fillUp(position - <span class="number">1</span>, temp.getTop() - dividerHeight);</span><br><span class="line">          adjustViewsUpOrDown();</span><br><span class="line">          below = fillDown(position + <span class="number">1</span>, temp.getBottom() + dividerHeight);</span><br><span class="line">          <span class="keyword">int</span> childCount = getChildCount();</span><br><span class="line">          <span class="keyword">if</span> (childCount &gt; <span class="number">0</span>) &#123;</span><br><span class="line">              correctTooHigh(childCount);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          below = fillDown(position + <span class="number">1</span>, temp.getBottom() + dividerHeight);</span><br><span class="line">          adjustViewsUpOrDown();</span><br><span class="line">          above = fillUp(position - <span class="number">1</span>, temp.getTop() - dividerHeight);</span><br><span class="line">          <span class="keyword">int</span> childCount = getChildCount();</span><br><span class="line">          <span class="keyword">if</span> (childCount &gt; <span class="number">0</span>) &#123;</span><br><span class="line">               correctTooLow(childCount);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (tempIsSelected) &#123;</span><br><span class="line">          <span class="keyword">return</span> temp;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (above != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">return</span> above;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">return</span> below;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法先设置当前 position 的子 View，然后以 position 为中心，分别向上和向下设置其他子 View。由于第二次 layout 时传入的 position 就是第一个子 View 的位置，所以和第一次 layout 的布局顺序是差不多的。获取并设置子 View 还是通过 makeAndAddView 方法。</p>
+<h3 id="ListView-makeAndAddView-1"><a href="#ListView-makeAndAddView-1" class="headerlink" title="ListView#makeAndAddView"></a>ListView#makeAndAddView</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">private</span> View <span class="title">makeAndAddView</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">int</span> y, <span class="keyword">boolean</span> flow, <span class="keyword">int</span> childrenLeft,</span></span></span><br><span class="line"><span class="function"><span class="params">         <span class="keyword">boolean</span> selected)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (!mDataChanged) &#123;</span><br><span class="line"><span class="comment">// 第二次 layout 时，可以从 ActiveViews 中获取到子 View</span></span><br><span class="line">         <span class="keyword">final</span> View activeView = mRecycler.getActiveView(position);</span><br><span class="line">         <span class="keyword">if</span> (activeView != <span class="keyword">null</span>) &#123;</span><br><span class="line">             setupChild(activeView, position, y, flow, childrenLeft, selected, <span class="keyword">true</span>);</span><br><span class="line">             <span class="keyword">return</span> activeView;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     <span class="comment">// ... </span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>这里和第一次 layout 不同的是，由于之前已经把旧的子 View 存到了 ActiveViews，所以可以直接从 ActiveViews 中获取到子 View，无需再通过 inflate 方法加载子 View。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>第一次 layout 时，由于当前子 View 数量为 0，且在 RecycleBin 的 ActiveViews 和 ScrapViews 都没有缓存，所以只能在 Adapter 的 getView 方法中，通过 LayoutInflate 的 inflate 方法加载子 View，相对来说比较耗时，不过一开始只会加载第一屏的数据，这样就保证了 ListView 的内容能够迅速显示在屏幕上。</p>
+<p>在某些手机版本中，第一次显示 ListView 时可能会发生两次 layout。和第一次 layout 过程不同，在进行第二次 layout 时，子 View 数量不为 0，就可以先将所有子View 添加到 RecycleBin 的 ActiveViews 中保存起来。然后清除旧的子 View，之后再次设置新的子 View 时，由于之前已经把旧的子 View 存到了 ActiveViews，所以可以直接从 ActiveViews 中获取到子 View，无需再通过 inflate 方法加载子 View。</p>
+<p>（注：在 Android 9.0 版本中，Button 显示时调用了两次 onMeasure、一次 onLayout、两次 onDraw；TextView 显示时调用了两次 onMeasure、一次 onLayout、一次 onDraw；ListView 会调用多次 onMeasure、<strong>一次 onLayout</strong>、多次 onDraw。所以<strong>在 9.0 版本并不会发生第二次 layout</strong>。）</p>
+<h1 id="滑动加载更多数据"><a href="#滑动加载更多数据" class="headerlink" title="滑动加载更多数据"></a>滑动加载更多数据</h1><p>上面 layout 过程分析的只是加载第一页的数据，如果有很多数据，剩下的数据将会在滑动过程中加载。下面将分析一下滑动加载数据的过程。</p>
+<p>该过程涉及到事件分发，所以是从 AbsListView 的 onTouchEvent 方法开始，滑动对应 ACTION_MOVE，所以接下来调用 onTouchMove 方法，里面又有一个 switch 语句判断 mTouchMode，这里对应 TOUCH_MODE_SCROLL，所以接下来调用 scrollIfNeeded 方法，里面又继续调用 trackMotionScroll 方法。</p>
+<p>下面看一下 trackMotionScroll 方法：</p>
+<h2 id="AbsListView-trackMotionScroll"><a href="#AbsListView-trackMotionScroll" class="headerlink" title="AbsListView#trackMotionScroll"></a>AbsListView#trackMotionScroll</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">boolean</span> <span class="title">trackMotionScroll</span><span class="params">(<span class="keyword">int</span> deltaY, <span class="keyword">int</span> incrementalDeltaY)</span> </span>&#123;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// incrementalDeltaY &lt; 0，说明是向下滑动（这里指内容，手指是向上滑动的）</span></span><br><span class="line">      <span class="keyword">final</span> <span class="keyword">boolean</span> down = incrementalDeltaY &lt; <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// getHeaderViewsCount 和 getFooterViewsCount 默认返回 0</span></span><br><span class="line">      <span class="keyword">final</span> <span class="keyword">int</span> headerViewsCount = getHeaderViewsCount();</span><br><span class="line">      <span class="keyword">final</span> <span class="keyword">int</span> footerViewsStart = mItemCount - getFooterViewsCount();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">int</span> start = <span class="number">0</span>;	<span class="comment">// 开始移除的索引</span></span><br><span class="line">      <span class="keyword">int</span> count = <span class="number">0</span>; 	<span class="comment">// 移除的数量</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 向下滑动</span></span><br><span class="line">      <span class="keyword">if</span> (down) &#123;</span><br><span class="line">          <span class="keyword">int</span> top = -incrementalDeltaY;</span><br><span class="line">          <span class="keyword">if</span> ((mGroupFlags &amp; CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) &#123;</span><br><span class="line">              top += listPadding.top;</span><br><span class="line">          &#125;</span><br><span class="line">	<span class="comment">// 从上往下遍历子 View</span></span><br><span class="line">          <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</span><br><span class="line">              <span class="keyword">final</span> View child = getChildAt(i);</span><br><span class="line">		<span class="comment">// 如果该子 View 的 bottom 值大于等于滑动的距离</span></span><br><span class="line">		<span class="comment">// 说明该子 View 以及其后的 View 都在屏幕上，退出循环</span></span><br><span class="line">              <span class="keyword">if</span> (child.getBottom() &gt;= top) &#123;</span><br><span class="line">                  <span class="keyword">break</span>;</span><br><span class="line">              &#125; </span><br><span class="line">		<span class="comment">// 如果该子 View 的 bottom 值小于滑动的距离，说明该子 View 已经不在屏幕上</span></span><br><span class="line">		<span class="keyword">else</span> &#123; </span><br><span class="line">                  count++;</span><br><span class="line">                  <span class="keyword">int</span> position = firstPosition + i;	<span class="comment">// 该子 View 的索引</span></span><br><span class="line">			<span class="comment">// 将不在屏幕的子 View 添加进 RecycleBin 的 ScrapViews 中</span></span><br><span class="line">                  <span class="keyword">if</span> (position &gt;= headerViewsCount &amp;&amp; position &lt; footerViewsStart) &#123;</span><br><span class="line">                      child.clearAccessibilityFocus();</span><br><span class="line">                      mRecycler.addScrapView(child, position);</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	<span class="comment">// 向上滑动，和向下滑动的过程相似，也是将不在屏幕上的子 View 添加进 RecycleBin 的 ScrapViews 中</span></span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将不在屏幕的子 View 全部 detach 掉</span></span><br><span class="line">      <span class="keyword">if</span> (count &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          detachViewsFromParent(start, count);</span><br><span class="line">          mRecycler.removeSkippedScrap();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 让所有的子 View 进行相应的偏移，达到内容随手指的拖动而滚动的效果</span></span><br><span class="line">      offsetChildrenTopAndBottom(incrementalDeltaY);</span><br><span class="line">      </span><br><span class="line">      <span class="comment">// 向下滑动时，更新 mFirstPosition（之后填充布局时会用到）</span></span><br><span class="line">      <span class="keyword">if</span> (down) &#123;</span><br><span class="line">          mFirstPosition += count;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">final</span> <span class="keyword">int</span> absIncrementalDeltaY = Math.abs(incrementalDeltaY);</span><br><span class="line"><span class="comment">// 如果第一个 View 的顶部或最后一个 View 的底部移入屏幕</span></span><br><span class="line"><span class="comment">// 说明要加载屏幕外的数据来填充布局</span></span><br><span class="line">      <span class="keyword">if</span> (spaceAbove &lt; absIncrementalDeltaY || spaceBelow &lt; absIncrementalDeltaY) &#123;</span><br><span class="line">          fillGap(down);</span><br><span class="line">      &#125;</span><br><span class="line">	</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法首先将滑出屏幕的子 View 添加进 RecycleBin 的 ScrapViews 中，并全部 detach 掉。然后让剩下的子 View 进行相应的偏移，达到内容随手指的拖动而滚动的效果。最后调用 fillGap 方法加载屏幕外的数据来填充布局，fillGap 在 AbsListView 是一个抽象方法，ListView 中有具体实现。</p>
+<h2 id="ListView-fillGap"><a href="#ListView-fillGap" class="headerlink" title="ListView#fillGap"></a>ListView#fillGap</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">fillGap</span><span class="params">(<span class="keyword">boolean</span> down)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">final</span> <span class="keyword">int</span> count = getChildCount();</span><br><span class="line"><span class="comment">// 如果是向下滑动，就通过 fillDown 方法从上往下添加子 View</span></span><br><span class="line">      <span class="keyword">if</span> (down) &#123;</span><br><span class="line">          <span class="keyword">int</span> paddingTop = <span class="number">0</span>;</span><br><span class="line">          <span class="keyword">if</span> ((mGroupFlags &amp; CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) &#123;</span><br><span class="line">              paddingTop = getListPaddingTop();</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">final</span> <span class="keyword">int</span> startOffset = count &gt; <span class="number">0</span> ? getChildAt(count - <span class="number">1</span>).getBottom() + mDividerHeight :</span><br><span class="line">                  paddingTop;</span><br><span class="line">          fillDown(mFirstPosition + count, startOffset);</span><br><span class="line">          correctTooHigh(getChildCount());</span><br><span class="line">      &#125; </span><br><span class="line"><span class="comment">// 如果是向下滑动，就通过 fillUp 方法从下往上添加子 View</span></span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">int</span> paddingBottom = <span class="number">0</span>;</span><br><span class="line">          <span class="keyword">if</span> ((mGroupFlags &amp; CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) &#123;</span><br><span class="line">              paddingBottom = getListPaddingBottom();</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">final</span> <span class="keyword">int</span> startOffset = count &gt; <span class="number">0</span> ? getChildAt(<span class="number">0</span>).getTop() - mDividerHeight :</span><br><span class="line">                  getHeight() - paddingBottom;</span><br><span class="line">          fillUp(mFirstPosition - <span class="number">1</span>, startOffset);</span><br><span class="line">          correctTooLow(getChildCount());</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法根据滑动方向，调用 fillDown 或 fillUp 方法添加子 View，无论调用拿个方法，最终都是调用 makeAndAddView 方法：</p>
+<h2 id="ListView-makeAndAddView-2"><a href="#ListView-makeAndAddView-2" class="headerlink" title="ListView#makeAndAddView"></a>ListView#makeAndAddView</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> View <span class="title">makeAndAddView</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">int</span> y, <span class="keyword">boolean</span> flow, <span class="keyword">int</span> childrenLeft,</span></span></span><br><span class="line"><span class="function"><span class="params">          <span class="keyword">boolean</span> selected)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (!mDataChanged) &#123;</span><br><span class="line">	<span class="comment">// 先尝试从 ActiveViews 中获取</span></span><br><span class="line">          <span class="keyword">final</span> View activeView = mRecycler.getActiveView(position);</span><br><span class="line">          <span class="keyword">if</span> (activeView != <span class="keyword">null</span>) &#123;</span><br><span class="line">              setupChild(activeView, position, y, flow, childrenLeft, selected, <span class="keyword">true</span>);</span><br><span class="line">              <span class="keyword">return</span> activeView;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过 obtainView 方法获取子 View</span></span><br><span class="line">      <span class="keyword">final</span> View child = obtainView(position, mIsScrap);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 测量和放置子 View</span></span><br><span class="line">      setupChild(child, position, y, flow, childrenLeft, selected, mIsScrap[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> child;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>先从 RecycleBin 的 ActiveViews 中获取，如果还没有进行第二次 layout 的话，是可以获取到的，如果已经进行过第二次 layout，那么就获取不到了，因为第二次 layout 的时候已经从 ActiveViews 中拿到过子 View，而 ActiveViews 不能重复利用，所以就获取不到了。</p>
+<p>如果 ActiveViews 获取不到，就会调用 obtainView 方法获取：</p>
+<h2 id="AbsListView-obtainView-1"><a href="#AbsListView-obtainView-1" class="headerlink" title="AbsListView#obtainView"></a>AbsListView#obtainView</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function">View <span class="title">obtainView</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">boolean</span>[] isScrap)</span> </span>&#123;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 从 ScrapViews 中获取一个 scrapView</span></span><br><span class="line">      <span class="keyword">final</span> View scrapView = mRecycler.getScrapView(position);</span><br><span class="line"><span class="comment">// 从 Adapter 的 getView 方法获取子 View，并将刚才得到的 scrapView 作为第二个参数传入</span></span><br><span class="line">      <span class="keyword">final</span> View child = mAdapter.getView(position, scrapView, <span class="keyword">this</span>);</span><br><span class="line">      <span class="keyword">if</span> (scrapView != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">if</span> (child != scrapView) &#123;</span><br><span class="line">		<span class="comment">// 该 scrapView 没有被用户利用，将其返回到 ScrapViews 中</span></span><br><span class="line">              mRecycler.addScrapView(scrapView, position);</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">if</span> (child.isTemporarilyDetached()) &#123;</span><br><span class="line">                  isScrap[<span class="number">0</span>] = <span class="keyword">true</span>;</span><br><span class="line">                  child.dispatchFinishTemporaryDetach();</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                  isScrap[<span class="number">0</span>] = <span class="keyword">false</span>;</span><br><span class="line">              &#125;</span><br><span class="line"></span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> child;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>这次和第一次 layout 的情况不一样，因为之前把移除屏幕的子 View 添加到了 ScrapViews 中，所以现在就可以从 ScrapViews 中得到之前移除的子 View，并传入 Adapter 的 getView 方法。用户就可以利用这个缓存 View，不用再 inflate 一个子 View 了。</p>
+<h2 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h2><p>ListView 在滑动时，先将滑出屏幕的子 View 添加进 RecycleBin 的 ScrapViews 中，并从父布局中 detach 掉。然后让剩下的子 View 进行相应的偏移，达到内容随手指的拖动而滚动的效果。最后通过加载屏幕外的数据来填充布局，这时就可以从 ScrapViews 中得到之前移除的子 View，并传入 Adapter 的 getView 方法。用户就可以重复利用这个缓存 View，无需再重新 inflate 一个子 View。</p>
+<h1 id="Adapter-相关"><a href="#Adapter-相关" class="headerlink" title="Adapter 相关"></a>Adapter 相关</h1><p>ListView 只是负责展示各子 View，各子 View 具体如何填充数据是交由 Adapter 来完成的。ListView 通过 setAdapter 方法和 Adapter 建立联系。先看一下该方法：</p>
+<h2 id="ListView-setAdapter"><a href="#ListView-setAdapter" class="headerlink" title="ListView#setAdapter"></a>ListView#setAdapter</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAdapter</span><span class="params">(ListAdapter adapter)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果之前绑定过 Adapter，先取消注册 AdapterDataSetObserver</span></span><br><span class="line">      <span class="keyword">if</span> (mAdapter != <span class="keyword">null</span> &amp;&amp; mDataSetObserver != <span class="keyword">null</span>) &#123;</span><br><span class="line">          mAdapter.unregisterDataSetObserver(mDataSetObserver);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      resetList();</span><br><span class="line">      mRecycler.clear();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置新的 Adapter</span></span><br><span class="line">      <span class="keyword">if</span> (mHeaderViewInfos.size() &gt; <span class="number">0</span>|| mFooterViewInfos.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="comment">// 如果 ListView 有 headerView 或 footerView，需包装传入的 adapter</span></span><br><span class="line">          mAdapter = wrapHeaderListAdapterInternal(mHeaderViewInfos, mFooterViewInfos, adapter);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          mAdapter = adapter;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// AbsListView#setAdapter will update choice mode states.</span></span><br><span class="line">      <span class="keyword">super</span>.setAdapter(adapter);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (mAdapter != <span class="keyword">null</span>) &#123;</span><br><span class="line">          mAreAllItemsSelectable = mAdapter.areAllItemsEnabled();</span><br><span class="line">          mOldItemCount = mItemCount;</span><br><span class="line">	<span class="comment">// 设置 item 个数</span></span><br><span class="line">          mItemCount = mAdapter.getCount();</span><br><span class="line">          checkFocus();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 生成并在 Adapter 中注册 AdapterDataSetObserver，用于通知数据源的改变</span></span><br><span class="line">          mDataSetObserver = <span class="keyword">new</span> AdapterDataSetObserver();</span><br><span class="line">          mAdapter.registerDataSetObserver(mDataSetObserver);</span><br><span class="line"></span><br><span class="line">          mRecycler.setViewTypeCount(mAdapter.getViewTypeCount());</span><br><span class="line"></span><br><span class="line">          <span class="comment">//...</span></span><br><span class="line">      &#125; <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">// 进行视图重绘</span></span><br><span class="line">      requestLayout();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，ListView 绑定传入的 adapter，并为 adapter 注册 AdapterDataSetObserver，用于通知数据源的改变。 最后调用 requestLayout 方法，该方法最终会调用 ListView 的 onLayout，来到第一次 onLayout 的过程。</p>
+<p>如果数据源发生了改变，想要更新 ListView 的时候，我们会调用 Adapter 的 notifyDataSetChanged 方法：</p>
+<h2 id="BaseAdapter-notifyDataSetChanged"><a href="#BaseAdapter-notifyDataSetChanged" class="headerlink" title="BaseAdapter#notifyDataSetChanged"></a>BaseAdapter#notifyDataSetChanged</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">notifyDataSetChanged</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    mDataSetObservable.notifyChanged();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>又调用了 DataSetObservable 的 notifyChanged：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">notifyChanged</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span>(mObservers) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = mObservers.size() - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">            mObservers.get(i).onChanged();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里的 mObservers 定义在 DataSetObservable 的父类 Observable 中：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> ArrayList&lt;T&gt; mObservers = <span class="keyword">new</span> ArrayList&lt;T&gt;();</span><br></pre></td></tr></table></figure></p>
+<p>mObservers 的元素是从哪里来的呢？要从 setAdapter 的这一句说起：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mAdapter.registerDataSetObserver(mDataSetObserver);</span><br></pre></td></tr></table></figure></p>
+<p>这一句最终调用了 Observable 的 registerObserver 方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">registerObserver</span><span class="params">(T observer)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (observer == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"The observer is null."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">synchronized</span>(mObservers) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mObservers.contains(observer)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Observer "</span> + observer + <span class="string">" is already registered."</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        mObservers.add(observer);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，这里将 Adapter 注册的 AdapterDataSetObserver 添加进了 mObservers 中。</p>
+<p>所以饶了一大圈，Adapter 的 notifyDataSetChanged 方法最终调用了 AdapterDataSetObserver（AdapterView 的一个内部类）的 onChanged 方法：</p>
+<h3 id="AdapterDataSetObserver-onChanged"><a href="#AdapterDataSetObserver-onChanged" class="headerlink" title="AdapterDataSetObserver#onChanged"></a>AdapterDataSetObserver#onChanged</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onChanged</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 将 mDataChanged 属性设置为 true</span></span><br><span class="line">    mDataChanged = <span class="keyword">true</span>;</span><br><span class="line">    mOldItemCount = mItemCount;</span><br><span class="line">    <span class="comment">// 更新 item 数量</span></span><br><span class="line">    mItemCount = getAdapter().getCount();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 最后进行视图重绘</span></span><br><span class="line">    requestLayout();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在该方法中，首先将 mDataChanged 属性设置为 true，并更新 item 数量，最后进行视图重绘，在 onLayout 中更新子 View。</p>
+<h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><p>到此为止，对于 ListView 的 分析就告一段落了。在分析 ListView 的过程，发现经常遇到也是最重要的就是 onLayout 过程以及 RecycleBin 机制。</p>
+<p>无论是设置 Adapter 还是通知 Adapter 更新数据的过程，最终都会回到视图重绘，也就是 onLayout。而 onLayout 过程也会根据是第一次 layout、第二次 layout 还是数据源改变的情况从不同途径获取子 View，是通过 inflate 加载还是从 RecycleBin 的 ActiveViews 或 ScrapViews 获取。</p>
+<p>RecycleBin 对子 View 的回收也是 ListView 的一个重点或是巧妙之处，在第二次 layout 时，会把子 View 添加到 RecycleBin 的 ActiveViews 中，之后获取新的子 View 时就可以直接从 ActiveViews 获取。在滑动过程中，滑出屏幕的子 View 又会被添加到 RecycleBin 的 ScrapViews 中，在之后填充布局时重新利用。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://blog.csdn.net/guolin_blog/article/details/44996879" target="_blank" rel="noopener">Android ListView工作原理完全解析，带你从源码的角度彻底理解</a></li>
+<li><a href="https://www.jianshu.com/p/7f95297b6271" target="_blank" rel="noopener">ListView源码分析</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/30/Trie-树（前缀树）/" rel="next" title="Trie 树（前缀树）">
+                <i class="fa fa-chevron-left"></i> Trie 树（前缀树）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">53</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">29</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RecycleBin"><span class="nav-number">2.</span> <span class="nav-text">RecycleBin</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#类注释"><span class="nav-number">2.1.</span> <span class="nav-text">类注释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主要成员变量"><span class="nav-number">2.2.</span> <span class="nav-text">主要成员变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主要方法"><span class="nav-number">2.3.</span> <span class="nav-text">主要方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#onLayout"><span class="nav-number">3.</span> <span class="nav-text">onLayout</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AbsListView-onLayout"><span class="nav-number">3.1.</span> <span class="nav-text">AbsListView#onLayout</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ListView-layoutChildren"><span class="nav-number">3.2.</span> <span class="nav-text">ListView#layoutChildren</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ListView-fillFromTop"><span class="nav-number">3.3.</span> <span class="nav-text">ListView#fillFromTop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ListView-fillDown"><span class="nav-number">3.4.</span> <span class="nav-text">ListView#fillDown</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ListView-makeAndAddView"><span class="nav-number">3.5.</span> <span class="nav-text">ListView#makeAndAddView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AbsListView-obtainView"><span class="nav-number">3.6.</span> <span class="nav-text">AbsListView#obtainView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二次-layout"><span class="nav-number">3.7.</span> <span class="nav-text">第二次 layout</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ListView-layoutChildren-1"><span class="nav-number">3.7.1.</span> <span class="nav-text">ListView#layoutChildren</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ListView-fillSpecific"><span class="nav-number">3.7.2.</span> <span class="nav-text">ListView#fillSpecific</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ListView-makeAndAddView-1"><span class="nav-number">3.7.3.</span> <span class="nav-text">ListView#makeAndAddView</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">3.8.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#滑动加载更多数据"><span class="nav-number">4.</span> <span class="nav-text">滑动加载更多数据</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AbsListView-trackMotionScroll"><span class="nav-number">4.1.</span> <span class="nav-text">AbsListView#trackMotionScroll</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ListView-fillGap"><span class="nav-number">4.2.</span> <span class="nav-text">ListView#fillGap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ListView-makeAndAddView-2"><span class="nav-number">4.3.</span> <span class="nav-text">ListView#makeAndAddView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AbsListView-obtainView-1"><span class="nav-number">4.4.</span> <span class="nav-text">AbsListView#obtainView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结-1"><span class="nav-number">4.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Adapter-相关"><span class="nav-number">5.</span> <span class="nav-text">Adapter 相关</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ListView-setAdapter"><span class="nav-number">5.1.</span> <span class="nav-text">ListView#setAdapter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BaseAdapter-notifyDataSetChanged"><span class="nav-number">5.2.</span> <span class="nav-text">BaseAdapter#notifyDataSetChanged</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AdapterDataSetObserver-onChanged"><span class="nav-number">5.2.1.</span> <span class="nav-text">AdapterDataSetObserver#onChanged</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#写在最后"><span class="nav-number">6.</span> <span class="nav-text">写在最后</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
