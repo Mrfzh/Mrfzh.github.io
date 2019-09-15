@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="简介Activity 有四种不同的启动模式，这四种模式分别是：standard，singleTop，singleTask，singleInstance。 这四种模式中，standard模式是默认的模式，其他三个想要使用的话，要在 AndroidMainFest 文件中进行修改（通过给对应的 activity 设置 launchMode 属性，例如：）。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Activity 的启动：四种启动模式及各种 FLAG">
+<meta property="og:url" content="https://mrfzh.github.io/2019/09/15/Activity-的启动：四种启动模式及各种-FLAG/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="简介Activity 有四种不同的启动模式，这四种模式分别是：standard，singleTop，singleTask，singleInstance。 这四种模式中，standard模式是默认的模式，其他三个想要使用的话，要在 AndroidMainFest 文件中进行修改（通过给对应的 activity 设置 launchMode 属性，例如：）。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://i.ibb.co/YtQG8gz/activity-launch-mode-1.jpg">
+<meta property="og:updated_time" content="2019-09-15T09:37:20.241Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Activity 的启动：四种启动模式及各种 FLAG">
+<meta name="twitter:description" content="简介Activity 有四种不同的启动模式，这四种模式分别是：standard，singleTop，singleTask，singleInstance。 这四种模式中，standard模式是默认的模式，其他三个想要使用的话，要在 AndroidMainFest 文件中进行修改（通过给对应的 activity 设置 launchMode 属性，例如：）。">
+<meta name="twitter:image" content="https://i.ibb.co/YtQG8gz/activity-launch-mode-1.jpg">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/09/15/Activity-的启动：四种启动模式及各种-FLAG/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Activity 的启动：四种启动模式及各种 FLAG | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/09/15/Activity-的启动：四种启动模式及各种-FLAG/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Activity 的启动：四种启动模式及各种 FLAG
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-09-15 17:34:13 / 修改时间：17:37:20" itemprop="dateCreated datePublished" datetime="2019-09-15T17:34:13+08:00">2019-09-15</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>Activity 有四种不同的启动模式，这四种模式分别是：<strong>standard</strong>，<strong>singleTop</strong>，<strong>singleTask</strong>，<strong>singleInstance</strong>。</p>
+<p>这四种模式中，standard模式是默认的模式，其他三个想要使用的话，要在 AndroidMainFest 文件中进行修改（通过给对应的 activity 设置 launchMode 属性，例如：<android launchmode="singleTop">）。</android></p>
+<a id="more"></a>
+<h1 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h1><ol>
+<li><p><strong>任务栈（Task Stack）</strong> 介绍（任务栈也叫返回栈（Back Stack））：</p>
+<ol>
+<li>任务栈用于存放用户开启的 Activity</li>
+<li>在应用程序创建之初，系统会启动一个任务栈（默认一个），并存储根 Activity</li>
+<li>新启动的 Activity 将会位于栈顶</li>
+<li>当任务栈的最后一个 Activity 被销毁时，将清除任务栈并退出程序，下次再进入程序时会创建新的任务栈</li>
+</ol>
+</li>
+<li><p><strong>taskAffinity</strong> 介绍：</p>
+<ol>
+<li>taskAffinity 是 Activity 的一个属性，可在 Manifest 文件中设置。</li>
+<li>Task 也有该属性，它的值由第一个入栈的 Activity 决定</li>
+<li>Application 也有 taskAffinity 属性，它的值为 Manifest 的包名</li>
+<li>默认情况下（没有显示设置 Activity 的 taskAffinity），所有 Activity 的 taskAffinity 属性都从 Application 继承，也就是说所有 Activity 的 taskAffinity 值都相同，为包名。</li>
+<li><strong>taskAffinity 的值应该是 xxx.xxx.xxx 这种样式</strong>，如果只是普通的字符串 xxx，是安装不了应用的。</li>
+</ol>
+</li>
+<li><p>如何在代码中获取 Activity 的 taskAffinity 属性值和 Activity 所在 Task：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当前 Activity 的 taskAffinity 属性值 </span></span><br><span class="line">String taskAffinity = <span class="string">""</span>;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    ActivityInfo activityInfo = getPackageManager().getActivityInfo(getComponentName(),</span><br><span class="line">            PackageManager.GET_META_DATA);</span><br><span class="line">    taskAffinity = activityInfo.taskAffinity;</span><br><span class="line">&#125; <span class="keyword">catch</span> (PackageManager.NameNotFoundException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当前 Activity 所在 Task</span></span><br><span class="line"><span class="keyword">int</span> taskId = getTaskId();</span><br></pre></td></tr></table></figure>
+<h1 id="四种模式"><a href="#四种模式" class="headerlink" title="四种模式"></a>四种模式</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li>standard：默认的启动方式。<strong>在该模式中，每启动一个新活动，都会创建一个新的实例，并在任务栈中入栈，处于栈顶的位置</strong>。假设你不停地进入同一个活动，你点击了十次，就要返回十次才能退出程序，因为你在返回栈中创造了十个相同的实例，尽管活动是一样的。</li>
+<li>singleTop：启动一个新活动时，系统会<strong>检查该活动是否已经位于任务栈栈顶</strong>，如果是的话直接使用已存在的栈顶活动，否则就创建新活动并压入栈顶。</li>
+<li>singleTask：和 singleTop 类似，不过这里是<strong>检查整个任务栈的活动</strong>，如果发现已经存在该活动就将位于该活动上方的活动全部出栈，该活动成为新的栈顶。</li>
+<li>singleInstance：最特殊的模式，系统为<strong>该模式的活动分配一个独立的任务栈</strong>，该任务栈有且只有一个该活动实例。也就是说，如果已经创建过目标活动实例，那么将不会创建新的任务栈，而是唤醒之前创建过的活动实例。</li>
+</ul>
+<h2 id="活动生命周期的变化"><a href="#活动生命周期的变化" class="headerlink" title="活动生命周期的变化"></a>活动生命周期的变化</h2><ol>
+<li>在 standard 模式下，启动一个新活动时，旧活动和新活动依次执行的生命周期方法如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2019-09-13 14:56:58.287 9848-9848/com.feng.startoptimizationtest D/fzh: onPause: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br><span class="line">2019-09-13 14:56:58.346 9848-9848/com.feng.startoptimizationtest D/fzh: onCreate: com.feng.startoptimizationtest.FirstActivity@4511a17, run</span><br><span class="line">2019-09-13 14:56:58.351 9848-9848/com.feng.startoptimizationtest D/fzh: onStart: com.feng.startoptimizationtest.FirstActivity@4511a17, run</span><br><span class="line">2019-09-13 14:56:58.353 9848-9848/com.feng.startoptimizationtest D/fzh: onResume: com.feng.startoptimizationtest.FirstActivity@4511a17, run</span><br><span class="line">2019-09-13 14:56:58.840 9848-9848/com.feng.startoptimizationtest D/fzh: onStop: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>可以看到，先执行了旧活动的 onPause，然后依次执行新活动的 onCreate,onStart 和 onResume，最后执行旧活动的 onStop</p>
+<ol start="2">
+<li>在 singleTop, singleTask 或 singleInstance 模式下，启动一个和当前栈顶活动相同的活动时，依次执行的生命周期方法如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2019-09-13 15:08:21.972 12508-12508/com.feng.startoptimizationtest D/fzh: onPause: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br><span class="line">2019-09-13 15:08:21.973 12508-12508/com.feng.startoptimizationtest D/fzh: onResume: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>可以看到，这时不会创建新的活动，而是先后执行当前活动的 <strong>onPause 和 onResume</strong> 方法</p>
+<ol start="3">
+<li>FirstActivity 为 singleTask 模式，先启动 FirstActivity，然后启动 SecondActivity，最后再一次启动 FirstActivity，其中，最后一次启动 FirstActivity 涉及的生命周期方法如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">2019-09-13 15:20:30.938 13922-13922/com.feng.startoptimizationtest D/fzh: onPause: com.feng.startoptimizationtest.SecondActivity@45089c1, run</span><br><span class="line">2019-09-13 15:20:30.957 13922-13922/com.feng.startoptimizationtest D/fzh: onRestart: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br><span class="line">2019-09-13 15:20:30.959 13922-13922/com.feng.startoptimizationtest D/fzh: onStart: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br><span class="line">2019-09-13 15:20:30.960 13922-13922/com.feng.startoptimizationtest D/fzh: onResume: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br><span class="line">2019-09-13 15:20:31.396 13922-13922/com.feng.startoptimizationtest D/fzh: onStop: com.feng.startoptimizationtest.SecondActivity@45089c1, run</span><br><span class="line">2019-09-13 15:20:31.399 13922-13922/com.feng.startoptimizationtest D/fzh: onDestroy: com.feng.startoptimizationtest.SecondActivity@45089c1, run</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>可以看到，在 singleTask 模式下，如果任务栈已经有要启动的活动，则一次调用该活动的 <strong>onRestart, onStart 和 onResume</strong>，而在栈中位于该活动之上的其他活动将会被销毁（这里为 SecondActivity）</p>
+<ol start="4">
+<li>FirstActivity 为 singleInstance 模式，先启动 FirstActivity，然后启动 SecondActivity，最后再一次启动 FirstActivity，其中，最后一次启动 FirstActivity 涉及的生命周期方法如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2019-09-13 15:38:51.995 15361-15361/com.feng.startoptimizationtest D/fzh: onPause: com.feng.startoptimizationtest.SecondActivity@51dbca3, run</span><br><span class="line">2019-09-13 15:38:52.008 15361-15361/com.feng.startoptimizationtest D/fzh: onRestart: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br><span class="line">2019-09-13 15:38:52.009 15361-15361/com.feng.startoptimizationtest D/fzh: onStart: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br><span class="line">2019-09-13 15:38:52.011 15361-15361/com.feng.startoptimizationtest D/fzh: onResume: com.feng.startoptimizationtest.FirstActivity@162e105, run</span><br><span class="line">2019-09-13 15:38:52.668 15361-15361/com.feng.startoptimizationtest D/fzh: onStop: com.feng.startoptimizationtest.SecondActivity@51dbca3, run</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>可以看到，由于 FirstActivity 位于不同的任务栈，并且<strong>该任务栈只会存在一个活动实例</strong>，所以重新启动 FirstActivity 时不会再次创建实例，而是复用之前的实例，所以会依次执行 FirstActivity 的 <strong>onRestart, onStart 和 onResume</strong>。</p>
+<h1 id="添加-FLAG-后对-Activity-启动的影响"><a href="#添加-FLAG-后对-Activity-启动的影响" class="headerlink" title="添加 FLAG 后对 Activity 启动的影响"></a>添加 FLAG 后对 Activity 启动的影响</h1><p>上面分析的启动模式都是静态设置的，也就是在 Manifest 文件中设置的，并且只分析了 Activity 启动 Activity 的情况，采用的是默认的 Intent，没有额外添加任何 FLAG。</p>
+<p>下面就来分析一下给 Intent 设置了 FLAG 后，对 Activity 的启动由什么影响：</p>
+<h2 id="Intent-FLAG-ACTIVITY-NEW-TASK"><a href="#Intent-FLAG-ACTIVITY-NEW-TASK" class="headerlink" title="Intent.FLAG_ACTIVITY_NEW_TASK"></a>Intent.FLAG_ACTIVITY_NEW_TASK</h2><ol>
+<li>该 FLAG 的作用：</li>
+</ol>
+<p>这个 FLAG 跟 SingleInstance 有点相似，<strong>设置了该 FLAG 后，会检查是否存在与目标 Activity 的 taskAffinity 值相同的 Task，如果不存在的话就新建一个这样的 Task 并将目标 Activity 压入栈顶</strong>。</p>
+<p>要注意的是，<strong>默认情况下，同一个应用的所有 Activity 的 taskAffinity 值是相同的</strong>，为应用包名。所以如果没有在 Manifest 文件中将目标活动的 launchMode 属性设置为 singleInstance，那么启动新活动时添加了 Intent.FLAG_ACTIVITY_NEW_TASK 这个 FLAG 并不会产生影响，新活动还是在同一个栈中。</p>
+<p>而如果<strong>没有设置该 FLAG 的话，即使两个 Activity 的 taskAffinity 值不一样，也不会新建一个 Task</strong>。</p>
+<ol start="2">
+<li>和 SingleInstance 的区别：</li>
+</ol>
+<ul>
+<li>Intent.FLAG_ACTIVITY_NEW_TASK 这个 FLAG 只是决定是否新建一个 Task，没有规定新的 Task 只能有一个活动实例，而 SingleInstance 模式下新的 Task 只能有一个活动实例</li>
+<li>在默认情况下，同一个应用的所有 Activity 的 taskAffinity 值相同，此 FLAG 不会创建新的 Task，而 SingleInstance 模式下会创建新的 Task</li>
+</ul>
+<ol start="3">
+<li>根据启动模式可分为两类：</li>
+</ol>
+<ul>
+<li>singleTask 和 singleInstance 在 AMS 中被预处理后，<strong>隐性</strong>地设置了 Intent.FLAG_ACTIVITY_NEW_TASK 这个 FLAG</li>
+<li>standard 和 singleTop 则需要<strong>显性</strong>地设置该 FLAG，即通过 Intent.setFlags 设置</li>
+</ul>
+<ol start="4">
+<li>非 Activity 启动 Activity 都必须添加 Intent.FLAG_ACTIVITY_NEW_TASK 才行。例如在 Service 中启动 Activity，需要这样写：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent(StartActivityService.<span class="keyword">this</span>, FirstActivity.class);</span><br><span class="line">intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); </span><br><span class="line">startActivity(intent);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>如果没有添加该 FLAG 的话，就会抛出异常（据说在 Android 7.0 和 8.0 版本不会抛出异常，不过在 Android 9.0 已经修复了这个 bug） </p>
+<p>为什么要这样限制呢？</p>
+<blockquote>
+<p>如果某个活动不是通过 Activity 启动的，说明不是用户主动的行为，也就是说这个活动可能会出现在任何 APP 的活动之上，这时如果不用 Intent.FLAG_ACTIVITY_NEW_TASK 将这个活动限制在自己的 Task 中，就可能让用户误以为新的活动是属于当前 APP，这是不合理的。</p>
+</blockquote>
+<ol start="5">
+<li>有一种情况比较特殊，并不会启动新的 Activity：</li>
+</ol>
+<p>如果新启动 Activity 的 taskAffinity 和当前 task 的该属性一致，此时<strong>如果新 Activity 的 Intent 和 当前 task 的根 Activity 的 Intent 一致的话，就不启动新 Activity</strong>，否则启动新 Activity。</p>
+<p>下面用一张图来说明：（此图出处：<a href="https://www.jianshu.com/p/b3a95747ee91）" target="_blank" rel="noopener">https://www.jianshu.com/p/b3a95747ee91）</a></p>
+<p><img src="https://i.ibb.co/YtQG8gz/activity-launch-mode-1.jpg" alt></p>
+<h2 id="Intent-FLAG-ACTIVITY-CLEAR-TASK"><a href="#Intent-FLAG-ACTIVITY-CLEAR-TASK" class="headerlink" title="Intent.FLAG_ACTIVITY_CLEAR_TASK"></a>Intent.FLAG_ACTIVITY_CLEAR_TASK</h2><ol>
+<li>首先要注意，Intent.FLAG_ACTIVITY_CLEAR_TASK 这个 FLAG 必须和 Intent.FLAG_ACTIVITY_NEW_TASK 配合使用，即：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><strong>单独使用 Intent.FLAG_ACTIVITY_CLEAR_TASK 是没有作用</strong>的。</p>
+<ol start="2">
+<li>两个 FLAG 配合使用的效果：</li>
+</ol>
+<p>如果目标 Task 已存在，就先<strong>清空目标 Task</strong>（将目标 Task 原有的 Activity 全部出栈），然后新 Activity 称为目标 Task 的根 Activity。如果目标 Task 还不存在，就新建目标 Task，新 Activity 成为根 Activity（这和单独设置 Intent.FLAG_ACTIVITY_NEW_TASK 的效果一样）。</p>
+<ol start="3">
+<li>和启动模式的搭配：</li>
+</ol>
+<ul>
+<li>如果新 Activity 的 launchMode 为 standard, singleTop 或 singleTask，那么启动模式对 FLAG 没有影响，还是会清除原有 Task 的 Activity。</li>
+<li>如果新 Activity 的 launchMode 为 singleInstance，分两种情况：<ol>
+<li>新 Activity 没有创建过，那么该 FLAG 就不起作用，只有 singleInstance 其作用，新 Activity 成为一个新建 Task 的根 Activity，其他 Activity 不受影响。</li>
+<li>新 Activity 已经创建过了，那么该 FLAG 就其作用了，目标 Task 中原有的实例会被销毁，然后新 Activity 成为目标 Task 的根 Activity。</li>
+</ol>
+</li>
+</ul>
+<h2 id="Intent-FLAG-ACTIVITY-SINGLE-TOP"><a href="#Intent-FLAG-ACTIVITY-SINGLE-TOP" class="headerlink" title="Intent.FLAG_ACTIVITY_SINGLE_TOP"></a>Intent.FLAG_ACTIVITY_SINGLE_TOP</h2><p>这个 FLAG 的效果和在 Manifest 文件设置 launchMode 为 singleTop 是一样的。</p>
+<p>当然，它还可以和 Intent.FLAG_ACTIVITY_NEW_TASK，Intent.FLAG_ACTIVITY_CLEAR_TASK 等 FLAG 配合使用，从而产生和 singleTop 不一样的效果。</p>
+<h2 id="Intent-FLAG-ACTIVITY-CLEAR-TOP"><a href="#Intent-FLAG-ACTIVITY-CLEAR-TOP" class="headerlink" title="Intent.FLAG_ACTIVITY_CLEAR_TOP"></a>Intent.FLAG_ACTIVITY_CLEAR_TOP</h2><ol>
+<li>单独使用 Intent.FLAG_ACTIVITY_CLEAR_TOP，没有设置 launchMode 的情况：</li>
+</ol>
+<p>假如 Task 中由下往上依次有 A、B、C，这时 C 启动 B，并且带有 Intent.FLAG_ACTIVITY_CLEAR_TOP，产生的结果是：Task 中原有的 B,C 出栈，新创建的 B 入栈，成为新的栈顶。</p>
+<p>也就是说<strong>单独使用这个 FLAG 时，无论新 Activity 是否已经存在于栈中，它都会被创建</strong>。</p>
+<ol start="2">
+<li>和其它 launchMode 结合的情况：</li>
+</ol>
+<ul>
+<li>当新 Activity 的 launchMode 为 singleTop 时，和该 FLAG 结合后，作用相当于 singleTask。</li>
+<li>当新 Activity 的 launchMode 为 singleTask 或 singleInstance 时，该 FLAG 不起作用，由相应的 launchMode 主导。</li>
+</ul>
+<ol start="3">
+<li>Intent.FLAG_ACTIVITY_CLEAR_TOP 和 Intent.FLAG_ACTIVITY_SINGLE_TOP 配合使用的情况：</li>
+</ol>
+<p>由于 Intent.FLAG_ACTIVITY_SINGLE_TOP 相当于 launchMode 为 singleTop 的情况，所以由上面第二点可知，两者结合使用的效果就相当于 launchMode 为 singleTask。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://blog.csdn.net/zy_jibai/article/details/80587083#commentBox" target="_blank" rel="noopener">细谈Activity四种启动模式</a></li>
+<li><a href="https://www.jianshu.com/p/b3a95747ee91" target="_blank" rel="noopener">Android面试官装逼失败之：Activity的启动模式</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/13/wait-notify-机制/" rel="next" title="wait & notify 机制">
+                <i class="fa fa-chevron-left"></i> wait & notify 机制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#预备知识"><span class="nav-number">2.</span> <span class="nav-text">预备知识</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四种模式"><span class="nav-number">3.</span> <span class="nav-text">四种模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">3.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#活动生命周期的变化"><span class="nav-number">3.2.</span> <span class="nav-text">活动生命周期的变化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#添加-FLAG-后对-Activity-启动的影响"><span class="nav-number">4.</span> <span class="nav-text">添加 FLAG 后对 Activity 启动的影响</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Intent-FLAG-ACTIVITY-NEW-TASK"><span class="nav-number">4.1.</span> <span class="nav-text">Intent.FLAG_ACTIVITY_NEW_TASK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Intent-FLAG-ACTIVITY-CLEAR-TASK"><span class="nav-number">4.2.</span> <span class="nav-text">Intent.FLAG_ACTIVITY_CLEAR_TASK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Intent-FLAG-ACTIVITY-SINGLE-TOP"><span class="nav-number">4.3.</span> <span class="nav-text">Intent.FLAG_ACTIVITY_SINGLE_TOP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Intent-FLAG-ACTIVITY-CLEAR-TOP"><span class="nav-number">4.4.</span> <span class="nav-text">Intent.FLAG_ACTIVITY_CLEAR_TOP</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
