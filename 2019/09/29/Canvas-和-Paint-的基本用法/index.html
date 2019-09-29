@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言在自定义 View 中，Canvas 和 Paint 配合使用，可以绘制各种 View。其中，Canvas 是画布的意思，Paint 是画笔的意思。本文主要介绍这两个类的一些基本 API，以及它们之间的配合使用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Canvas 和 Paint 的基本用法">
+<meta property="og:url" content="https://mrfzh.github.io/2019/09/29/Canvas-和-Paint-的基本用法/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="前言在自定义 View 中，Canvas 和 Paint 配合使用，可以绘制各种 View。其中，Canvas 是画布的意思，Paint 是画笔的意思。本文主要介绍这两个类的一些基本 API，以及它们之间的配合使用。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://i.ibb.co/2YpCy8f/canvas-1.png">
+<meta property="og:image" content="https://i.ibb.co/ZMzpCn1/paint-style.png">
+<meta property="og:image" content="https://i.ibb.co/4Mf8nD8/paint-cap.png">
+<meta property="og:image" content="https://i.ibb.co/s3tr31k/draw-Arc-use-Center.png">
+<meta property="og:image" content="https://i.ibb.co/Dz2LtTS/draw-Arc-not-use-Center.png">
+<meta property="og:image" content="https://i.ibb.co/gg24T45/draw-Arc-sweep-Angle360.png">
+<meta property="og:image" content="https://i.ibb.co/S7F1Z8j/canvas-rotate-1.png">
+<meta property="og:image" content="https://i.ibb.co/2gRp8v5/canvas-rotate-2.png">
+<meta property="og:image" content="https://i.ibb.co/vqbJ4Mz/canvas-rotate-3.png">
+<meta property="og:image" content="https://i.ibb.co/NSMNc5w/canvas-rotate-4.png">
+<meta property="og:image" content="https://i.ibb.co/ypqK1SY/canvas-scale.png">
+<meta property="og:updated_time" content="2019-09-29T09:39:38.057Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Canvas 和 Paint 的基本用法">
+<meta name="twitter:description" content="前言在自定义 View 中，Canvas 和 Paint 配合使用，可以绘制各种 View。其中，Canvas 是画布的意思，Paint 是画笔的意思。本文主要介绍这两个类的一些基本 API，以及它们之间的配合使用。">
+<meta name="twitter:image" content="https://i.ibb.co/2YpCy8f/canvas-1.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/09/29/Canvas-和-Paint-的基本用法/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Canvas 和 Paint 的基本用法 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/09/29/Canvas-和-Paint-的基本用法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Canvas 和 Paint 的基本用法
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-09-29 17:38:18 / 修改时间：17:39:38" itemprop="dateCreated datePublished" datetime="2019-09-29T17:38:18+08:00">2019-09-29</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在自定义 View 中，Canvas 和 Paint 配合使用，可以绘制各种 View。其中，Canvas 是画布的意思，Paint 是画笔的意思。本文主要介绍这两个类的一些基本 API，以及它们之间的配合使用。</p>
+<a id="more"></a>
+<h1 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h1><h2 id="绘图坐标系和视图坐标系"><a href="#绘图坐标系和视图坐标系" class="headerlink" title="绘图坐标系和视图坐标系"></a>绘图坐标系和视图坐标系</h2><ol>
+<li>绘图坐标系</li>
+</ol>
+<p>在绘制图形的时候，需要确定一个落笔点，这个落笔点用坐标来表示。这个坐标所在的坐标系就是绘图坐标系。</p>
+<p>初始状态下，Canvas 的左上角为坐标系的原点。在绘图过程中，绘图坐标是根据原点来确定的，这个原点是可以移动的。</p>
+<ol start="2">
+<li>视图坐标系</li>
+</ol>
+<p>理论上 Canvas 是没有边界的，但是我们的手机屏幕是有界的。可以理解为我们是通过一个方形的洞（手机屏幕）来看一张巨画（Canvas）。</p>
+<p>手机屏幕也有一个坐标系，原点位于屏幕左上角，向右和向下分别为 x 轴和 y 轴的正方向，称为视图坐标系。</p>
+<p>在介绍绘图坐标系时所说的原点移动是指落笔点的移动，而画布本身是静止的。如果我们所绘制的图的范围超出了屏幕范围，那么就可以通过移动屏幕来查看超出范围的部分。移动屏幕可以使用 scrollTo 和 scrollBy。</p>
+<p>对于手机屏幕和 Canvas 的关系，可以参考下图：（图片出处：<a href="https://juejin.im/post/5cc3d0686fb9a031f4160713#heading-3" target="_blank" rel="noopener">https://juejin.im/post/5cc3d0686fb9a031f4160713#heading-3</a> ）</p>
+<p><img src="https://i.ibb.co/2YpCy8f/canvas-1.png" alt></p>
+<h1 id="Paint-的基本用法"><a href="#Paint-的基本用法" class="headerlink" title="Paint 的基本用法"></a>Paint 的基本用法</h1><h2 id="Paint-的创建"><a href="#Paint-的创建" class="headerlink" title="Paint 的创建"></a>Paint 的创建</h2><p>Paint 的创建有三种方式：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Paint()     <span class="comment">// 默认的创建方式</span></span><br><span class="line"></span><br><span class="line">Paint(<span class="keyword">int</span> flags)    <span class="comment">// 可通过 flags 参数进行配置</span></span><br><span class="line"></span><br><span class="line">Paint(Paint paint)  <span class="comment">// 相当于复制一个 paint</span></span><br></pre></td></tr></table></figure></p>
+<p>第一种方式是默认形式，没有配置任何 flag。</p>
+<p>第二种方式不仅可以创建新画笔，还可以添加 flag。主要有这几种 flag：</p>
+<table>
+<thead>
+<tr>
+<th>flag</th>
+<th>简介</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ANTI_ALIAS_FLAG</td>
+<td>开启抗锯齿功能</td>
+</tr>
+<tr>
+<td>FILTER_BITMAP_FLAG</td>
+<td>设置位图进行滤波处理</td>
+</tr>
+<tr>
+<td>DITHER_FLAG</td>
+<td>在绘制时启用抖动</td>
+</tr>
+</tbody>
+</table>
+<p>如果要添加多个 flag，中间可用’|’进行连接，例如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Paint paint = <span class="keyword">new</span> Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);</span><br></pre></td></tr></table></figure></p>
+<p>第三种方式根据已有的画笔复制一个新画笔，复制后的画笔是一个全新的画笔，对复制后的画笔进行改动不会影响被复制的画笔。</p>
+<h2 id="画笔颜色"><a href="#画笔颜色" class="headerlink" title="画笔颜色"></a>画笔颜色</h2><p>我们经常要用到颜色，这里的颜色还包括透明度，在设置颜色时主要有这几个相关的方法：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>简介</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>setColor(int color)</td>
+<td>设置颜色</td>
+</tr>
+<tr>
+<td>setAlpha(int a)</td>
+<td>设置透明度</td>
+</tr>
+<tr>
+<td>setARGB(int a, int r, int g, int b)</td>
+<td>设置透明度及颜色</td>
+</tr>
+</tbody>
+</table>
+<p>在设置透明度时，其参数的取值范围为 0 - 255，即 0x00 - 0xFF。同理，setARGB 的另外 3 个参数的取值也是 0 - 255。例如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mPaint.setARGB(<span class="number">0xFF</span>, <span class="number">0x03</span>, <span class="number">0xA9</span>, <span class="number">0xF4</span>);  <span class="comment">// （1）</span></span><br><span class="line"></span><br><span class="line">mPaint.setARGB(<span class="number">255</span>, <span class="number">3</span>, <span class="number">169</span>, <span class="number">244</span>);   <span class="comment">// （2）</span></span><br><span class="line"></span><br><span class="line">mPaint.setColor(<span class="number">0xFF03A9F4</span>);        <span class="comment">// （3）</span></span><br></pre></td></tr></table></figure></p>
+<p>这三个式子是等价的，只不过第一个是用十六进制表示，而第二个用十进制表示，最后一个则是把几个参数合起来表示。</p>
+<p>要注意的是，如果第一个参数传入 0，或者（3）传入的数为 0x03A9F4 ，即透明度为 0 时，颜色变为透明，你是看不见颜色的。</p>
+<p>除了根据 ARGB 指定颜色外，还可以使用系统内置的一些颜色，例如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mPaint.setColor(Color.RED);</span><br></pre></td></tr></table></figure></p>
+<h2 id="画笔模式（Paint-Style）"><a href="#画笔模式（Paint-Style）" class="headerlink" title="画笔模式（Paint.Style）"></a>画笔模式（Paint.Style）</h2><p>这里的画笔模式指在绘制一个图形的时候，是绘制图形轮廓还是填充图形内容，或者两者兼有。它有以下三种模式：</p>
+<table>
+<thead>
+<tr>
+<th>Style</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Paint.Style.FILL</td>
+<td>填充内容，默认模式</td>
+</tr>
+<tr>
+<td>Paint.Style.STROKE</td>
+<td>描边，只绘制图形轮廓</td>
+</tr>
+<tr>
+<td>Paint.Style.FILL_AND_STROKE</td>
+<td>填充 + 描边，同时填充内容和绘制轮廓</td>
+</tr>
+</tbody>
+</table>
+<p>下面用一张图来说明各模式的区别：（图片出处：<a href="https://www.gcssloop.com/customview/paint-base" target="_blank" rel="noopener">https://www.gcssloop.com/customview/paint-base</a> ）</p>
+<p><img src="https://i.ibb.co/ZMzpCn1/paint-style.png" alt></p>
+<p>使用方式如下，下面用三种模式各画了一个圆：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mPaint.setStyle(Paint.Style.STROKE);</span><br><span class="line">mPaint.setStrokeWidth(<span class="number">50</span>);</span><br><span class="line">mPaint.setColor(Color.RED);</span><br><span class="line">canvas.drawCircle(<span class="number">0f</span>, <span class="number">0f</span>, <span class="number">100f</span>, mPaint);</span><br><span class="line"></span><br><span class="line">mPaint.setStyle(Paint.Style.FILL);</span><br><span class="line">canvas.drawCircle(<span class="number">0f</span>, <span class="number">300f</span>, <span class="number">100f</span>, mPaint);</span><br><span class="line"></span><br><span class="line">mPaint.setStyle(Paint.Style.FILL_AND_STROKE);</span><br><span class="line">canvas.drawCircle(<span class="number">0f</span>, <span class="number">600f</span>, <span class="number">100f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<h2 id="画笔线帽（Paint-Cap）"><a href="#画笔线帽（Paint-Cap）" class="headerlink" title="画笔线帽（Paint.Cap）"></a>画笔线帽（Paint.Cap）</h2><p>画笔线帽用于指定线段开始和结束时的效果。它有以下三种类型：</p>
+<table>
+<thead>
+<tr>
+<th>Cap</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Paint.Cap.BUTT</td>
+<td>无线帽，默认类型</td>
+</tr>
+<tr>
+<td>Paint.Cap.ROUND</td>
+<td>以线条宽度为直径，在开头和结尾分别添加一个半圆</td>
+</tr>
+<tr>
+<td>Paint.Cap.SQUARE</td>
+<td>以线条宽度为边长，在开头和结尾分别添加半个正方形</td>
+</tr>
+</tbody>
+</table>
+<p>使用方式如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mPaint.setStrokeCap(Paint.Cap.ROUND);</span><br><span class="line">mPaint.setStyle(Paint.Style.STROKE);</span><br><span class="line">mPaint.setStrokeWidth(<span class="number">100</span>);</span><br><span class="line">canvas.drawLine(-<span class="number">200f</span>, <span class="number">0f</span>, <span class="number">200f</span>, <span class="number">0f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>三种类型的区别如图：（图片出处：<a href="https://www.gcssloop.com/customview/paint-base" target="_blank" rel="noopener">https://www.gcssloop.com/customview/paint-base</a> ）</p>
+<p><img src="https://i.ibb.co/4Mf8nD8/paint-cap.png" alt></p>
+<h2 id="其它基本方法"><a href="#其它基本方法" class="headerlink" title="其它基本方法"></a>其它基本方法</h2><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>setAntiAlias(boolean aa)</td>
+<td>是否抗锯齿，设置了抗锯齿后边界变模糊，锯齿减少</td>
+</tr>
+<tr>
+<td>setDither(boolean dither)</td>
+<td>是否使用图像抖动，使用后绘制出来的图片更加平滑和饱满，更加清晰</td>
+</tr>
+<tr>
+<td>setFilterBitmap(boolean filter)</td>
+<td>是否对位图进行滤波处理</td>
+</tr>
+</tbody>
+</table>
+<h1 id="Canvas-的基本用法"><a href="#Canvas-的基本用法" class="headerlink" title="Canvas 的基本用法"></a>Canvas 的基本用法</h1><h2 id="Canvas-的常用操作速查表"><a href="#Canvas-的常用操作速查表" class="headerlink" title="Canvas 的常用操作速查表"></a>Canvas 的常用操作速查表</h2><table>
+<thead>
+<tr>
+<th>操作类型</th>
+<th>相关 API</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>绘制颜色</td>
+<td>drawColor, drawARGB, drawRGB</td>
+<td>使用单一颜色填充整个画布</td>
+</tr>
+<tr>
+<td>绘制基本形状</td>
+<td>drawPoint, drawPoints, drawLine, drawLines, drawRect, drawRoundRect, drawOval, drawCircle, drawArc</td>
+<td>依次为画点、线、矩形、圆角矩形、椭圆、圆、圆弧</td>
+</tr>
+<tr>
+<td>绘制图片</td>
+<td>drawBitmap, drawPicture</td>
+<td>绘制位图和图片</td>
+</tr>
+<tr>
+<td>绘制文本</td>
+<td>drawText, drawTextOnPath</td>
+<td>绘制文字，根据路径绘制文字</td>
+</tr>
+<tr>
+<td>绘制路径</td>
+<td>drawPath</td>
+<td>绘制路径</td>
+</tr>
+<tr>
+<td>画布裁剪</td>
+<td>clipPath, clipRect</td>
+<td>设置画布的显示区域</td>
+</tr>
+<tr>
+<td>画布快照</td>
+<td>save, restore, restoreToCount, getSaveCount</td>
+<td>依次为保存状态、回滚到上一次保存的状态、回滚到指定状态、获取保存次数</td>
+</tr>
+<tr>
+<td>画布变换</td>
+<td>translate, scale, rotate, skew</td>
+<td>依次为平移、缩放、旋转、错切</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Canvas-的绘制"><a href="#Canvas-的绘制" class="headerlink" title="Canvas 的绘制"></a>Canvas 的绘制</h2><h3 id="绘制颜色"><a href="#绘制颜色" class="headerlink" title="绘制颜色"></a>绘制颜色</h3><p>可以使用 drawColor, drawARGB, drawRGB 等方法给画布设置颜色，这些方法的使用和 Paint 中相关方法的使用相似，例如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 画布颜色变为红色</span></span><br><span class="line">canvas.drawColor(Color.RED);</span><br></pre></td></tr></table></figure></p>
+<h3 id="绘制点"><a href="#绘制点" class="headerlink" title="绘制点"></a>绘制点</h3><p>有关的方法是 drawPoint 和 drawPoints，先看 drawPoint 方法，该方法绘制一个点。方法具体如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">drawPoint(<span class="keyword">float</span> x, <span class="keyword">float</span> y, <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>第一个和第二个参数是点的坐标(x, y)，第三个参数是使用的画笔。下面看下该方法的使用：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mPaint.setColor(Color.RED);     <span class="comment">// 点的颜色</span></span><br><span class="line">mPaint.setStrokeWidth(<span class="number">30f</span>);     <span class="comment">// 宽度，不设置的话太小，可能看不见点</span></span><br><span class="line">canvas.drawPoint(<span class="number">0f</span>, <span class="number">0f</span>, mPaint);   <span class="comment">// 画出的点为正方形</span></span><br><span class="line"></span><br><span class="line">mPaint.setStrokeCap(Paint.Cap.ROUND);   <span class="comment">// 设置为圆点</span></span><br><span class="line">canvas.drawPoint(<span class="number">0f</span>, <span class="number">50f</span>, mPaint);  <span class="comment">// 画出的点为圆形</span></span><br></pre></td></tr></table></figure></p>
+<p>再看另一个方法 drawPoints，该方法绘制一组点，方法具体如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">drawPoints(<span class="meta">@Size</span>(multiple = <span class="number">2</span>) <span class="meta">@NonNull</span> <span class="keyword">float</span>[] pts, <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>方法有两个参数，第一个参数是 float 数组，要求元素个数是 2 的倍数，每两个元素为一组（x, y 坐标）。第二个参数是使用的画笔。使用如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 10 个元素，每两个元素为一组，即有 5 个点，分别为</span></span><br><span class="line"><span class="comment">// (0, 0), (0, 50), (0, -50), (-50, 0), (50, 0)</span></span><br><span class="line"><span class="keyword">float</span>[] points = &#123;<span class="number">0f</span>, <span class="number">0f</span>, <span class="number">0f</span>, <span class="number">50f</span>, <span class="number">0f</span>, -<span class="number">50f</span>, -<span class="number">50f</span>, <span class="number">0f</span>, <span class="number">50f</span>, <span class="number">0f</span>&#125;;</span><br><span class="line">canvas.drawPoints(points, mPaint);</span><br></pre></td></tr></table></figure></p>
+<h3 id="绘制直线"><a href="#绘制直线" class="headerlink" title="绘制直线"></a>绘制直线</h3><p>同样有两个方法绘制直线，分别是 drawLine 和 drawLines，先看 drawLine 方法，该方法绘制一条直线：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">drawLine(<span class="keyword">float</span> startX, <span class="keyword">float</span> startY, <span class="keyword">float</span> stopX, <span class="keyword">float</span> stopY,</span><br><span class="line">            <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>方法有 5 个参数，第 1 和第 2 个参数为起点的坐标(x, y)，第 3 和第 4 个参数为终点的坐标(x, y)，第 5 个参数为画笔。使用如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mPaint.setColor(Color.RED);</span><br><span class="line">mPaint.setStrokeWidth(<span class="number">30f</span>);     <span class="comment">// 宽度 </span></span><br><span class="line">canvas.drawLine(-<span class="number">100f</span>, <span class="number">0f</span>, <span class="number">0f</span>, <span class="number">100f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>另一方法 drawLines 可以绘制多条直线，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">drawLines(@Size(multiple = 4) @NonNull float[] pts, @NonNull Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>和 drawPoints 类似，它的第一个参数也是一个 float 数组，不过这次要求元素个数为 4 的倍数，即每 4 个为一组。第二个参数是画笔。使用如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 每四个为一组，这里有 8 个元素，即有两条直线</span></span><br><span class="line"><span class="keyword">float</span>[] lines = &#123;-<span class="number">200f</span>, -<span class="number">200f</span>, <span class="number">200f</span>, <span class="number">200f</span>, -<span class="number">100f</span>, <span class="number">0f</span>, <span class="number">100f</span>, <span class="number">0f</span>&#125;;</span><br><span class="line">canvas.drawLines(lines, mPaint);</span><br></pre></td></tr></table></figure></p>
+<h3 id="绘制形状"><a href="#绘制形状" class="headerlink" title="绘制形状"></a>绘制形状</h3><p>Canvas 可以画的形状有很多，例如矩形、圆角矩形、椭圆、圆等。下面依次看一下：</p>
+<h4 id="绘制矩形和圆角矩形"><a href="#绘制矩形和圆角矩形" class="headerlink" title="绘制矩形和圆角矩形"></a>绘制矩形和圆角矩形</h4><p>绘制矩形可以使用 drawRect 方法，该方法有三种形式：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">drawRect(<span class="meta">@NonNull</span> RectF rect, <span class="meta">@NonNull</span> Paint paint)                                             </span><br><span class="line">drawRect(<span class="meta">@NonNull</span> Rect r, <span class="meta">@NonNull</span> Paint paint)</span><br><span class="line">drawRect(<span class="keyword">float</span> left, <span class="keyword">float</span> top, <span class="keyword">float</span> right, <span class="keyword">float</span> bottom, <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>第一种和第二种类似，只是第一个参数不同，RectF 和 Rect 相似，只是前者使用 float 表示边长，而后者使用 int 表示边长。RectF 和 Rect 封装了一个矩形。</p>
+<p>第三种重载方法的第 1 和第 2 个参数可以理解为左上角的坐标，第 3 和第 4 个参数可以理解为右下角的坐标。第 5 个参数为画笔。</p>
+<p>下面来看下它们的使用：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">    mPaint.setColor(Color.BLUE);</span><br><span class="line">    mPaint.setStyle(Paint.Style.FILL);  <span class="comment">// 填充内容</span></span><br><span class="line">    <span class="comment">// 该矩形左上角的坐标为 (100, 200)，长为 600-100 = 500，宽为 500-200 = 300</span></span><br><span class="line">    canvas.drawRect(<span class="number">100f</span>, <span class="number">200f</span>, <span class="number">600f</span>, <span class="number">500f</span>, mPaint);</span><br><span class="line"><span class="comment">//    // 等价于上一行</span></span><br><span class="line"><span class="comment">//    canvas.drawRect(new RectF(100f, 200f, 600f, 500f), mPaint);</span></span><br></pre></td></tr></table></figure></p>
+<p>绘制圆角矩形和绘制矩形类似，使用 drawRoundRect 方法，它有两个重载方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">drawRoundRect(<span class="meta">@NonNull</span> RectF rect, <span class="keyword">float</span> rx, <span class="keyword">float</span> ry, <span class="meta">@NonNull</span> Paint paint)</span><br><span class="line">drawRoundRect(<span class="keyword">float</span> left, <span class="keyword">float</span> top, <span class="keyword">float</span> right, <span class="keyword">float</span> bottom, <span class="keyword">float</span> rx, <span class="keyword">float</span> ry,</span><br><span class="line">            <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，比起 drawRect 方法，在 Paint 参数前，多了两个参数。分别表示在 x 轴和 y 轴方向上圆角的半径。使用如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 可以看到左右两侧是一个半圆</span></span><br><span class="line">canvas.drawRoundRect(<span class="number">100f</span>, <span class="number">200f</span>, <span class="number">600f</span>, <span class="number">500f</span>, <span class="number">100f</span>, <span class="number">150f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<h4 id="绘制椭圆和圆"><a href="#绘制椭圆和圆" class="headerlink" title="绘制椭圆和圆"></a>绘制椭圆和圆</h4><p>绘制椭圆使用 drawOval 方法，它有两个重载方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">drawOval(<span class="meta">@NonNull</span> RectF oval, <span class="meta">@NonNull</span> Paint paint)</span><br><span class="line">drawOval(<span class="keyword">float</span> left, <span class="keyword">float</span> top, <span class="keyword">float</span> right, <span class="keyword">float</span> bottom, <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>参数跟上面的 drawRect 方法是一样的，可以说是在一个矩形框里绘制椭圆，该椭圆紧贴矩形边界。使用方式如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">canvas.drawOval(<span class="number">100f</span>, <span class="number">200f</span>, <span class="number">600f</span>, <span class="number">500f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>绘制圆使用 drawCircle 方法，该方法如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">drawCircle(<span class="keyword">float</span> cx, <span class="keyword">float</span> cy, <span class="keyword">float</span> radius, <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>第 1 和第 2 个参数是圆心的坐标(x, y)，第 3 个参数是半径，第 4 个参数是画笔。使用方式如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 以 (600, 500) 为圆心，100 为半径画圆</span></span><br><span class="line">canvas.drawCircle(<span class="number">600f</span>, <span class="number">500f</span>, <span class="number">100f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<h4 id="绘制圆弧"><a href="#绘制圆弧" class="headerlink" title="绘制圆弧"></a>绘制圆弧</h4><p>绘制圆弧使用方法 drawArc，它有两个重载方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">drawArc(<span class="meta">@NonNull</span> RectF oval, <span class="keyword">float</span> startAngle, <span class="keyword">float</span> sweepAngle, <span class="keyword">boolean</span> useCenter,</span><br><span class="line">            <span class="meta">@NonNull</span> Paint paint)</span><br><span class="line">drawArc(<span class="keyword">float</span> left, <span class="keyword">float</span> top, <span class="keyword">float</span> right, <span class="keyword">float</span> bottom, <span class="keyword">float</span> startAngle,</span><br><span class="line">            <span class="keyword">float</span> sweepAngle, <span class="keyword">boolean</span> useCenter, <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>从参数可以看出，圆弧的绘制也是基于矩形框的。与矩形相关的参数前面已经说过了，新的参数有这三个：startAngle, float sweepAngle 和 useCenter。</p>
+<p>startAngle 代表开始扫描的角度；sweepAngle 代表圆弧要扫描的范围，为正则顺时针扫，为负则逆时针扫；useCenter 表示是否使用中心点，为 ture 则扫描边缘两点与中心的连续区域，为 false 则只扫描边缘两点连续区域。</p>
+<p>看个例子，还是用上面的矩形，从 0° 开始扫描，顺时针扫描 90°。分别看下 useCenter 为 true 和 为 false 的区别：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 先画个蓝色的矩形</span></span><br><span class="line">mPaint.setColor(Color.BLUE);</span><br><span class="line">mPaint.setStyle(Paint.Style.FILL);  </span><br><span class="line">canvas.drawRect(<span class="number">100f</span>, <span class="number">200f</span>, <span class="number">600f</span>, <span class="number">500f</span>, mPaint);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 再基于上面的矩形画个红色的椭圆</span></span><br><span class="line">mPaint.setColor(Color.RED);</span><br><span class="line">canvas.drawOval(<span class="number">100f</span>, <span class="number">200f</span>, <span class="number">600f</span>, <span class="number">500f</span>, mPaint);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 先看下 useCenter 为 true 的情况</span></span><br><span class="line">mPaint.setColor(Color.YELLOW);</span><br><span class="line">canvas.drawArc(<span class="number">100f</span>, <span class="number">200f</span>, <span class="number">600f</span>, <span class="number">500f</span>,</span><br><span class="line">        <span class="number">0f</span>, <span class="number">90f</span>, <span class="keyword">true</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>为了方便比较，还在底下画了个蓝色的矩形和红色的椭圆，先看下经过中心点的运行结果：</p>
+<p><img src="https://i.ibb.co/s3tr31k/draw-Arc-use-Center.png" alt></p>
+<p>然后将上面最后一行代码的倒数第二个参数改为 false，即不经过中心点：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">canvas.drawArc(<span class="number">100f</span>, <span class="number">200f</span>, <span class="number">600f</span>, <span class="number">500f</span>,</span><br><span class="line">        <span class="number">0f</span>, <span class="number">90f</span>, <span class="keyword">false</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>运行结果如下：</p>
+<p><img src="https://i.ibb.co/Dz2LtTS/draw-Arc-not-use-Center.png" alt></p>
+<p>对比之下，可以看出是否经过中心点的区别。另外，通过与矩形和椭圆的比较，还可以发现，圆弧就像是截取了椭圆的一部分，如果将上述的 sweepAngle 参数由 90° 改为 360° 的话，也就是扫描一圈，无论是否经过中心点，结果都是一个椭圆。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">canvas.drawArc(<span class="number">100f</span>, <span class="number">200f</span>, <span class="number">600f</span>, <span class="number">500f</span>,</span><br><span class="line">        <span class="number">0f</span>, <span class="number">360f</span>, <span class="keyword">false</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>运行结果如下：</p>
+<p><img src="https://i.ibb.co/gg24T45/draw-Arc-sweep-Angle360.png" alt></p>
+<p>可以看到，黄色的圆弧（现在应该是椭圆了）覆盖了之前画的红色的椭圆。</p>
+<h3 id="绘制文字"><a href="#绘制文字" class="headerlink" title="绘制文字"></a>绘制文字</h3><p>绘制文字使用 drawText 方法，drawText 有几个重载方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">drawText(<span class="meta">@NonNull</span> <span class="keyword">char</span>[] text, <span class="keyword">int</span> index, <span class="keyword">int</span> count, <span class="keyword">float</span> x, <span class="keyword">float</span> y,</span><br><span class="line">            <span class="meta">@NonNull</span> Paint paint)</span><br><span class="line">drawText(<span class="meta">@NonNull</span> String text, <span class="keyword">float</span> x, <span class="keyword">float</span> y, <span class="meta">@NonNull</span> Paint paint)</span><br><span class="line">drawText(<span class="meta">@NonNull</span> String text, <span class="keyword">int</span> start, <span class="keyword">int</span> end, <span class="keyword">float</span> x, <span class="keyword">float</span> y,</span><br><span class="line">            <span class="meta">@NonNull</span> Paint paint)</span><br><span class="line">drawText(<span class="meta">@NonNull</span> CharSequence text, <span class="keyword">int</span> start, <span class="keyword">int</span> end, <span class="keyword">float</span> x, <span class="keyword">float</span> y,</span><br><span class="line">            <span class="meta">@NonNull</span> Paint paint)</span><br></pre></td></tr></table></figure></p>
+<p>一般使用第二个方法，该重载方法最简单，只有四个参数：</p>
+<p>第一个参数是要绘制的文字，第二、三个参数组成的坐标 (x, y) 对应要绘制文字的第一个字符的左下角，第四个参数是相应画笔。</p>
+<p>使用示例如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mPaint.setTextSize(<span class="number">36</span>);</span><br><span class="line">mPaint.setColor(Color.RED);</span><br><span class="line"><span class="comment">// 第 2、3个参数 (x, y) 是绘制的第一个字符的左下角坐标</span></span><br><span class="line">canvas.drawText(<span class="string">"FengZH"</span>, <span class="number">50f</span>, <span class="number">50f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<h2 id="画布变换"><a href="#画布变换" class="headerlink" title="画布变换"></a>画布变换</h2><p>画布变换涉及到的方法有 translate, scale, rotate, skew，分别对应平移、缩放、旋转、错切。其中错切有点复杂，这里先不说了。</p>
+<h3 id="save-amp-restore"><a href="#save-amp-restore" class="headerlink" title="save &amp; restore"></a>save &amp; restore</h3><p>画布变换往往要用到 save 和 restore 方法，而这两个方法又涉及到了图层的概念：</p>
+<blockquote>
+<p>在 Canvas 中，每次的 save 都会将之前的状态保存起来，然后产生一个新的图层，在新图层的绘制不会影响已画好的图，最后用 restore &gt;将这个图层合并到原图层中。</p>
+<p>注意：可以多次 save 和 restore，每次 restore 回复到最后一次 save 的状态。</p>
+</blockquote>
+<h3 id="rotate"><a href="#rotate" class="headerlink" title="rotate"></a>rotate</h3><p>rotate 方法可以旋转画布，它有两个重载方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rotate(<span class="keyword">float</span> degrees)</span><br><span class="line">rotate(<span class="keyword">float</span> degrees, <span class="keyword">float</span> px, <span class="keyword">float</span> py)</span><br></pre></td></tr></table></figure></p>
+<p>两个方法的第一个参数都指定了旋转角度，第一个重载方法是以原点为中心进行旋转，第二个方法是以第二、三个参数指定的坐标(x, y) 为中心进行选择（旋转时中心不会移动，其它点都会移动）。</p>
+<p>下面以旋转矩形为例，顺便借此说明 save 和 restore 的作用：</p>
+<p><strong>假设有一个矩形，现在要以它的左上角为中心，旋转 45°</strong>。由于没有直接绘制旋转图形的 API，所以需要先旋转画布，然后再绘制矩形，这样就可以绘制一个旋转的矩形了。代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 先绘制一个蓝色的矩形</span></span><br><span class="line">mPaint.setColor(Color.BLUE);</span><br><span class="line">mPaint.setStyle(Paint.Style.FILL);</span><br><span class="line">canvas.drawRect(<span class="number">300f</span>, <span class="number">200f</span>, <span class="number">800f</span>, <span class="number">500f</span>, mPaint);</span><br><span class="line"><span class="comment">// 以矩形的左上角为中心，旋转画布</span></span><br><span class="line">canvas.rotate(<span class="number">45f</span>, <span class="number">300f</span>, <span class="number">200f</span>);</span><br><span class="line"><span class="comment">// 在相同位置绘制一个红色的矩形</span></span><br><span class="line">mPaint.setColor(Color.RED);</span><br><span class="line">canvas.drawRect(<span class="number">300f</span>, <span class="number">200f</span>, <span class="number">800f</span>, <span class="number">500f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>运行结果如下：</p>
+<p><img src="https://i.ibb.co/S7F1Z8j/canvas-rotate-1.png" alt></p>
+<p>这时假设我们还要<strong>继续画一个没有旋转的矩形</strong>，如果不做处理直接绘制的话：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ... </span></span><br><span class="line"><span class="comment">// 画一个没有旋转的黄色的矩形</span></span><br><span class="line">mPaint.setColor(Color.YELLOW);</span><br><span class="line">canvas.drawRect(<span class="number">300f</span>, <span class="number">700f</span>, <span class="number">800f</span>, <span class="number">1000f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>绘制出来的结果是这样的：</p>
+<p><img src="https://i.ibb.co/2gRp8v5/canvas-rotate-2.png" alt></p>
+<p>显然，由于画布旋转了，所以现在不能绘制正常的矩形了。解决方法有两种：第一种就是再旋转一次画布，之前将画布顺时针旋转了 45°，那么现在就将画布逆时针旋转 45°，这样画布就正常了：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// 逆时针旋转画布，让画布恢复为一开始的状态</span></span><br><span class="line">canvas.rotate(-<span class="number">45f</span>, <span class="number">300f</span>, <span class="number">200f</span>);</span><br><span class="line"><span class="comment">// 画一个没有旋转的黄色的矩形</span></span><br><span class="line">mPaint.setColor(Color.YELLOW);</span><br><span class="line">canvas.drawRect(<span class="number">300f</span>, <span class="number">700f</span>, <span class="number">800f</span>, <span class="number">1000f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>这时绘制的结果如下：</p>
+<p><img src="https://i.ibb.co/vqbJ4Mz/canvas-rotate-3.png" alt></p>
+<p>可以看到，现在可以正常绘制矩形了。现在说下另一种方法，另一种方法就是用到了 save 和 restore，我们可以在绘制旋转矩形前 save 画布，然后画完旋转矩形后，就可以 restore 回之前正常的状态，也就可以正常绘制矩形了。代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mPaint.setColor(Color.BLUE);</span><br><span class="line">mPaint.setStyle(Paint.Style.FILL);</span><br><span class="line">canvas.drawRect(<span class="number">300f</span>, <span class="number">200f</span>, <span class="number">800f</span>, <span class="number">500f</span>, mPaint);</span><br><span class="line"><span class="comment">// 旋转画布前先 save</span></span><br><span class="line">canvas.save();</span><br><span class="line"><span class="comment">// 以矩形的左上角为中心，旋转画布</span></span><br><span class="line">canvas.rotate(<span class="number">45f</span>, <span class="number">300f</span>, <span class="number">200f</span>);</span><br><span class="line"><span class="comment">// 绘制旋转矩形</span></span><br><span class="line">mPaint.setColor(Color.RED);</span><br><span class="line">canvas.drawRect(<span class="number">300f</span>, <span class="number">200f</span>, <span class="number">800f</span>, <span class="number">500f</span>, mPaint);</span><br><span class="line"><span class="comment">// 绘制完旋转矩形后，restore 回之前的正常状态</span></span><br><span class="line">canvas.restore();</span><br><span class="line"><span class="comment">// 画一个没有旋转的绿色的矩形</span></span><br><span class="line">mPaint.setColor(Color.GREEN);</span><br><span class="line">canvas.drawRect(<span class="number">300f</span>, <span class="number">700f</span>, <span class="number">800f</span>, <span class="number">1000f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>绘制结果如下：</p>
+<p><img src="https://i.ibb.co/NSMNc5w/canvas-rotate-4.png" alt></p>
+<p>可以看到，这种方法同样可以达到效果。并且比起第一种方法，利用 save 和 restore 更加优雅。</p>
+<h3 id="translate"><a href="#translate" class="headerlink" title="translate"></a>translate</h3><p>translate 只有一个方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">translate(<span class="keyword">float</span> dx, <span class="keyword">float</span> dy)</span><br></pre></td></tr></table></figure></p>
+<p>它接收一个坐标(x, y)，它的作用就是将绘图坐标系的原点（绘制点）移动到该坐标。例如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">canvas.translate(mWidth/<span class="number">2</span>, mHeight/<span class="number">2</span>);  <span class="comment">// 画布的原点移动到中心</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="scale"><a href="#scale" class="headerlink" title="scale"></a>scale</h3><p>scale 方法用于对画布进行缩放，它有两个重载方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scale(<span class="keyword">float</span> sx, <span class="keyword">float</span> sy)</span><br><span class="line">scale(<span class="keyword">float</span> sx, <span class="keyword">float</span> sy, <span class="keyword">float</span> px, <span class="keyword">float</span> py)</span><br></pre></td></tr></table></figure></p>
+<p>类似于 rotate，第一个重载方法以原点为中心进行缩放，第二个重载方法可以利用第三、四个参数指定缩放的中心坐标(x, y)。</p>
+<p>示例如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 先画一个蓝色的矩形</span></span><br><span class="line">mPaint.setColor(Color.BLUE);</span><br><span class="line">mPaint.setStyle(Paint.Style.FILL);</span><br><span class="line">canvas.drawRect(<span class="number">200f</span>, <span class="number">200f</span>, <span class="number">500f</span>, <span class="number">400f</span>, mPaint);</span><br><span class="line"></span><br><span class="line">canvas.save();</span><br><span class="line"><span class="comment">// 以矩形左上角为中心，画布扩大两倍，然后绘制一个同样的红色矩形</span></span><br><span class="line">canvas.scale(<span class="number">2</span>, <span class="number">2</span>, <span class="number">200f</span>, <span class="number">200f</span>);</span><br><span class="line">mPaint.setColor(Color.RED);</span><br><span class="line">canvas.drawRect(<span class="number">200f</span>, <span class="number">200f</span>, <span class="number">500f</span>, <span class="number">400f</span>, mPaint);</span><br><span class="line">canvas.restore();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 绘制一个同样的绿色矩形，标志原来蓝色矩形的位置</span></span><br><span class="line">mPaint.setColor(Color.GREEN);</span><br><span class="line">canvas.drawRect(<span class="number">200f</span>, <span class="number">200f</span>, <span class="number">500f</span>, <span class="number">400f</span>, mPaint);</span><br></pre></td></tr></table></figure></p>
+<p>绘制结果：</p>
+<p><img src="https://i.ibb.co/ypqK1SY/canvas-scale.png" alt></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://juejin.im/post/5cc3d0686fb9a031f4160713#heading-0" target="_blank" rel="noopener">Canvas中的裁剪师讲解与实战——Android高级UI</a></li>
+<li><a href="https://blog.csdn.net/u013831257/article/details/50599912#commentBox" target="_blank" rel="noopener">安卓自定义View进阶-Canvas之画布操作</a></li>
+<li><a href="https://juejin.im/post/5be29aa2e51d45228170ff33#comment" target="_blank" rel="noopener">Android关于Canvas你所知道的和不知道的一切</a></li>
+<li><a href="https://www.gcssloop.com/customview/paint-base" target="_blank" rel="noopener">安卓自定义View进阶-画笔基础(Paint)</a></li>
+<li><a href="http://wuxiaolong.me/2016/08/20/Paint/" target="_blank" rel="noopener">Android 画笔Paint</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/23/kotlin-的基本使用/" rel="next" title="kotlin 的基本使用">
+                <i class="fa fa-chevron-left"></i> kotlin 的基本使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">63</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#预备知识"><span class="nav-number">2.</span> <span class="nav-text">预备知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#绘图坐标系和视图坐标系"><span class="nav-number">2.1.</span> <span class="nav-text">绘图坐标系和视图坐标系</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Paint-的基本用法"><span class="nav-number">3.</span> <span class="nav-text">Paint 的基本用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Paint-的创建"><span class="nav-number">3.1.</span> <span class="nav-text">Paint 的创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#画笔颜色"><span class="nav-number">3.2.</span> <span class="nav-text">画笔颜色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#画笔模式（Paint-Style）"><span class="nav-number">3.3.</span> <span class="nav-text">画笔模式（Paint.Style）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#画笔线帽（Paint-Cap）"><span class="nav-number">3.4.</span> <span class="nav-text">画笔线帽（Paint.Cap）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它基本方法"><span class="nav-number">3.5.</span> <span class="nav-text">其它基本方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Canvas-的基本用法"><span class="nav-number">4.</span> <span class="nav-text">Canvas 的基本用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Canvas-的常用操作速查表"><span class="nav-number">4.1.</span> <span class="nav-text">Canvas 的常用操作速查表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Canvas-的绘制"><span class="nav-number">4.2.</span> <span class="nav-text">Canvas 的绘制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#绘制颜色"><span class="nav-number">4.2.1.</span> <span class="nav-text">绘制颜色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绘制点"><span class="nav-number">4.2.2.</span> <span class="nav-text">绘制点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绘制直线"><span class="nav-number">4.2.3.</span> <span class="nav-text">绘制直线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绘制形状"><span class="nav-number">4.2.4.</span> <span class="nav-text">绘制形状</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#绘制矩形和圆角矩形"><span class="nav-number">4.2.4.1.</span> <span class="nav-text">绘制矩形和圆角矩形</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#绘制椭圆和圆"><span class="nav-number">4.2.4.2.</span> <span class="nav-text">绘制椭圆和圆</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#绘制圆弧"><span class="nav-number">4.2.4.3.</span> <span class="nav-text">绘制圆弧</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绘制文字"><span class="nav-number">4.2.5.</span> <span class="nav-text">绘制文字</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#画布变换"><span class="nav-number">4.3.</span> <span class="nav-text">画布变换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#save-amp-restore"><span class="nav-number">4.3.1.</span> <span class="nav-text">save &amp; restore</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rotate"><span class="nav-number">4.3.2.</span> <span class="nav-text">rotate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#translate"><span class="nav-number">4.3.3.</span> <span class="nav-text">translate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scale"><span class="nav-number">4.3.4.</span> <span class="nav-text">scale</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
