@@ -98,18 +98,20 @@
 
 
 
-  <meta name="description" content="题目给定两个整数 n 和 k，返回 1 … n 中所有可能的 k 个数的组合。">
-<meta name="keywords" content="leetcode">
+  <meta name="description" content="前言揭露动画是 Android 5.0 的新特性，使用该动画后，在显示或隐藏视图的时候能够给用户提供视觉连续型。">
+<meta name="keywords" content="动画">
 <meta property="og:type" content="article">
-<meta property="og:title" content="利用递归和回溯解决LeetCode第77题：组合（Java实现）">
-<meta property="og:url" content="https://mrfzh.github.io/2019/06/05/利用递归和回溯解决LeetCode第77题：组合（Java实现）/index.html">
+<meta property="og:title" content="揭露动画（RevealAnimator）的基本使用">
+<meta property="og:url" content="https://mrfzh.github.io/2019/10/19/揭露动画（RevealAnimator）的基本使用/index.html">
 <meta property="og:site_name" content="FengZH的博客">
-<meta property="og:description" content="题目给定两个整数 n 和 k，返回 1 … n 中所有可能的 k 个数的组合。">
+<meta property="og:description" content="前言揭露动画是 Android 5.0 的新特性，使用该动画后，在显示或隐藏视图的时候能够给用户提供视觉连续型。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-06-05T08:44:29.639Z">
+<meta property="og:image" content="https://i.ibb.co/hFH6Mfn/reveal-animator-demo.gif">
+<meta property="og:updated_time" content="2019-10-19T07:44:19.981Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="利用递归和回溯解决LeetCode第77题：组合（Java实现）">
-<meta name="twitter:description" content="题目给定两个整数 n 和 k，返回 1 … n 中所有可能的 k 个数的组合。">
+<meta name="twitter:title" content="揭露动画（RevealAnimator）的基本使用">
+<meta name="twitter:description" content="前言揭露动画是 Android 5.0 的新特性，使用该动画后，在显示或隐藏视图的时候能够给用户提供视觉连续型。">
+<meta name="twitter:image" content="https://i.ibb.co/hFH6Mfn/reveal-animator-demo.gif">
 
 
 
@@ -117,7 +119,7 @@
 
   
   
-  <link rel="canonical" href="https://mrfzh.github.io/2019/06/05/利用递归和回溯解决LeetCode第77题：组合（Java实现）/">
+  <link rel="canonical" href="https://mrfzh.github.io/2019/10/19/揭露动画（RevealAnimator）的基本使用/">
 
 
 
@@ -127,7 +129,7 @@
   };
 </script>
 
-  <title>利用递归和回溯解决LeetCode第77题：组合（Java实现） | FengZH的博客</title>
+  <title>揭露动画（RevealAnimator）的基本使用 | FengZH的博客</title>
   
 
 
@@ -326,7 +328,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/06/05/利用递归和回溯解决LeetCode第77题：组合（Java实现）/">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/10/19/揭露动画（RevealAnimator）的基本使用/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="FengZH">
@@ -343,7 +345,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">利用递归和回溯解决LeetCode第77题：组合（Java实现）
+          <h1 class="post-title" itemprop="name headline">揭露动画（RevealAnimator）的基本使用
 
               
             
@@ -369,7 +371,7 @@
                 
               
 
-              <time title="创建时间：2019-06-05 16:42:40 / 修改时间：16:44:29" itemprop="dateCreated datePublished" datetime="2019-06-05T16:42:40+08:00">2019-06-05</time>
+              <time title="创建时间：2019-10-19 15:40:32 / 修改时间：15:44:19" itemprop="dateCreated datePublished" datetime="2019-10-19T15:40:32+08:00">2019-10-19</time>
             
 
             
@@ -391,7 +393,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/算法/" itemprop="url" rel="index"><span itemprop="name">算法</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
 
                 
                 
@@ -433,11 +435,55 @@
       
 
       
-        <h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><p>给定两个整数 n 和 k，返回 1 … n 中所有可能的 k 个数的组合。</p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>揭露动画是 Android 5.0 的新特性，使用该动画后，在显示或隐藏视图的时候能够给用户提供视觉连续型。</p>
 <a id="more"></a>
-<h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">输入: n = 4, k = 2</span><br><span class="line">输出:</span><br><span class="line">[</span><br><span class="line">  [2,4],</span><br><span class="line">  [3,4],</span><br><span class="line">  [2,3],</span><br><span class="line">  [1,2],</span><br><span class="line">  [1,3],</span><br><span class="line">  [1,4],</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-<h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><h2 id="递归"><a href="#递归" class="headerlink" title="递归"></a>递归</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> List&lt;List&lt;Integer&gt;&gt; combine(<span class="keyword">int</span> n, <span class="keyword">int</span> k) &#123;</span><br><span class="line">    <span class="keyword">return</span> add(<span class="number">1</span>, n, k);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 获得从from...to中所有可能的k个数组合</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> List&lt;List&lt;Integer&gt;&gt; add(<span class="keyword">int</span> from, <span class="keyword">int</span> to, <span class="keyword">int</span> k) &#123;</span><br><span class="line">    <span class="keyword">int</span> n = to - from + <span class="number">1</span>;  <span class="comment">//from...to的数字个数</span></span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">if</span> (n == k) &#123;</span><br><span class="line">        List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = from; i &lt;= to; i++) &#123;</span><br><span class="line">            list.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        result.add(list);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (k == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = from; i &lt;= to; i++) &#123;</span><br><span class="line">            List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">            list.add(i);</span><br><span class="line">            result.add(list);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//当n &gt; k时</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt;= n - k; i++) &#123;</span><br><span class="line">        <span class="comment">//先递归求得某数前面的数中k-1个数的组合</span></span><br><span class="line">        List&lt;List&lt;Integer&gt;&gt; other = add(from, to-i-<span class="number">1</span>, k-<span class="number">1</span>);</span><br><span class="line">        <span class="comment">//然后加上该数</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; other.size(); j++) &#123;</span><br><span class="line">            List&lt;Integer&gt; curr = other.get(j);</span><br><span class="line">            curr.add(to-i);</span><br><span class="line">            result.add(curr);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="回溯"><a href="#回溯" class="headerlink" title="回溯"></a>回溯</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> n;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> k;</span><br><span class="line"><span class="keyword">private</span> List&lt;List&lt;Integer&gt;&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> List&lt;List&lt;Integer&gt;&gt; combine(<span class="keyword">int</span> n, <span class="keyword">int</span> k) &#123;</span><br><span class="line">    <span class="keyword">this</span>.n = n;</span><br><span class="line">    <span class="keyword">this</span>.k = k;</span><br><span class="line"></span><br><span class="line">    back(<span class="keyword">new</span> ArrayList&lt;&gt;(), <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">back</span><span class="params">(List&lt;Integer&gt; curr, <span class="keyword">int</span> first)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//满了k个数后，存入result，并回溯</span></span><br><span class="line">    <span class="keyword">if</span> (curr.size() == k) &#123;</span><br><span class="line">        result.add(curr);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = first; i &lt;= n - (k - curr.size()) + <span class="number">1</span>; i++) &#123;</span><br><span class="line">        List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;(curr);</span><br><span class="line">        list.add(i);</span><br><span class="line">        back(list, i + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h1><p>先上最终的效果图，毕竟只有当你对动画效果感兴趣的时候，才会认真地看它的代码实现。</p>
+<p><img src="https://i.ibb.co/hFH6Mfn/reveal-animator-demo.gif" alt></p>
+<p>由于是在模拟器上运行，可能有点卡顿，在真机上效果会更好</p>
+<h1 id="API"><a href="#API" class="headerlink" title="API"></a>API</h1><p>在讲代码实现前，先介绍下实现揭露动画的 API：<strong>ViewAnimationUtils.createCircularReveal</strong> 方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Animator <span class="title">createCircularReveal</span><span class="params">(View view,</span></span></span><br><span class="line"><span class="function"><span class="params">            <span class="keyword">int</span> centerX,  <span class="keyword">int</span> centerY, <span class="keyword">float</span> startRadius, <span class="keyword">float</span> endRadius)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>它有五个参数，作用如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">参数</th>
+<th style="text-align:center">说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">View view</td>
+<td style="text-align:center">动画作用的视图 </td>
+</tr>
+<tr>
+<td style="text-align:center">int centerX</td>
+<td style="text-align:center">揭露动画中心点的 x 坐标</td>
+</tr>
+<tr>
+<td style="text-align:center">int centerY</td>
+<td style="text-align:center">揭露动画中心点的 y 坐标</td>
+<td>后面的开始（结束）半径是以该（x, y）坐标为原点开始算的</td>
+</tr>
+<tr>
+<td style="text-align:center">float startRadius</td>
+<td style="text-align:center">开始半径 </td>
+</tr>
+<tr>
+<td style="text-align:center">float endRadius</td>
+<td style="text-align:center">结束半径</td>
+<td>结束半径 &gt; 开始半径，为显示视图。反之，为隐藏视图。</td>
+</tr>
+</tbody>
+</table>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>活动的一些成员变量：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> ImageView mImageIv;     <span class="comment">// 图片</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Animator mShowAnim;     <span class="comment">// 显示视图的揭露动画</span></span><br><span class="line"><span class="keyword">private</span> Animator mHideAnim;     <span class="comment">// 隐藏视图的揭露动画</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="显示视图"><a href="#显示视图" class="headerlink" title="显示视图"></a>显示视图</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 动画正在进行，不要重复点击</span></span><br><span class="line"><span class="keyword">if</span> (mShowAnim != <span class="keyword">null</span> &amp;&amp; mShowAnim.isRunning() ||</span><br><span class="line">        mHideAnim != <span class="keyword">null</span> &amp;&amp; mHideAnim.isRunning()) &#123;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 由于揭露动画创建后只能运行一次</span></span><br><span class="line">    <span class="comment">// 所以如果没有创建过动画或动画已经运行结束，就再创建一次</span></span><br><span class="line">    initShowAnim();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 先显示视图再进行动画</span></span><br><span class="line">mImageIv.setVisibility(View.VISIBLE);</span><br><span class="line">mShowAnim.start();</span><br></pre></td></tr></table></figure>
+<p>其中 initShowAnim 方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 初始化显示视图的揭露动画</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initShowAnim</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> cx = mImageIv.getMeasuredWidth() / <span class="number">2</span>;   <span class="comment">// 揭露动画中心点的 x 坐标</span></span><br><span class="line">    <span class="keyword">int</span> cy = mImageIv.getMeasuredHeight() / <span class="number">2</span>;  <span class="comment">// 揭露动画中心点的 y 坐标</span></span><br><span class="line">    <span class="keyword">float</span> startRadius = <span class="number">0f</span>;     <span class="comment">// 开始半径</span></span><br><span class="line">    <span class="keyword">float</span> endRadius = (<span class="keyword">float</span>) Math.max(mImageIv.getWidth(), mImageIv.getHeight()) / <span class="number">2</span>;  <span class="comment">// 结束半径</span></span><br><span class="line">    mShowAnim = ViewAnimationUtils</span><br><span class="line">            .createCircularReveal(mImageIv, cx, cy, startRadius, endRadius); <span class="comment">// 创建揭露动画</span></span><br><span class="line">    mShowAnim.setDuration(<span class="number">2</span> * <span class="number">1000</span>);</span><br><span class="line">    mShowAnim.setInterpolator(<span class="keyword">new</span> AccelerateDecelerateInterpolator());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="隐藏视图"><a href="#隐藏视图" class="headerlink" title="隐藏视图"></a>隐藏视图</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 动画正在进行，不要重复点击</span></span><br><span class="line"><span class="keyword">if</span> (mHideAnim != <span class="keyword">null</span> &amp;&amp; mHideAnim.isRunning() ||</span><br><span class="line">        mShowAnim != <span class="keyword">null</span> &amp;&amp; mShowAnim.isRunning()) &#123;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 由于揭露动画创建后只能运行一次</span></span><br><span class="line">    <span class="comment">// 所以如果没有创建过动画或动画已经运行结束，就再创建一次</span></span><br><span class="line">    initHideAnim();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 先显示视图再进行动画</span></span><br><span class="line">mImageIv.setVisibility(View.VISIBLE);</span><br><span class="line">mHideAnim.start();</span><br></pre></td></tr></table></figure>
+<p>其中 initHideAnim 方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 初始化隐藏视图的揭露动画</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initHideAnim</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> cx = mImageIv.getMeasuredWidth() / <span class="number">2</span>;   <span class="comment">// 揭露动画中心点的 x 坐标</span></span><br><span class="line">    <span class="keyword">int</span> cy = mImageIv.getMeasuredHeight() / <span class="number">2</span>;  <span class="comment">// 揭露动画中心点的 y 坐标</span></span><br><span class="line">    <span class="keyword">float</span> startRadius = (<span class="keyword">float</span>) Math.max(mImageIv.getWidth(), mImageIv.getHeight()) / <span class="number">2</span>;   <span class="comment">// 开始半径</span></span><br><span class="line">    <span class="keyword">float</span> endRadius = <span class="number">0f</span>;   <span class="comment">// 结束半径</span></span><br><span class="line">    mHideAnim = ViewAnimationUtils</span><br><span class="line">            .createCircularReveal(mImageIv, cx, cy, startRadius, endRadius); <span class="comment">// 创建揭露动画</span></span><br><span class="line">    mHideAnim.setDuration(<span class="number">2</span> * <span class="number">1000</span>);</span><br><span class="line">    mHideAnim.setInterpolator(<span class="keyword">new</span> AccelerateDecelerateInterpolator());</span><br><span class="line">    <span class="comment">// 结束动画时隐藏 View</span></span><br><span class="line">    mHideAnim.addListener(<span class="keyword">new</span> AnimatorListenerAdapter() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAnimationEnd</span><span class="params">(Animator animation)</span> </span>&#123;</span><br><span class="line">            mImageIv.setVisibility(View.INVISIBLE);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://yuweiguocn.github.io/circular-reveal-animation/" target="_blank" rel="noopener">（译）Android圆形揭露动画</a></li>
+</ul>
+
       
     </div>
 
@@ -471,7 +517,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/leetcode/" rel="tag"><i class="fa fa-tag"></i> leetcode</a>
+            <a href="/tags/动画/" rel="tag"><i class="fa fa-tag"></i> 动画</a>
           
         </div>
       
@@ -484,8 +530,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/06/02/HashMap源码分析（JDK1-7）/" rel="next" title="HashMap源码分析（JDK1.7）">
-                <i class="fa fa-chevron-left"></i> HashMap源码分析（JDK1.7）
+              <a href="/2019/10/15/并查集/" rel="next" title="并查集">
+                <i class="fa fa-chevron-left"></i> 并查集
               </a>
             
           </div>
@@ -493,10 +539,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/06/06/源码分析：广播的动态注册、发送和接收过程/" rel="prev" title="源码分析：广播的动态注册、发送和接收过程">
-                源码分析：广播的动态注册、发送和接收过程 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -737,7 +779,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#题目"><span class="nav-number">1.</span> <span class="nav-text">题目</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#示例"><span class="nav-number">2.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解法"><span class="nav-number">3.</span> <span class="nav-text">解法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#递归"><span class="nav-number">3.1.</span> <span class="nav-text">递归</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#回溯"><span class="nav-number">3.2.</span> <span class="nav-text">回溯</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#效果"><span class="nav-number">2.</span> <span class="nav-text">效果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API"><span class="nav-number">3.</span> <span class="nav-text">API</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现"><span class="nav-number">4.</span> <span class="nav-text">实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#显示视图"><span class="nav-number">4.1.</span> <span class="nav-text">显示视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#隐藏视图"><span class="nav-number">4.2.</span> <span class="nav-text">隐藏视图</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
