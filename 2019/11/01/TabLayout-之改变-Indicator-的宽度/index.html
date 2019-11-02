@@ -105,7 +105,7 @@
 <meta property="og:site_name" content="FengZH的博客">
 <meta property="og:description" content="前言默认情况下，TabLayout 中 Indicator 的宽度和该 Tab 的宽度相等。但是有时候我们需要自定义 Indicator 的宽度，所以本文将介绍改变 Indicator 的宽度的几种方法。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-01T13:03:17.147Z">
+<meta property="og:updated_time" content="2019-11-02T02:44:44.484Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TabLayout 之改变 Indicator 的宽度">
 <meta name="twitter:description" content="前言默认情况下，TabLayout 中 Indicator 的宽度和该 Tab 的宽度相等。但是有时候我们需要自定义 Indicator 的宽度，所以本文将介绍改变 Indicator 的宽度的几种方法。">
@@ -368,12 +368,24 @@
                 
               
 
-              <time title="创建时间：2019-11-01 20:59:18 / 修改时间：21:03:17" itemprop="dateCreated datePublished" datetime="2019-11-01T20:59:18+08:00">2019-11-01</time>
+              <time title="创建时间：2019-11-01 20:59:18" itemprop="dateCreated datePublished" datetime="2019-11-01T20:59:18+08:00">2019-11-01</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-02 10:44:44" itemprop="dateModified" datetime="2019-11-02T10:44:44+08:00">2019-11-02</time>
               
             
           </span>
@@ -435,7 +447,7 @@
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>默认情况下，TabLayout 中 Indicator 的宽度和该 Tab 的宽度相等。但是有时候我们需要自定义 Indicator 的宽度，所以本文将介绍改变 Indicator 的宽度的几种方法。</p>
 <a id="more"></a>
 <h1 id="一、反射实现"><a href="#一、反射实现" class="headerlink" title="一、反射实现"></a>一、反射实现</h1><p>第一种方法是通过反射的方式改变 Indicator 的宽度。</p>
-<p>TabLayout 只提供了 ==app:tabIndicatorHeight== 属性来设置 Indicator 的宽度，但没有提供设置宽度的 API。所以只能自己去修改了，先看下源码是怎么实现 Indicator 的。</p>
+<p>TabLayout 只提供了 <code>app:tabIndicatorHeight</code> 属性来设置 Indicator 的宽度，但没有提供设置宽度的 API。所以只能自己去修改了，先看下源码是怎么实现 Indicator 的。</p>
 <h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>在 TabLayout 中，定义了一个 SlidingTabStrip 对象：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> SlidingTabStrip mTabStrip;</span><br></pre></td></tr></table></figure></p>
 <p>SlidingTabStrip 继承自 LinearLayout，负责处理 Tab 滑动的相关操作。在它的 draw 方法中，有绘制 Indicator 相关的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">draw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.draw(canvas);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mIndicatorLeft &gt;= <span class="number">0</span> &amp;&amp; mIndicatorRight &gt; mIndicatorLeft) &#123;</span><br><span class="line">        canvas.drawRect(mIndicatorLeft, getHeight() - mSelectedIndicatorHeight,</span><br><span class="line">                mIndicatorRight, getHeight(), mSelectedIndicatorPaint);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>其中 mIndicatorLeft 和 mIndicatorRight 决定 Indicator 的宽度，宽度为 mIndicatorRight - mIndicatorLeft。</p>
@@ -452,7 +464,7 @@
 <li>如果升级 sdk 后，sdk 中获取反射的变量名发生改变，代码也要跟着变，不然会失效。</li>
 <li>这种方式最小只能把 Indicator 的宽度设置成 TextView 的宽度，如果宽度更小的话，TextView 的文本就会被压缩。</li>
 </ol>
-<h1 id="二、SDK-28-属性配置"><a href="#二、SDK-28-属性配置" class="headerlink" title="二、SDK 28+ 属性配置"></a>二、SDK 28+ 属性配置</h1><p>如果你使用的 SDK 版本在 28 以上，并且需要将 Indicator 的宽度设置成和文字宽度一样，那么只需在 xml 中给 TabLayout 加上 ==app:tabIndicatorFullWidth=”false”== 即可：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">android.support.design.widget.TabLayout</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:id</span>=<span class="string">"@+id/tab_layout"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:tabIndicatorFullWidth</span>=<span class="string">"false"</span>/&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="二、SDK-28-属性配置"><a href="#二、SDK-28-属性配置" class="headerlink" title="二、SDK 28+ 属性配置"></a>二、SDK 28+ 属性配置</h1><p>如果你使用的 SDK 版本在 28 以上，并且需要将 Indicator 的宽度设置成和文字宽度一样，那么只需在 xml 中给 TabLayout 加上 <code>app:tabIndicatorFullWidth=&quot;false&quot;</code> 即可：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">android.support.design.widget.TabLayout</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:id</span>=<span class="string">"@+id/tab_layout"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:tabIndicatorFullWidth</span>=<span class="string">"false"</span>/&gt;</span></span><br></pre></td></tr></table></figure></p>
 <p>这样做虽然比反射实现简单，但还是无法实现设置 Indicator 的宽度比文字宽度短的效果。</p>
 <h1 id="三、使用-layer-list"><a href="#三、使用-layer-list" class="headerlink" title="三、使用 layer-list"></a>三、使用 layer-list</h1><p>Indicator 允许我们设置 drawable 来自定义样式，通过 layer-list 可以在上层设置一个固定宽度的 shape：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">layer-list</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:shape</span>=<span class="string">"rectangle"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">android:gravity</span>=<span class="string">"center"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">shape</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">size</span> <span class="attr">android:width</span>=<span class="string">"20dp"</span></span></span><br><span class="line"><span class="tag">                <span class="attr">android:height</span>=<span class="string">"4dp"</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">solid</span> <span class="attr">android:color</span>=<span class="string">"@android:color/holo_red_light"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">shape</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">layer-list</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
 <p>然后在 xml 中给 TabLayout 设置：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">android.support.design.widget.TabLayout</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:id</span>=<span class="string">"@+id/tl_style_one_tab"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:tabIndicator</span>=<span class="string">"@drawable/tab_indicator"</span>/&gt;</span></span><br></pre></td></tr></table></figure></p>
