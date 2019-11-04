@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="X7_M3eeaLhvcnX4TXnFCfa8gF_OXS5CEpA0zKHEBuLY">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/F-32x21.png?v=7.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/F-16x16.png?v=7.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.1.0',
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言最近在做的一个小说阅读 APP，打算模仿掌阅实现 TabLayout 切换时的动画效果。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="仿掌阅实现 TabLayout 切换时的字体和 Indicator 动画">
+<meta property="og:url" content="https://mrfzh.github.io/2019/11/04/仿掌阅实现-TabLayout-切换时的字体和-Indicator-动画/index.html">
+<meta property="og:site_name" content="FengZH的博客">
+<meta property="og:description" content="前言最近在做的一个小说阅读 APP，打算模仿掌阅实现 TabLayout 切换时的动画效果。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20191103203119645.gif">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20191103203055659.gif">
+<meta property="og:image" content="https://i.ibb.co/LSK7mZQ/tab-layout-anim-1.png">
+<meta property="og:image" content="https://i.ibb.co/94BbBtQ/tab-layout-anim-2.png">
+<meta property="og:image" content="https://i.ibb.co/1948sX6/tab-layout-anim-3.png">
+<meta property="og:image" content="https://i.ibb.co/ZGrgkwm/tab-layout-anim-4.png">
+<meta property="og:updated_time" content="2019-11-04T07:49:17.807Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="仿掌阅实现 TabLayout 切换时的字体和 Indicator 动画">
+<meta name="twitter:description" content="前言最近在做的一个小说阅读 APP，打算模仿掌阅实现 TabLayout 切换时的动画效果。">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20191103203119645.gif">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="https://mrfzh.github.io/2019/11/04/仿掌阅实现-TabLayout-切换时的字体和-Indicator-动画/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>仿掌阅实现 TabLayout 切换时的字体和 Indicator 动画 | FengZH的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">FengZH的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://mrfzh.github.io/2019/11/04/仿掌阅实现-TabLayout-切换时的字体和-Indicator-动画/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="FengZH">
+      <meta itemprop="description" content="阳光总在风雨后！坚持就是胜利！">
+      <meta itemprop="image" content="https://i.ibb.co/ZNQVBbd/head-Image1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="FengZH的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">仿掌阅实现 TabLayout 切换时的字体和 Indicator 动画
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-04 15:48:08 / 修改时间：15:49:17" itemprop="dateCreated datePublished" datetime="2019-11-04T15:48:08+08:00">2019-11-04</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在做的一个小说阅读 APP，打算模仿掌阅实现 TabLayout 切换时的动画效果。</p>
+<a id="more"></a>
+<p>首先看下掌阅的切换效果：</p>
+<p><img src="https://img-blog.csdnimg.cn/20191103203119645.gif" alt></p>
+<p>接下来是我的实现效果：</p>
+<p><img src="https://img-blog.csdnimg.cn/20191103203055659.gif" alt></p>
+<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>切换动画主要有两部分组成：</p>
+<ol>
+<li>字体的缩放动画：进入页面的字体逐渐放大，移除页面的字体逐渐缩小</li>
+<li>Indicator 的长度变化动画：在进行页面滑动时，Indicator 的长度由短边长再变短。以页面移出一半为分界线，前半部分 Indicator 由短变长，后半部分 Indicator 由长变短。</li>
+</ol>
+<p>接下来的实现也分这两部分进行。</p>
+<h1 id="实现字体缩放动画"><a href="#实现字体缩放动画" class="headerlink" title="实现字体缩放动画"></a>实现字体缩放动画</h1><p>这里的重点是获取到当前页面移出屏幕和旁边页面进入屏幕的比例，我采用的方法是实现 ViewPager.PageTransformer 接口，通过里面 transformPage 方法的 position 参数获取页面移出（进入）屏幕的比例。</p>
+<p>这里的难点是如何理解 position 参数的变化规律，怎么理解就不在这里讲了，要解释清楚需要很大篇幅，想要了解的话可以另外查资料，或者看下我写的这篇分析：<a href="https://blog.csdn.net/fzhhsa/article/details/102886133" target="_blank" rel="noopener">ViewPager.PageTransformer 的 position 分析</a></p>
+<p>具体的接口实现如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * @author Feng Zhaohao</span><br><span class="line"> * Created on 2019/11/2</span><br><span class="line"> */</span><br><span class="line">public class MyPageTransformer implements ViewPager.PageTransformer &#123;</span><br><span class="line"></span><br><span class="line">    public static final float MAX_SCALE = 1.3f;</span><br><span class="line"></span><br><span class="line">    private TabLayout mTabLayout;</span><br><span class="line">    @SuppressLint(&quot;UseSparseArrays&quot;)</span><br><span class="line">    private HashMap&lt;Integer, Float&gt; mLastMap = new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public MyPageTransformer(TabLayout mTabLayout) &#123;</span><br><span class="line">        this.mTabLayout = mTabLayout;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void transformPage(@NonNull View view, float v) &#123;</span><br><span class="line">        if (v &gt; -1 &amp;&amp; v &lt; 1) &#123;</span><br><span class="line">            int currPosition = (int) view.getTag(); // 获取当前 View 对应的索引</span><br><span class="line">            final float currV = Math.abs(v);</span><br><span class="line">            if (!mLastMap.containsKey(currPosition)) &#123;</span><br><span class="line">                mLastMap.put(currPosition, currV);</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line">            float lastV = mLastMap.get(currPosition);</span><br><span class="line">            // 获取当前 TabView 的 TextView </span><br><span class="line">            LinearLayout ll = (LinearLayout) mTabLayout.getChildAt(0);</span><br><span class="line">            TabLayout.TabView tb = (TabLayout.TabView) ll.getChildAt(currPosition);</span><br><span class="line">            View textView = tb.getTextView();</span><br><span class="line"></span><br><span class="line">            // 先判断是要变大还是变小</span><br><span class="line">            // 如果 currV &gt; lastV，则为变小；如果 currV &lt; lastV，则为变大</span><br><span class="line">            if (currV &gt; lastV) &#123;</span><br><span class="line">                float leavePercent = currV; // 计算离开屏幕的百分比</span><br><span class="line">                // 变小</span><br><span class="line">                textView.setScaleX(MAX_SCALE - (MAX_SCALE - 1.0f) * leavePercent);</span><br><span class="line">                textView.setScaleY(MAX_SCALE - (MAX_SCALE - 1.0f) * leavePercent);</span><br><span class="line">            &#125; else if (currV &lt; lastV) &#123;</span><br><span class="line">                float enterPercent = 1 - currV; // 进入屏幕的百分比</span><br><span class="line">                // 变大</span><br><span class="line">                textView.setScaleX(1.0f + (MAX_SCALE - 1.0f) * enterPercent);</span><br><span class="line">                textView.setScaleY(1.0f + (MAX_SCALE - 1.0f) * enterPercent);</span><br><span class="line">            &#125;</span><br><span class="line">            mLastMap.put(currPosition, currV);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>有几点说明一下。</p>
+<ol>
+<li><p>为了通过 View 获取到其对应的位置，在给 Fragment 创建视图的时候，给它设置一个 tag，值为它的位置索引：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> View <span class="title">onCreateView</span><span class="params">(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">    View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_test, <span class="keyword">null</span>);</span><br><span class="line">    view.setTag(index);     <span class="comment">// index 为该 Fragment 的位置索引</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> view;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在获取当前 TabView 的 TextView 时，我通过当前位置获取到的 TabView 可以直接进行转换：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LinearLayout ll = (LinearLayout) mTabLayout.getChildAt(<span class="number">0</span>);</span><br><span class="line">TabLayout.TabView tb = (TabLayout.TabView) ll.getChildAt(currPosition);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>如果使用官方 TabLayout，是不能这样做的，因为它内部的 TabView 不是 public，你在外界不能访问到。我这里能这样做是因为这个 TabLayout 是我拷贝官方 TabLayout 到我的项目中，并对它进行了一些修改（之所以要修改官方 TabLayout，是为了实现 Indicator 的动画效果，之后会说到）。这里只需将内部类 TabView 的访问等级修改为 public 就行了。 </p>
+<ol start="3">
+<li>这里我是通过 setScaleX 和 setScaleY 方法对 TextView 进行缩放操作。</li>
+</ol>
+<p>其实一开始我是直接使用 setTextSize 来进行缩放的，不过这样做的话会很发生很明显的文字抖动，所以放弃了这种做法。</p>
+<p>后来参考一个开源库（MagicIndicator）的实现，使用 setScaleX 和 setScaleY 方法进行缩放，发现这样做效果好了很多。最终采用了这种方式实现文字的缩放。</p>
+<p>以下是我对于这种差别的原因猜测（不知道对不对）：setScaleX 和 setScaleY 内部使用 <code>invalidate(false)</code> 重绘视图，而 setTextSize 使用 <code>invalidate()</code>（即 invalidate(true)）重绘视图， invalidate 方法传入的参数表示是否让此视图的缓存无效，也就是说传入 true 时不使用缓存。所以我觉得是因为 setScaleX 和 setScaleY 使用了缓存，所以效率更高，特别是进行动画时需要重绘多次，使用缓存对于效率的提高就更加明显了。</p>
+<h1 id="实现-Indicator-的长度变化动画"><a href="#实现-Indicator-的长度变化动画" class="headerlink" title="实现 Indicator 的长度变化动画"></a>实现 Indicator 的长度变化动画</h1><p>实现这个还是挺不容易的。要实现长度变化动画，你首先就要改变它的长度，但 TabLayout 并没有直接提供设置 Indicator 宽度的方法，只能通过其他方式来设置。</p>
+<p>总的来说有这几种方法：反射实现、自定义 View、sdk28+ 属性配置、layer-list。但是这几种方法都不能实现最终的动画效果。</p>
+<p>反射不能让 Indicator 的宽度小于文本宽度，不然会压缩文本。sdk28+ 属性配置虽然简单，但 Indicator 的宽度只能等于文本宽度。自定义 View 实现麻烦，并且很难实现动画效果。layer-list 实现简单，但缺点是 Indicator 没有动画效果。</p>
+<p>以上方法除了自定义 View，我都一一尝试过，后来发现很难满足自己的需求。后来看到这篇文章<a href="https://blog.csdn.net/u010119815/article/details/79823680" target="_blank" rel="noopener">骚操作之改造TabLayout，修改指示线宽增加切Tab过渡动画</a>，里面讲到可以通过修改官方 TabLayout 来实现功能，受此启发，我最终通过修改官方 TabLayout 实现了 Indicator 的长度变化动画。</p>
+<p>下面看下具体过程：</p>
+<h2 id="一、准备工作"><a href="#一、准备工作" class="headerlink" title="一、准备工作"></a>一、准备工作</h2><ol>
+<li>导入相关类</li>
+</ol>
+<p><img src="https://i.ibb.co/LSK7mZQ/tab-layout-anim-1.png" alt></p>
+<p>这里我使用的是 API26 的 TabLayout。</p>
+<ol start="2">
+<li><p>一开始发现 Indicator 不显示，需在 xml 文件设置 Indicator 的颜色和高度</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">com.feng.tablayoutdemo.tablayout.TabLayout</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:id</span>=<span class="string">"@+id/tab_layout"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:tabIndicatorColor</span>=<span class="string">"@android:color/holo_blue_light"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:tabIndicatorHeight</span>=<span class="string">"3dp"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>一些分析</p>
+</li>
+</ol>
+<p>TabLayout 包含一个 SlidingTabStrip，SlidingTabStrip 中包含 n 个 TabView，TabView 包含：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Tab mTab;</span><br><span class="line"><span class="keyword">private</span> TextView mTextView;</span><br><span class="line"><span class="keyword">private</span> ImageView mIconView;</span><br></pre></td></tr></table></figure></p>
+<p>通过 TabView 的 update() 方法添加 mIconView 和 mTextView</p>
+<p>TextView 不能放大到整个 tab，是因为它的父 View（TabView）默认设置了 padding。</p>
+<h2 id="二、让-TextView-撑满-TabView"><a href="#二、让-TextView-撑满-TabView" class="headerlink" title="二、让 TextView 撑满 TabView"></a>二、让 TextView 撑满 TabView</h2><p>默认情况下，TabView 是有 padding 的，所以文本之间才会有间距。但是这样会影响到我放大字体，字体放大是需要空间的，所以要在 TextView 内部设置 padding，但是由于 TabView 也有 padding，两个 padding 加起来会使得文本间距很大，很难看。所以我要取消 TabView 的 padding，让 TextView 撑满整个 TabView，然后在 TextView 内部设置 padding，留下放大的空间。</p>
+<p>实现过程如下：</p>
+<ol>
+<li><p>取消 TabView 默认的 padding：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">TabView</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line"><span class="comment">//            ViewCompat.setPaddingRelative(this, mTabPaddingStart, mTabPaddingTop,</span></span><br><span class="line"><span class="comment">//                    mTabPaddingEnd, mTabPaddingBottom);</span></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>给 TabView 的 TextView 加上自己的布局：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">        <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (mTextView == <span class="keyword">null</span>) &#123;</span><br><span class="line"><span class="comment">//                    TextView textView = (TextView) LayoutInflater.from(getContext())</span></span><br><span class="line"><span class="comment">//                            .inflate(R.layout.design_layout_tab_text, this, false);</span></span><br><span class="line">                    TextView textView = (TextView) LayoutInflater.from(getContext())</span><br><span class="line">                            .inflate(com.feng.tabdemo.R.layout.tab_text, <span class="keyword">this</span>, <span class="keyword">false</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>R.layout.tab_text：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">TextView</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:ellipsize</span>=<span class="string">"end"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:gravity</span>=<span class="string">"center"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:maxLines</span>=<span class="string">"2"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:paddingStart</span>=<span class="string">"10dp"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:paddingEnd</span>=<span class="string">"10dp"</span>/&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>通过 <code>paddingStart</code> 和 <code>paddingEnd</code> 设置字体间的间距。</p>
+<ol start="3">
+<li>TabView 设置了一个最小宽度，为了防止 TextView 比较短时不能撑满，把它取消掉：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> TabView <span class="title">createTabView</span><span class="params">(@NonNull <span class="keyword">final</span> Tab tab)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">//        tabView.setMinimumWidth(getTabMinWidth());</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="三、实现滑动时-Indicator-的动画效果"><a href="#三、实现滑动时-Indicator-的动画效果" class="headerlink" title="三、实现滑动时 Indicator 的动画效果"></a>三、实现滑动时 Indicator 的动画效果</h2><p>动画效果：当从一个页面滑向另一个页面时，Indicator 的宽度由短变长再变短。</p>
+<p>下面简单分析下动画过程</p>
+<p>以页面滑出一半（另一个页面进来一半）为分界线，在前半段，由短变长：</p>
+<p><img src="https://i.ibb.co/94BbBtQ/tab-layout-anim-2.png" alt></p>
+<p>页面滑动一半时，Indicator 的宽度达到最长：</p>
+<p><img src="https://i.ibb.co/1948sX6/tab-layout-anim-3.png" alt></p>
+<p>在后半段，由长变短：</p>
+<p><img src="https://i.ibb.co/ZGrgkwm/tab-layout-anim-4.png" alt></p>
+<p>实现步骤：</p>
+<ol>
+<li>SlidingTabStrip 的修改<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SlidingTabStrip</span> <span class="keyword">extends</span> <span class="title">LinearLayout</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Indicator 的左右边界</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> left;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> right;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">draw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.draw(canvas);</span><br><span class="line"></span><br><span class="line">        canvas.drawRect(left, getHeight() - mSelectedIndicatorHeight,</span><br><span class="line">                right, getHeight(), mSelectedIndicatorPaint);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>在 SlidingTabStrip 中增加两个变量表示 Indicator 的左右边界，并且改写它的 draw 方法，这样做是为了方便滑动监听器修改 Indicator 的左右边界。</p>
+<ol start="2">
+<li>修改 TabLayoutOnPageChangeListener 的 onPageScrolled 方法</li>
+</ol>
+<p>TabLayoutOnPageChangeListener 的 onPageScrolled 方法在页面滑动时回调，可以从中知道偏移页面和页面偏移量。知道偏移量就可以重新设置 Indicator 的左右边界并进行动画重绘。具体代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> position 当前显示的第一页的索引（右侧页面进入时显示的是当前页面，左侧页面进入时显示的是左侧页面）</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> positionOffset 取值范围 [0, 1)，表示 position 页面的偏移量（在屏幕外的比例）</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> positionOffsetPixels</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageScrolled</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> position, <span class="keyword">final</span> <span class="keyword">float</span> positionOffset,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">final</span> <span class="keyword">int</span> positionOffsetPixels)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ... 原有代码不用删，保留即可</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (tabLayout == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Indicator 的宽度占 TabView 的比例</span></span><br><span class="line">    <span class="keyword">float</span> scale = <span class="number">0.3f</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 左滑（右侧页面进入）的第一阶段</span></span><br><span class="line">    <span class="comment">// 以及右滑（左侧页面进入）的第二阶段</span></span><br><span class="line">    <span class="keyword">if</span> (positionOffset &gt; <span class="number">0</span> &amp;&amp; positionOffset &lt; <span class="number">0.5</span>) &#123;</span><br><span class="line">        tabLayout.mTabStrip.left = tabLayout.mTabStrip.getChildAt(position).getLeft()</span><br><span class="line">                + scale * tabLayout.mTabStrip.getChildAt(position).getWidth();</span><br><span class="line">        <span class="keyword">float</span> lr = tabLayout.mTabStrip.getChildAt(position).getRight()</span><br><span class="line">                - scale * tabLayout.mTabStrip.getChildAt(position).getWidth();</span><br><span class="line">        <span class="keyword">float</span> rr = tabLayout.mTabStrip.getChildAt(position + <span class="number">1</span>).getRight()</span><br><span class="line">                - scale * tabLayout.mTabStrip.getChildAt(position + <span class="number">1</span>).getWidth();</span><br><span class="line">        tabLayout.mTabStrip.right = lr + (positionOffset / <span class="number">0.5f</span>) * (rr - lr);</span><br><span class="line">        ViewCompat.postInvalidateOnAnimation(tabLayout.mTabStrip);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 左滑（右侧页面进入）的第二阶段</span></span><br><span class="line">    <span class="comment">// 以及右滑（左侧页面进入）的第一阶段</span></span><br><span class="line">    <span class="keyword">if</span> (positionOffset &gt; <span class="number">0.5</span>) &#123;</span><br><span class="line">        <span class="keyword">float</span> rr = tabLayout.mTabStrip.getChildAt(position + <span class="number">1</span>).getRight()</span><br><span class="line">                - scale * tabLayout.mTabStrip.getChildAt(position + <span class="number">1</span>).getWidth();</span><br><span class="line">        <span class="comment">// 先确保 Indicator 滑动最右</span></span><br><span class="line">        <span class="keyword">if</span> (tabLayout.mTabStrip.right &lt; rr) &#123;</span><br><span class="line">            tabLayout.mTabStrip.right = rr;</span><br><span class="line">            ViewCompat.postInvalidateOnAnimation(tabLayout.mTabStrip);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">float</span> ll = tabLayout.mTabStrip.getChildAt(position).getLeft()</span><br><span class="line">                + scale * tabLayout.mTabStrip.getChildAt(position).getWidth();</span><br><span class="line">        <span class="keyword">float</span> rl = tabLayout.mTabStrip.getChildAt(position + <span class="number">1</span>).getLeft()</span><br><span class="line">                + scale * tabLayout.mTabStrip.getChildAt(position + <span class="number">1</span>).getWidth();</span><br><span class="line">        tabLayout.mTabStrip.left = ll + ((positionOffset - <span class="number">0.5f</span>) / <span class="number">0.5f</span>) * (rl - ll);</span><br><span class="line">        ViewCompat.postInvalidateOnAnimation(tabLayout.mTabStrip);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 滑动开始或结束</span></span><br><span class="line">    <span class="keyword">if</span> (positionOffset == <span class="number">0</span>) &#123;</span><br><span class="line">        tabLayout.mTabStrip.left = tabLayout.mTabStrip.getChildAt(position).getLeft()</span><br><span class="line">                + scale * tabLayout.mTabStrip.getChildAt(position).getWidth();</span><br><span class="line">        tabLayout.mTabStrip.right = tabLayout.mTabStrip.getChildAt(position).getRight()</span><br><span class="line">                - scale * tabLayout.mTabStrip.getChildAt(position).getWidth();</span><br><span class="line">        ViewCompat.postInvalidateOnAnimation(tabLayout.mTabStrip);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>到此为止，就实现了完整的 Indicator 动画效果。</p>
+<p>字体的缩放动画和 Indicator 的动画是分开实现的，把它们两者合并起来就是最后的动画效果了，合并的时候并不会产生什么冲突，毕竟它们的实现原理不同，也没有什么耦合。</p>
+<h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><p>实现完整的动画效果花了我三天时间，这三天包括还周末的两天，时间还是花了挺久的。不过总的来说还是值得的，因为在实现过程不断地发现问题不断地解决，学到了不少。对反射的作用有了新的理解，对 TabLayout 的布局更加清晰了，也体会到了改官方源码的快感（笑）。写这篇文章更多是为了趁刚写完把自己的理解记录下来，方便以后回看。如果能够帮助到有需要的人，那就更好了。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://blog.csdn.net/u010119815/article/details/79823680" target="_blank" rel="noopener">骚操作之改造TabLayout，修改指示线宽增加切Tab过渡动画</a></li>
+<li><a href="https://www.jianshu.com/p/252650d07340" target="_blank" rel="noopener">仿陌陌选项卡：文字大小变化的SlidingScaleTabLayout</a></li>
+<li><a href="https://juejin.im/post/5cc99ab9e51d456e5977b213" target="_blank" rel="noopener">优雅地修改 TabLayout 指示线 Indicator 的宽度</a></li>
+<li><a href="https://www.jianshu.com/p/83922d08250b" target="_blank" rel="noopener">关于Android改变TabLayout 下划线(Indicator)宽度实践总结</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+	
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------　　　　本文到此结束　<i class="fa fa-heart"></i>　感谢您的阅读　　　　-------------</div>
+    
+</div>
+
+	  
+	</div>
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/01/TabLayout-之改变-Indicator-的宽度/" rel="next" title="TabLayout 之改变 Indicator 的宽度">
+                <i class="fa fa-chevron-left"></i> TabLayout 之改变 Indicator 的宽度
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://i.ibb.co/ZNQVBbd/head-Image1.jpg" alt="FengZH">
+            
+              <p class="site-author-name" itemprop="name">FengZH</p>
+              <div class="site-description motion-element" itemprop="description">阳光总在风雨后！坚持就是胜利！</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">69</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Mrfzh" title="GitHub &rarr; https://github.com/Mrfzh" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:15521206029@163.com" title="E-Mail &rarr; mailto:15521206029@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现字体缩放动画"><span class="nav-number">3.</span> <span class="nav-text">实现字体缩放动画</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现-Indicator-的长度变化动画"><span class="nav-number">4.</span> <span class="nav-text">实现 Indicator 的长度变化动画</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、准备工作"><span class="nav-number">4.1.</span> <span class="nav-text">一、准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、让-TextView-撑满-TabView"><span class="nav-number">4.2.</span> <span class="nav-text">二、让 TextView 撑满 TabView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、实现滑动时-Indicator-的动画效果"><span class="nav-number">4.3.</span> <span class="nav-text">三、实现滑动时 Indicator 的动画效果</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#写在最后"><span class="nav-number">5.</span> <span class="nav-text">写在最后</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">FengZH</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+    
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.0"></script>
+
+  <script src="/js/motion.js?v=7.1.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.0"></script>
+<script src="/js/post-details.js?v=7.1.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
