@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://mrfzh.github.io/2019/12/16/ConcurrentHashMap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%EF%BC%881-8%EF%BC%89/</loc>
+    <lastmod>2019-12-16</lastmod>
+  </url>  <url>
     <loc>https://mrfzh.github.io/2019/12/04/LinkedList-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
     <lastmod>2019-12-04</lastmod>
   </url>  <url>
