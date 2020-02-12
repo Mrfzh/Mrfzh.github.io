@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://mrfzh.github.io/2020/02/12/ReentrantLock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
+    <lastmod>2020-02-12</lastmod>
+  </url>  <url>
     <loc>https://mrfzh.github.io/2020/02/08/String-%E7%9A%84-intern-%E6%96%B9%E6%B3%95%E5%88%86%E6%9E%90/</loc>
     <lastmod>2020-02-08</lastmod>
   </url>  <url>
